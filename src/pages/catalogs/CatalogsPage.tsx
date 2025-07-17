@@ -1,0 +1,201 @@
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import {
+    ArchiveBoxIcon,
+    ListBulletIcon,
+    TableCellsIcon,
+    EyeIcon,
+    PencilIcon
+} from '@heroicons/react/24/outline'
+import { catalogService } from '@/services/catalogService'
+import { CatalogInfo } from '@/types'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import ErrorMessage from '@/components/ui/ErrorMessage'
+
+interface CatalogCardProps {
+    catalog: CatalogInfo
+}
+
+const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {
+    const icon = catalog.type === 'LIST' ? ListBulletIcon : TableCellsIcon
+    const Icon = icon
+
+    return (
+        <div className="card hover:shadow-md transition-shadow duration-200">
+            <div className="p-6">
+                <div className="flex items-center">
+                    <div className={`flex-shrink-0 p-3 rounded-lg ${
+                        catalog.type === 'LIST' ? 'bg-blue-100' : 'bg-green-100'
+                    }`}>
+                        <Icon className={`h-6 w-6 ${
+                            catalog.type === 'LIST' ? 'text-blue-600' : 'text-green-600'
+                        }`} />
+                    </div>
+                    <div className="ml-4 flex-1">
+                        <h3 className="text-lg font-medium text-gray-900">{catalog.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{catalog.description}</p>
+                        <div className="mt-2 flex items-center">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  catalog.type === 'LIST'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+              }`}>
+                {catalog.type === 'LIST' ? 'Simple List' : 'Structured Catalog'}
+              </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 flex justify-between items-center">
+                    <div className="text-sm text-gray-500">
+                        Key: <code className="bg-gray-100 px-1 rounded">{catalog.key}</code>
+                    </div>
+                    <div className="flex space-x-2">
+                        <Link
+                            to={`/catalogs/${catalog.key}`}
+                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            View Items
+                        </Link>
+                        <Link
+                            to={`/catalogs/${catalog.key}/edit`}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            <PencilIcon className="h-4 w-4 mr-1" />
+                            Manage
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const CatalogsPage: React.FC = () => {
+    const { data: catalogs, isLoading, error } = useQuery({
+        queryKey: ['catalogs'],
+        queryFn: async () => {
+            const response = await catalogService.getCatalogs()
+            return response.data
+        },
+    })
+
+    if (isLoading) {
+        return <LoadingSpinner size="lg" text="Loading catalogs..." />
+    }
+
+    if (error) {
+        return <ErrorMessage message="Failed to load catalogs" />
+    }
+
+    const lists = catalogs?.filter(c => c.type === 'LIST') || []
+    const catalogsItems = catalogs?.filter(c => c.type === 'CATALOG') || []
+
+    return (
+        <div className="space-y-6">
+            {/* Page header */}
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Master Data Catalogs</h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Manage reference data and catalogs used throughout the system
+                    </p>
+                </div>
+                <div className="flex space-x-3">
+                    <button className="btn-outline">
+                        <ArchiveBoxIcon className="h-4 w-4 mr-2" />
+                        Import Data
+                    </button>
+                    <button className="btn-primary">
+                        <ArchiveBoxIcon className="h-4 w-4 mr-2" />
+                        New Catalog
+                    </button>
+                </div>
+            </div>
+
+            {/* Statistics */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <div className="card p-6">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <ListBulletIcon className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <div className="ml-5">
+                            <div className="text-sm font-medium text-gray-500">Simple Lists</div>
+                            <div className="text-2xl font-semibold text-gray-900">{lists.length}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card p-6">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <TableCellsIcon className="h-8 w-8 text-green-600" />
+                        </div>
+                        <div className="ml-5">
+                            <div className="text-sm font-medium text-gray-500">Structured Catalogs</div>
+                            <div className="text-2xl font-semibold text-gray-900">{catalogsItems.length}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card p-6">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <ArchiveBoxIcon className="h-8 w-8 text-purple-600" />
+                        </div>
+                        <div className="ml-5">
+                            <div className="text-sm font-medium text-gray-500">Total Catalogs</div>
+                            <div className="text-2xl font-semibold text-gray-900">{catalogs?.length || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Simple Lists Section */}
+            {lists.length > 0 && (
+                <div>
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Simple Lists</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {lists.map((catalog) => (
+                            <CatalogCard key={catalog.key} catalog={catalog} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Structured Catalogs Section */}
+            {catalogsItems.length > 0 && (
+                <div>
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Structured Catalogs</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {catalogsItems.map((catalog) => (
+                            <CatalogCard key={catalog.key} catalog={catalog} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Empty state */}
+            {(!catalogs || catalogs.length === 0) && (
+                <div className="text-center py-12">
+                    <ArchiveBoxIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No catalogs found</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Get started by creating your first catalog.
+                    </p>
+                    <div className="mt-6">
+                        <button className="btn-primary">
+                            <ArchiveBoxIcon className="h-4 w-4 mr-2" />
+                            Create Catalog
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default CatalogsPage
