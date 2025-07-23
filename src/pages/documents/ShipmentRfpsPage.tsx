@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ColumnDef } from '@tanstack/react-table'
 import {
     PlusIcon,
     EyeIcon,
@@ -10,13 +9,13 @@ import {
     MapPinIcon
 } from '@heroicons/react/24/outline'
 import { documentService } from '@/services/documentService'
+import { schemaService } from '@/services/schemaService'
 import { useAuthStore } from '@/stores/authStore'
 import { authService } from '@/services/authService'
 import { ShipmentRfp, DocumentStatus } from '@/types'
-import DataTable from '@/components/ui/DataTable'
+import AutoTable from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
-import StatusBadge from '@/components/ui/StatusBadge'
 import { format } from 'date-fns'
 import clsx from 'clsx'
 
@@ -59,6 +58,101 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatuses, onStatusC
     )
 }
 
+const IdCellRenderer = (params: any) => {
+    const id = params.value
+    if (!id) return ''
+    return (
+        <div className="font-mono text-sm text-gray-600">
+            #{id.slice(-8)}
+        </div>
+    )
+}
+
+const TitleCellRenderer = (params: any) => {
+    const title = params.value
+    if (!title) return ''
+    return (
+        <div>
+            <div className="font-medium text-gray-900">{title}</div>
+            <div className="text-sm text-gray-500 truncate max-w-xs">
+                {title}
+            </div>
+        </div>
+    )
+}
+
+const RouteCellRenderer = (params: any) => {
+    const data = params.data
+    if (!data?.pickupLocation || !data?.deliveryLocation) return ''
+
+    return (
+        <div className="flex items-center space-x-1 text-sm text-gray-600">
+            <MapPinIcon className="h-4 w-4" />
+            <span className="truncate max-w-24">{data.pickupLocation.address}</span>
+            <span>→</span>
+            <span className="truncate max-w-24">{data.deliveryLocation.address}</span>
+        </div>
+    )
+}
+
+const PickupDateCellRenderer = (params: any) => {
+    const data = params.data
+    if (!data?.timeline?.pickupDate) return ''
+
+    return (
+        <div className="flex items-center space-x-1 text-sm text-gray-600">
+            <CalendarIcon className="h-4 w-4" />
+            <span>{format(new Date(data.timeline.pickupDate), 'MMM dd, yyyy')}</span>
+        </div>
+    )
+}
+
+const CargoCellRenderer = (params: any) => {
+    const data = params.data
+    if (!data?.cargoDetails) return ''
+
+    return (
+        <div className="text-sm text-gray-600">
+            <div>{data.cargoDetails.weight} kg</div>
+            <div className="text-xs text-gray-500">{data.cargoDetails.cargoType}</div>
+        </div>
+    )
+}
+
+const CarrierCellRenderer = (params: any) => {
+    const data = params.data
+    const carrier = data?.data?._carrier
+
+    return (
+        <div className="text-sm text-gray-600">
+            {carrier?.title || (
+                <span className="text-gray-400 italic">Not assigned</span>
+            )}
+        </div>
+    )
+}
+
+const ActionsCellRenderer = (params: any) => {
+    const navigate = useNavigate()
+
+    const handleViewClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        navigate(`/shipment-rfps/${params.data.id}`)
+    }
+
+    return (
+        <div className="flex space-x-2">
+            <button
+                onClick={handleViewClick}
+                className="text-primary-600 hover:text-primary-900"
+                title="View Details"
+            >
+                <EyeIcon className="h-4 w-4" />
+            </button>
+        </div>
+    )
+}
+
 const ShipmentRfpsPage: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -69,9 +163,19 @@ const ShipmentRfpsPage: React.FC = () => {
     const [selectedStatuses, setSelectedStatuses] = useState<DocumentStatus[]>(
         searchParams.get('status')?.split(',') as DocumentStatus[] || []
     )
+    const [selectedRfps, setSelectedRfps] = useState<ShipmentRfp[]>([])
+
+    // Fetch shipment RFP schema
+    const { data: schema, isLoading: schemaLoading } = useQuery({
+        queryKey: ['shipment-rfp-schema'],
+        queryFn: async () => {
+            const response = await schemaService.getAnySchema('shipment-rfp')
+            return response.data
+        },
+    })
 
     // Fetch RFPs with filters
-    const { data: rfpsData, isLoading, error } = useQuery({
+    const { data: rfpsData, isLoading: rfpsLoading, error } = useQuery({
         queryKey: ['shipment-rfps', selectedStatuses],
         queryFn: async () => {
             const response = await documentService.getShipmentRfps({
@@ -93,128 +197,35 @@ const ShipmentRfpsPage: React.FC = () => {
         }
     }
 
-    // Table columns
-    const columns: ColumnDef<ShipmentRfp>[] = [
-        {
-            accessorKey: 'id',
-            header: 'ID',
-            cell: ({ row }) => (
-                <div className="font-mono text-sm text-gray-600">
-                    #{row.original.id.slice(-8)}
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'title',
-            header: 'Title',
-            cell: ({ row }) => (
-                <div>
-                    <div className="font-medium text-gray-900">{row.original.title}</div>
-                    <div className="text-sm text-gray-500 truncate max-w-xs">
-                        {row.original.title}
-                    </div>
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: ({ row }) => <StatusBadge status={row.original.status} />,
-        },
-        {
-            id: 'route',
-            header: 'Route',
-            cell: ({ row }) => (
-                <div className="flex items-center space-x-1 text-sm text-gray-600">
-                    <MapPinIcon className="h-4 w-4" />
-                    <span className="truncate max-w-24">{row.original.pickupLocation.address}</span>
-                    <span>→</span>
-                    <span className="truncate max-w-24">{row.original.deliveryLocation.address}</span>
-                </div>
-            ),
-        },
-        {
-            id: 'timeline',
-            header: 'Pickup Date',
-            cell: ({ row }) => (
-                <div className="flex items-center space-x-1 text-sm text-gray-600">
-                    <CalendarIcon className="h-4 w-4" />
-                    <span>{format(new Date(row.original.timeline.pickupDate), 'MMM dd, yyyy')}</span>
-                </div>
-            ),
-        },
-        {
-            id: 'cargo',
-            header: 'Cargo',
-            cell: ({ row }) => (
-                <div className="text-sm text-gray-600">
-                    <div>{row.original.cargoDetails.weight} kg</div>
-                    <div className="text-xs text-gray-500">{row.original.cargoDetails.cargoType}</div>
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'carrier',
-            header: 'Carrier',
-            cell: ({ row }) => (
-                <div className="text-sm text-gray-600">
-                    {row.original.data._carrier?.title || (
-                        <span className="text-gray-400 italic">Not assigned</span>
-                    )}
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'createdAt',
-            header: 'Created',
-            cell: ({ row }) => (
-                <div className="text-sm text-gray-500">
-                    {format(new Date(row.original.createdDate), 'MMM dd, yyyy')}
-                </div>
-            ),
-        },
-        {
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
-                <div className="flex space-x-2">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            navigate(`/shipment-rfps/${row.original.id}`)
-                        }}
-                        className="text-primary-600 hover:text-primary-900"
-                        title="View Details"
-                    >
-                        <EyeIcon className="h-4 w-4" />
-                    </button>
-                </div>
-            ),
-            enableSorting: false,
-        },
-    ]
-
-    // Filter columns based on user role
-    const filteredColumns = columns.filter(col => {
-        if (isCarrier && col.id === 'carrier') {
-            return false // Carriers don't need to see carrier column
-        }
-        return true
-    })
-
-    if (isLoading) {
-        return <LoadingSpinner size="lg" text="Loading shipment RFPs..." />
+    // Handle row selection
+    const handleSelectionChange = (selectedRows: any[]) => {
+        setSelectedRfps(selectedRows)
     }
+
+    // Handle row click
+    const handleRowClick = (rfp: ShipmentRfp) => {
+        navigate(`/shipment-rfps/${rfp.id}`)
+    }
+
+    const isLoading = schemaLoading || rfpsLoading
 
     if (error) {
         return <ErrorMessage message="Failed to load shipment RFPs" />
     }
 
-    const rfps = rfpsData?.data || []
+    if (isLoading) {
+        return <LoadingSpinner size="lg" text="Loading shipment RFPs..." />
+    }
+
+    if (!schema) {
+        return <ErrorMessage message="Schema not available" />
+    }
+
+    const rfps = rfpsData?.content || []
     const stats = [
         {
             name: 'Total RFPs',
-            value: rfpsData?.pagination.total || 0,
+            value: rfpsData?.page.totalPages || 0,
             icon: TruckIcon,
             color: 'text-blue-600',
         },
@@ -304,14 +315,25 @@ const ShipmentRfpsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* RFPs table */}
-            <DataTable
-                data={rfps}
-                columns={filteredColumns}
-                loading={isLoading}
-                searchPlaceholder="Search RFPs by title, description, or route..."
-                onRowClick={(rfp) => navigate(`/shipment-rfps/${rfp.id}`)}
-            />
+            {/* RFPs Auto-generated Table */}
+            <div className="card p-0 overflow-hidden">
+                <AutoTable
+                    data={rfps}
+                    schema={schema}
+                    loading={rfpsLoading}
+                    onRowClick={handleRowClick}
+                    onSelectionChange={handleSelectionChange}
+                    enableBulkActions={isLogist}
+                    height="70vh"
+                    config={{
+                        pagination: true,
+                        pageSize: 25,
+                        enableSorting: true,
+                        enableFiltering: true,
+                        enableSelection: isLogist
+                    }}
+                />
+            </div>
 
             {/* Empty state for carriers */}
             {isCarrier && rfps.length === 0 && (

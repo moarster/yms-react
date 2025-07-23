@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ApiResponse, ApiError } from '@/types'
+import {ApiResponse, ApiError, PaginatedResponse} from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { ENV } from '@/constants'
 import toast from 'react-hot-toast'
+import {BaseEntity} from "@/types/dataModel.ts";
 
 class ApiClient {
     private client: AxiosInstance
@@ -72,8 +73,18 @@ class ApiClient {
         )
     }
 
-    async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-        const response = await this.client.get<ApiResponse<T>>(url, config)
+    async get<T extends BaseEntity>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.get<T>(url, config)
+        return response.data
+    }
+
+    async getMany<T extends BaseEntity>(url: string, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> {
+        const response = await this.client.get<PaginatedResponse<T>>(url, config)
+        return response.data
+    }
+
+    async getNaked<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.get<T>(url, config)
         return response.data
     }
 

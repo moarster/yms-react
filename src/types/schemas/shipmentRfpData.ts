@@ -1,5 +1,6 @@
-// Updated types based on JSON Schema
-export interface ShipmentRfpData  {
+import {ListLink, ReferenceLink, Attachment, AnyData} from './schemaModel.ts'
+
+export interface ShipmentRfpData extends AnyData {
     type: 'shipment-rfp'
     // Required fields from schema
     _shipmentType: ListLink<'shipment-type'>
@@ -82,33 +83,6 @@ export interface LetterOfAttorney {
     attachment?: Attachment
 }
 
-// Reference system types
-export interface AnyLink {
-    domain: string // pattern: ^[A-Za-z\-]{2,256}$
-    entity?: string // pattern: ^[A-Za-z\-]{2,256}$
-    catalog?: string // pattern: ^[A-Za-z\-]{2,256}$
-    id: string // uuid format
-    title?: string // pattern: \w+
-}
 
-export interface ListLink<T extends string = string> extends AnyLink {
-    domain: 'lists'
-    entity: 'item'
-    catalog: T
-}
 
-export interface ReferenceLink<T extends string = string> extends AnyLink {
-    domain: 'reference'
-    entity: 'item'
-    catalog: T
-}
-
-export interface Attachment {
-    filename?: string
-    mimetype?: string
-    size?: number
-    minio_key?: string
-}
-
-// Updated PaginatedResponse to match API structure
 
