@@ -32,7 +32,7 @@ class CatalogService {
     async getCatalogItems(
         catalogKey: string,
         filters?: CatalogFilters
-    ): Promise<CatalogItem[]> {
+    ): Promise<PaginatedResponse<CatalogItem>> {
         const params = new URLSearchParams()
 
         if (filters?.search) params.append('search', filters.search)
@@ -47,7 +47,7 @@ class CatalogService {
         const response = await apiClient.getMany<CatalogItem>(
             `/reference/${catalogKey}?${params.toString()}`
         )
-        return response.content
+        return response
     }
 
     // Get list items with filters
@@ -114,11 +114,10 @@ class CatalogService {
     }
 
     // Delete catalog item
-    async deleteCatalogItem(catalogKey: string, itemId: string): Promise<ApiResponse<void>> {
-        const response = await apiClient.delete<ApiResponse<void>>(
-            `/catalogs/${catalogKey}/items/${itemId}`
+    async deleteCatalogItem(catalogKey: string, itemId: string): Promise<void> {
+        return await apiClient.delete(
+            `/reference/${catalogKey}/items/${itemId}`
         )
-        return response.data
     }
 
     // Delete list item

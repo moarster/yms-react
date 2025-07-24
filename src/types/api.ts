@@ -9,18 +9,19 @@ export interface ApiResponse<T extends BaseEntity> {
 
 export interface PaginatedResponse<T extends BaseEntity> {
     content: T[]
-    page: {
-        number: number
-        size: number
-        totalElements: number
-        totalPages: number
-        first: boolean
-        last: boolean
-        numberOfElements: number
-        empty: boolean
-    }
+    page: Pageable
 }
 
+export interface Pageable {
+    number: number
+    size: number
+    totalElements: number
+    totalPages: number
+    first: boolean
+    last: boolean
+    numberOfElements: number
+    empty: boolean
+}
 
 export interface ApiError {
     message: string

@@ -26,7 +26,7 @@ interface StatusFilterProps {
 
 const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatuses, onStatusChange }) => {
     const statuses: { value: DocumentStatus; label: string; color: string }[] = [
-        { value: 'DRAFT', label: 'Draft', color: 'gray' },
+        { value: 'NEW', label: 'Draft', color: 'gray' },
         { value: 'ASSIGNED', label: 'Assigned', color: 'blue' },
         { value: 'COMPLETED', label: 'Completed', color: 'green' },
         { value: 'CANCELLED', label: 'Cancelled', color: 'red' },

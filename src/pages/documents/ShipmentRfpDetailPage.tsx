@@ -28,6 +28,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import StatusBadge from '@/components/ui/StatusBadge'
 import toast from 'react-hot-toast'
 
+
 const CustomFieldTemplate = (props: any) => {
     const { id, label, help, required, description, errors, children, schema } = props
 
@@ -53,8 +54,8 @@ const CustomFieldTemplate = (props: any) => {
                 {label}{required && ' *'}
             </label>
             {children}
-            {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
-            {help && <p className="text-xs text-gray-500 mt-1">{help}</p>}
+            {description && <div className="text-sm text-gray-600 mt-1">{description}</div>}
+            {help && <div className="text-xs text-gray-500 mt-1">{help}</div>}
             {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
         </div>
     )
