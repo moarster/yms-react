@@ -1,87 +1,107 @@
-import React, { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+// src/pages/documents/ShipmentRfpDetailPage.tsx
+import React, { useState, useMemo } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import Form from '@rjsf/mui'
+import validator from '@rjsf/validator-ajv8'
+import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import {
     ChevronLeftIcon,
+    PencilIcon,
+    EyeIcon,
+    ClockIcon,
     MapPinIcon,
-    CalendarIcon,
     ScaleIcon,
     DocumentIcon,
     PaperClipIcon,
+    UsersIcon,
     CheckCircleIcon,
     XCircleIcon,
-    PencilIcon,
-    ExclamationCircleIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { documentService } from '@/services/documentService'
+import { schemaService } from '@/services/schemaService'
 import { useAuthStore } from '@/stores/authStore'
-import { authService } from '@/services/authService'
-import {  DocumentAction } from '@/types'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import ErrorMessage from '@/components/ui/ErrorMessage'
-import StatusBadge from '@/components/ui/StatusBadge'
-import Modal from '@/components/ui/Modal'
 import { useUiStore } from '@/stores/uiStore'
-import { format } from 'date-fns'
+import { authService } from '@/services/authService'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import StatusBadge from '@/components/ui/StatusBadge'
 import toast from 'react-hot-toast'
 
-interface ActionButtonProps {
-    action: DocumentAction
-    onExecute: (action: string) => void
-    loading?: boolean
-}
+const CustomFieldTemplate = (props: any) => {
+    const { id, label, help, required, description, errors, children, schema } = props
 
-const ActionButton: React.FC<ActionButtonProps> = ({ action, onExecute, loading }) => {
-    const getButtonStyle = (actionKey: string) => {
-        switch (actionKey) {
-            case 'publish':
-                return 'btn-primary'
-            case 'confirm':
-                return 'btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
-            case 'cancel':
-                return 'btn-danger'
-            case 'complete':
-                return 'btn bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500'
-            default:
-                return 'btn-outline'
-        }
-    }
+    // Check if this field should be in sidebar
+    const isSidebarField = schema['x-layout'] === 'sidebar'
 
-    const getIcon = (actionKey: string) => {
-        switch (actionKey) {
-            case 'publish':
-                return <DocumentIcon className="h-4 w-4 mr-2" />
-            case 'confirm':
-                return <CheckCircleIcon className="h-4 w-4 mr-2" />
-            case 'cancel':
-                return <XCircleIcon className="h-4 w-4 mr-2" />
-            case 'complete':
-                return <CheckCircleIcon className="h-4 w-4 mr-2" />
-            default:
-                return null
-        }
-    }
-
-    const handleClick = () => {
-        if (action.confirmationRequired) {
-            if (confirm(`Are you sure you want to ${action.label.toLowerCase()}?`)) {
-                onExecute(action.key)
-            }
-        } else {
-            onExecute(action.key)
-        }
+    if (isSidebarField) {
+        return (
+            <div className="mb-4">
+                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                    {label}{required && ' *'}
+                </label>
+                {children}
+                {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
+                {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
+            </div>
+        )
     }
 
     return (
-        <button
-            onClick={handleClick}
-            disabled={loading}
-            className={getButtonStyle(action.key)}
-            title={action.description}
-        >
-            {getIcon(action.key)}
-            {loading ? 'Processing...' : action.label}
-        </button>
+        <div className="mb-6">
+            <label htmlFor={id} className="block text-sm font-medium text-gray-900 mb-2">
+                {label}{required && ' *'}
+            </label>
+            {children}
+            {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
+            {help && <p className="text-xs text-gray-500 mt-1">{help}</p>}
+            {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
+        </div>
+    )
+}
+
+const CustomObjectFieldTemplate = (props: any) => {
+    const { title, description, properties, schema } = props
+
+    // Check if this is an accordion section
+    const isAccordion = schema['x-layout'] === 'accordion'
+    const [isExpanded, setIsExpanded] = useState(true)
+
+    if (isAccordion) {
+        return (
+            <div className="card mb-6">
+                <button
+                    type="button"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="w-full px-6 py-4 border-b border-gray-200 flex items-center justify-between text-left"
+                >
+                    <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+                    <ChevronLeftIcon className={`h-5 w-5 transform transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                </button>
+                {isExpanded && (
+                    <div className="p-6">
+                        {description && <p className="text-gray-600 mb-4">{description}</p>}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {properties.map((element: any) => element.content)}
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div className="card mb-6">
+            <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+                {description && <p className="text-gray-600">{description}</p>}
+            </div>
+            <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {properties.map((element: any) => element.content)}
+                </div>
+            </div>
+        </div>
     )
 }
 
@@ -89,13 +109,17 @@ interface DocumentSectionProps {
     title: string
     children: React.ReactNode
     actions?: React.ReactNode
+    icon?: React.ComponentType<{ className?: string }>
 }
 
-const DocumentSection: React.FC<DocumentSectionProps> = ({ title, children, actions }) => (
+const DocumentSection: React.FC<DocumentSectionProps> = ({ title, children, actions, icon: Icon }) => (
     <div className="card">
         <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+                <div className="flex items-center space-x-2">
+                    {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+                    <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+                </div>
                 {actions && <div className="flex space-x-2">{actions}</div>}
             </div>
         </div>
@@ -109,7 +133,8 @@ const ShipmentRfpDetailPage: React.FC = () => {
     const { user } = useAuthStore()
     const { addNotification } = useUiStore()
     const queryClient = useQueryClient()
-    const [showRateModal, setShowRateModal] = useState(false)
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [formData, setFormData] = useState<any>({})
 
     const isLogist = authService.isLogist(user)
     const isCarrier = authService.isCarrier(user)
@@ -118,340 +143,325 @@ const ShipmentRfpDetailPage: React.FC = () => {
     const { data: rfp, isLoading, error } = useQuery({
         queryKey: ['shipment-rfp', id],
         queryFn: async () => {
-            const response = await documentService.getShipmentRfp(id!)
-            return response.data
+            return await documentService.getShipmentRfp(id!)
         },
         enabled: !!id,
+    })
+
+    // Fetch RFP schema
+    const { data: schema } = useQuery({
+        queryKey: ['shipment-rfp-schema'],
+        queryFn: () => schemaService.getAnySchema('shipment-rfp'),
     })
 
     // Fetch available actions
     const { data: actions } = useQuery({
         queryKey: ['shipment-rfp-actions', id],
         queryFn: async () => {
-            const response = await documentService.getAvailableActions('shipment-rfp', 'shipment-rfp', id!)
-            return response.data
+            return await documentService.getAvailableActions(id!)
         },
-        enabled: !!id && !!rfp,
+        enabled: !!id && !isLoading && rfp?.status !== 'CLOSED'
     })
 
-    // Action execution mutation
-    const actionMutation = useMutation({
-        mutationFn: async (actionKey: string) => {
-            const response = await documentService.executeAction('shipment-rfp', 'shipment-rfp', id!, actionKey)
-            return response.data
+    // Update RFP mutation
+    const updateMutation = useMutation({
+        mutationFn: async (data: any) => {
+            await documentService.updateShipmentRfp(id!, data)
         },
-        onSuccess: (data, actionKey) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['shipment-rfp', id] })
-            queryClient.invalidateQueries({ queryKey: ['shipment-rfp-actions', id] })
-            queryClient.invalidateQueries({ queryKey: ['shipment-rfps'] })
-
-            toast.success(`Action "${actionKey}" executed successfully`)
-            addNotification({
-                type: 'success',
-                title: 'Action Completed',
-                message: `Successfully executed action: ${actionKey}`,
-            })
+            setIsEditMode(false)
+            toast.success('RFP updated successfully')
         },
         onError: (error: any) => {
-            toast.error(error.message || 'Failed to execute action')
+            toast.error(error.response?.data?.message || 'Failed to update RFP')
         },
     })
 
+    // Execute action mutation
+    const actionMutation = useMutation({
+        mutationFn: async (actionName: string) => {
+            await documentService.executeAction('shipment-rfp', id!, actionName)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['shipment-rfp', id] })
+            queryClient.invalidateQueries({ queryKey: ['shipment-rfp-actions', id] })
+            toast.success('Action executed successfully')
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to execute action')
+        },
+    })
+
+    // Create UI Schema for layout control
+    const uiSchema: UiSchema = useMemo(() => {
+        if (!schema) return {}
+
+        return {
+            'ui:layout': 'grid',
+            'ui:options': {
+                sidebar: {
+                    width: '300px',
+                    fields: ['status', 'createdAt', 'createdBy', 'assignedTo', 'urgency']
+                }
+            },
+            title: {
+                'ui:widget': 'text',
+                'ui:options': {
+                    className: 'text-xl font-semibold'
+                }
+            },
+            description: {
+                'ui:widget': 'textarea',
+                'ui:options': {
+                    rows: 4
+                }
+            },
+            pickupLocation: {
+                'ui:title': 'Pickup Location',
+                'ui:layout': 'accordion',
+                'ui:options': {
+                    icon: 'MapPin'
+                }
+            },
+            deliveryLocation: {
+                'ui:title': 'Delivery Location',
+                'ui:layout': 'accordion',
+                'ui:options': {
+                    icon: 'MapPin'
+                }
+            },
+            cargoDetails: {
+                'ui:title': 'Cargo Details',
+                'ui:layout': 'accordion',
+                'ui:options': {
+                    icon: 'Scale'
+                }
+            },
+            timeline: {
+                'ui:title': 'Timeline',
+                'ui:layout': 'accordion',
+                'ui:options': {
+                    icon: 'Clock'
+                }
+            },
+            attachments: {
+                'ui:title': 'Attachments',
+                'ui:layout': 'section',
+                'ui:options': {
+                    icon: 'PaperClip'
+                }
+            }
+        }
+    }, [schema])
+
+    // Handle form submission
+    const handleSubmit = (data: any) => {
+        setFormData(data.formData)
+        updateMutation.mutate(data.formData)
+    }
+
+    // Handle action execution
+    const handleActionClick = (actionName: string) => {
+        actionMutation.mutate(actionName)
+    }
+
     if (isLoading) {
-        return <LoadingSpinner size="lg" text="Loading RFP details..." />
+        return (
+            <div className="flex items-center justify-center h-64">
+                <LoadingSpinner size="lg" />
+            </div>
+        )
     }
 
     if (error || !rfp) {
-        return <ErrorMessage message="Failed to load RFP details" />
+        return (
+            <div className="text-center py-12">
+                <XCircleIcon className="mx-auto h-12 w-12 text-red-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">RFP not found</h3>
+                <p className="mt-1 text-sm text-gray-500">The requested RFP could not be loaded.</p>
+                <Link to="/shipment-rfps" className="btn-primary mt-4 inline-flex">
+                    Back to RFPs
+                </Link>
+            </div>
+        )
     }
 
-    // Filter actions based on user role
-    const filteredActions = actions?.filter(action =>
-        action.roles.includes(isLogist ? 'LOGIST' : 'CARRIER')
-    ) || []
-
-    // Check access rules for carrier
-    const canCarrierEdit = isCarrier &&
-        rfp.status === 'ASSIGNED' &&
-        rfp.carrier === user?.organization?.id
+    const canEdit = isLogist && ['NEW', 'ASSIGNED'].includes(rfp.status)
+    const canCarrierEdit = isCarrier && rfp.status === 'ASSIGNED'
+        //&& rfp.assignedTo === user?.organizationId
 
     return (
-        <div className="space-y-6">
-            {/* Breadcrumb */}
-            <nav className="flex" aria-label="Breadcrumb">
-                <ol className="flex items-center space-x-4">
-                    <li>
-                        <Link to="/shipment-rfps" className="text-gray-400 hover:text-gray-500">
-                            <ChevronLeftIcon className="h-5 w-5 inline mr-1" />
-                            Shipment RFPs
-                        </Link>
-                    </li>
-                    <li>
-                        <span className="text-gray-500">/</span>
-                    </li>
-                    <li>
-                        <span className="text-gray-900 font-medium">#{rfp.id.slice(-8)}</span>
-                    </li>
-                </ol>
-            </nav>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="flex justify-between items-start">
-                <div>
-                    <div className="flex items-center space-x-3">
-                        <h1 className="text-2xl font-bold text-gray-900">{rfp.title}</h1>
-                        <StatusBadge status={rfp.status} size="lg" />
+            <div className="mb-6">
+                <div className="flex items-center space-x-4 mb-4">
+                    <Link
+                        to="/shipment-rfps"
+                        className="inline-flex items-center text-gray-500 hover:text-gray-700"
+                    >
+                        <ChevronLeftIcon className="h-5 w-5 mr-1" />
+                        Back to RFPs
+                    </Link>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <h1 className="text-2xl font-semibold text-gray-900">{rfp.title}</h1>
+                        <StatusBadge status={rfp.status?rfp.status:"NEW"} />
                     </div>
-                    <p className="mt-1 text-sm text-gray-500">{rfp.description}</p>
-                    <div className="mt-2 text-sm text-gray-500">
-                        Created by {rfp.createdBy} on {format(new Date(rfp.createdAt), 'MMM dd, yyyy HH:mm')}
+
+                    <div className="flex items-center space-x-3">
+                        {!isEditMode && (canEdit || canCarrierEdit) && (
+                            <button
+                                onClick={() => setIsEditMode(true)}
+                                className="btn-secondary inline-flex items-center"
+                            >
+                                <PencilIcon className="h-4 w-4 mr-2" />
+                                Edit
+                            </button>
+                        )}
+
+                        {isEditMode && (
+                            <>
+                                <button
+                                    onClick={() => setIsEditMode(false)}
+                                    className="btn-secondary"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    form="rfp-form"
+                                    disabled={updateMutation.isPending}
+                                    className="btn-primary"
+                                >
+                                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </>
+                        )}
+
+                        {/* Action buttons */}
+                        {actions?.map((action: any) => (
+                            <button
+                                key={action.name}
+                                onClick={() => handleActionClick(action.name)}
+                                disabled={actionMutation.isPending}
+                                className={`btn-${action.variant || 'secondary'}`}
+                            >
+                                {actionMutation.isPending ? 'Processing...' : action.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Sidebar - Key Info */}
+                <div className="lg:col-span-1">
+                    <div className="card p-6 space-y-6">
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">Status & Info</h3>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <span className="text-sm text-gray-500">Status</span>
+                                    <div className="mt-1">
+                                        <StatusBadge status={rfp?.status} />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span className="text-sm text-gray-500">Created</span>
+                                    <div className="mt-1 text-sm text-gray-900">
+                                        {new Date(rfp?.createdDate).toLocaleDateString()}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span className="text-sm text-gray-500">Created By</span>
+                                    <div className="mt-1 text-sm text-gray-900">{rfp.createdBy}</div>
+                                </div>
+
+                                {rfp.assignedTo && (
+                                    <div>
+                                        <span className="text-sm text-gray-500">Assigned To</span>
+                                        <div className="mt-1 text-sm text-gray-900">{rfp.assignedTo}</div>
+                                    </div>
+                                )}
+
+                                {rfp.urgency && (
+                                    <div>
+                                        <span className="text-sm text-gray-500">Urgency</span>
+                                        <div className="mt-1">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                rfp.urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                                    rfp.urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-green-100 text-green-800'
+                                            }`}>
+                                                {rfp.urgency}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex space-x-2">
-                    {filteredActions.map((action) => (
-                        <ActionButton
-                            key={action.key}
-                            action={action}
-                            onExecute={(actionKey) => actionMutation.mutate(actionKey)}
-                            loading={actionMutation.isPending}
-                        />
-                    ))}
-                    {(isLogist || canCarrierEdit) && (
-                        <Link to={`/shipment-rfps/${rfp.id}/edit`} className="btn-outline">
-                            <PencilIcon className="h-4 w-4 mr-2" />
-                            Edit
-                        </Link>
+                {/* Main Content */}
+                <div className="lg:col-span-3">
+                    {schema && (
+                        <Form
+                            id="rfp-form"
+                            schema={schema as RJSFSchema}
+                            uiSchema={uiSchema}
+                            formData={formData || rfp}
+                            onChange={(e) => setFormData(e.formData)}
+                            onSubmit={handleSubmit}
+                            validator={validator}
+                            disabled={!isEditMode}
+                            templates={{
+                                FieldTemplate: CustomFieldTemplate,
+                                ObjectFieldTemplate: CustomObjectFieldTemplate,
+                            }}
+                            showErrorList={false}
+                        >
+                            {/* Hide submit button - we have custom ones in header */}
+                            <div style={{ display: 'none' }}>
+                                <button type="submit" />
+                            </div>
+                        </Form>
+                    )}
+
+                    {/* Proposals Section */}
+                    {rfp.status === 'ASSIGNED' && (
+                        <DocumentSection title="Carrier Proposals" icon={UsersIcon}>
+                            <div className="space-y-4">
+                                {rfp.proposals?.map((proposal: any, index: number) => (
+                                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-medium text-gray-900">{proposal.carrierName}</h4>
+                                            <span className="text-lg font-semibold text-green-600">
+                                                €{proposal.rate?.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">{proposal.notes}</p>
+                                        <div className="flex items-center justify-between text-xs text-gray-500">
+                                            <span>Submitted: {new Date(proposal.submittedAt).toLocaleDateString()}</span>
+                                            <span>ETA: {proposal.estimatedDelivery}</span>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {(!rfp.proposals || rfp.proposals.length === 0) && (
+                                    <p className="text-gray-500 text-center py-8">No proposals submitted yet</p>
+                                )}
+                            </div>
+                        </DocumentSection>
                     )}
                 </div>
             </div>
-
-            {/* Status-specific alerts */}
-            {rfp.status === 'ASSIGNED' && isCarrier && (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <ExclamationCircleIcon className="h-5 w-5 text-blue-400" />
-                        </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-blue-800">
-                                RFP Assigned to Your Organization
-                            </h3>
-                            <div className="mt-2 text-sm text-blue-700">
-                                <p>
-                                    This shipment request has been assigned to your organization.
-                                    Please review the details and submit your rate or confirm acceptance.
-                                </p>
-                            </div>
-                            <div className="mt-4">
-                                <button
-                                    onClick={() => setShowRateModal(true)}
-                                    className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 focus:ring-blue-500"
-                                >
-                                    Submit Rate
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Route Information */}
-                <DocumentSection title="Route & Timeline">
-                    <div className="space-y-4">
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Pickup Location</h4>
-                            <div className="flex items-start space-x-2">
-                                <MapPinIcon className="h-5 w-5 text-green-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-900">{rfp.pickupLocation.address}</p>
-                                    <p className="text-xs text-gray-500">
-                                        Contact: {rfp.pickupLocation.contactPerson} ({rfp.pickupLocation.contactPhone})
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        Hours: {rfp.pickupLocation.workingHours}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Delivery Location</h4>
-                            <div className="flex items-start space-x-2">
-                                <MapPinIcon className="h-5 w-5 text-red-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-900">{rfp.deliveryLocation.address}</p>
-                                    <p className="text-xs text-gray-500">
-                                        Contact: {rfp.deliveryLocation.contactPerson} ({rfp.deliveryLocation.contactPhone})
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        Hours: {rfp.deliveryLocation.workingHours}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">Pickup Date</h4>
-                                <div className="flex items-center space-x-1 text-sm text-gray-600">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    <span>{format(new Date(rfp.timeline.pickupDate), 'MMM dd, yyyy')}</span>
-                                </div>
-                                {rfp.timeline.pickupTimeWindow && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Window: {rfp.timeline.pickupTimeWindow.from} - {rfp.timeline.pickupTimeWindow.to}
-                                    </p>
-                                )}
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">Delivery Date</h4>
-                                <div className="flex items-center space-x-1 text-sm text-gray-600">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    <span>{format(new Date(rfp.timeline.deliveryDate), 'MMM dd, yyyy')}</span>
-                                </div>
-                                {rfp.timeline.deliveryTimeWindow && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Window: {rfp.timeline.deliveryTimeWindow.from} - {rfp.timeline.deliveryTimeWindow.to}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </DocumentSection>
-
-                {/* Cargo Information */}
-                <DocumentSection title="Cargo Details">
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">Weight</h4>
-                                <div className="flex items-center space-x-1 text-sm text-gray-600">
-                                    <ScaleIcon className="h-4 w-4" />
-                                    <span>{rfp.cargoDetails.weight} kg</span>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">Volume</h4>
-                                <p className="text-sm text-gray-600">{rfp.cargoDetails.volume} m³</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-1">Cargo Type</h4>
-                            <p className="text-sm text-gray-600">{rfp.cargoDetails.cargoType}</p>
-                        </div>
-
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-1">Packaging</h4>
-                            <p className="text-sm text-gray-600">{rfp.cargoDetails.packagingType}</p>
-                        </div>
-
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-1">Description</h4>
-                            <p className="text-sm text-gray-600">{rfp.cargoDetails.description}</p>
-                        </div>
-
-                        {rfp.cargoDetails.specialRequirements.length > 0 && (
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-900 mb-2">Special Requirements</h4>
-                                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                    {rfp.cargoDetails.specialRequirements.map((req, index) => (
-                                        <li key={index}>{req}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                </DocumentSection>
-            </div>
-
-            {/* Additional Requirements */}
-            {rfp.requirements.length > 0 && (
-                <DocumentSection title="Additional Requirements">
-                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        {rfp.requirements.map((req, index) => (
-                            <li key={index}>{req}</li>
-                        ))}
-                    </ul>
-                </DocumentSection>
-            )}
-
-            {/* Attachments */}
-            {rfp.attachments.length > 0 && (
-                <DocumentSection title="Attachments">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {rfp.attachments.map((attachment) => (
-                            <div
-                                key={attachment.id}
-                                className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                                onClick={() => documentService.downloadAttachment('shipment-rfp', 'shipment-rfp', rfp.id, attachment.id, attachment.originalName)}
-                            >
-                                <PaperClipIcon className="h-5 w-5 text-gray-400 mr-3" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                        {attachment.originalName}
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        {(attachment.size / 1024).toFixed(1)} KB • {format(new Date(attachment.uploadedAt), 'MMM dd, yyyy')}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </DocumentSection>
-            )}
-
-            {/* Rates (for carriers) */}
-            {rfp.rates.length > 0 && (
-                <DocumentSection title="Submitted Rates">
-                    <div className="space-y-4">
-                        {rfp.rates.map((rate) => (
-                            <div key={rate.id} className="border border-gray-200 rounded-lg p-4">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-900">{rate.carrierName}</h4>
-                                        <p className="text-lg font-semibold text-primary-600">
-                                            {rate.rate} {rate.currency}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            Valid until {format(new Date(rate.validUntil), 'MMM dd, yyyy')}
-                                        </p>
-                                    </div>
-                                    <StatusBadge status={rate.status as any} />
-                                </div>
-                                {rate.notes && (
-                                    <p className="text-sm text-gray-600 mt-2">{rate.notes}</p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </DocumentSection>
-            )}
-
-            {/* Rate submission modal */}
-            {showRateModal && (
-                <Modal
-                    isOpen={showRateModal}
-                    onClose={() => setShowRateModal(false)}
-                    title="Submit Rate"
-                    size="lg"
-                >
-                    <div className="p-6">
-                        <p>Rate submission form would go here...</p>
-                        <div className="mt-6 flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowRateModal(false)}
-                                className="btn-outline"
-                            >
-                                Cancel
-                            </button>
-                            <button className="btn-primary">Submit Rate</button>
-                        </div>
-                    </div>
-                </Modal>
-            )}
         </div>
     )
 }

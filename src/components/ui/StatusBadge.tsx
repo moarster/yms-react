@@ -1,16 +1,15 @@
 import React from 'react'
-import { DocumentStatus } from '@/types'
 import clsx from 'clsx'
 
 interface StatusBadgeProps {
-    status: DocumentStatus
+    status: string
     size?: 'sm' | 'md' | 'lg'
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' }) => {
     const statusConfig = {
         DRAFT: {
-            label: 'Draft',
+            label: 'NEW',
             className: 'status-draft',
         },
         ASSIGNED: {

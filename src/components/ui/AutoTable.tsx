@@ -113,7 +113,8 @@ const generateColumnDefs = (schema: JsonSchema): ColDef[] => {
         suppressMovable: true
     }
 
-    Object.entries(schema.properties).forEach(([key, property]) => {
+    const properties = schema.properties ?schema.properties: schema.allOf?.[0].properties
+    Object.entries(properties).forEach(([key, property]) => {
         // Skip hidden fields
         if (property['x-table-hidden']) return
 

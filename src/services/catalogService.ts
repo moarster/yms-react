@@ -29,7 +29,6 @@ class CatalogService {
         return response.data
     }
 
-    // Get catalog items with filters
     async getCatalogItems(
         catalogKey: string,
         filters?: CatalogFilters

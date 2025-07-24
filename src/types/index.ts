@@ -21,18 +21,23 @@ export type ShipmentRfp = DomainEntity<ShipmentRfpData>
 
 
 export type DocumentStatus =
-    | 'DRAFT'
+    | 'NEW'
     | 'ASSIGNED'
     | 'COMPLETED'
     | 'CANCELLED'
 
-export interface DocumentAction {
-    key: string
-    label: string
-    description: string
-    roles: string[]
-    availableInStatuses: DocumentStatus[]
-    confirmationRequired: boolean
+export interface DocumentActions {
+    processInstanceKey: number
+    entity: string
+    tasks: DocumentTask[]
+    timestamp: number
+}
+
+export interface DocumentTask {
+    name: string
+    elementId: string
+    jobId: string
+    assignee?: string
 }
 
 

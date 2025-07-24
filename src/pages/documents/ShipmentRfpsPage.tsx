@@ -169,8 +169,7 @@ const ShipmentRfpsPage: React.FC = () => {
     const { data: schema, isLoading: schemaLoading } = useQuery({
         queryKey: ['shipment-rfp-schema'],
         queryFn: async () => {
-            const response = await schemaService.getAnySchema('shipment-rfp')
-            return response.data
+            return await schemaService.getAnySchema('shipment-rfp')
         },
     })
 
@@ -178,12 +177,11 @@ const ShipmentRfpsPage: React.FC = () => {
     const { data: rfpsData, isLoading: rfpsLoading, error } = useQuery({
         queryKey: ['shipment-rfps', selectedStatuses],
         queryFn: async () => {
-            const response = await documentService.getShipmentRfps({
+            return await documentService.getShipmentRfps({
                 page: 0,
                 size: 50,
                 status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
             })
-            return response.data
         },
     })
 
@@ -221,7 +219,10 @@ const ShipmentRfpsPage: React.FC = () => {
         return <ErrorMessage message="Schema not available" />
     }
 
-    const rfps = rfpsData?.content || []
+    const rfps = rfpsData?.content?.map(item => ({
+        ...(item.data || {}),
+        id: item.id
+    })) || []
     const stats = [
         {
             name: 'Total RFPs',
@@ -231,19 +232,19 @@ const ShipmentRfpsPage: React.FC = () => {
         },
         {
             name: 'Draft',
-            value: rfps.filter(r => r.status === 'DRAFT').length,
+            value: rfpsData?.content.filter(r => r.status === 'NEW').length,
             icon: TruckIcon,
             color: 'text-gray-600',
         },
         {
             name: 'Assigned',
-            value: rfps.filter(r => r.status === 'ASSIGNED').length,
+            value: rfpsData?.content.filter(r => r.status === 'ASSIGNED').length,
             icon: TruckIcon,
             color: 'text-blue-600',
         },
         {
             name: 'Completed',
-            value: rfps.filter(r => r.status === 'COMPLETED').length,
+            value: rfpsData?.content.filter(r => r.status === 'CLOSED').length,
             icon: TruckIcon,
             color: 'text-green-600',
         },

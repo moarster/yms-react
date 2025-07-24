@@ -11,6 +11,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import Modal from '@/components/ui/Modal'
 import {useUiStore} from '@/stores/uiStore'
 import toast from 'react-hot-toast'
+import {DataEntity} from '@/types'
 
 const CatalogItemsPage: React.FC = () => {
     const { catalogKey } = useParams<{ catalogKey: string }>()
@@ -138,7 +139,7 @@ const CatalogItemsPage: React.FC = () => {
     }
 
     const isLoading = catalogLoading || schemaLoading || itemsLoading
-    const items = itemsData?.content  || []
+    const items = itemsData?.map(item => item.data) || []
 
     if (error) {
         return <ErrorMessage message="Failed to load catalog items" />

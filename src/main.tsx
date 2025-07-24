@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import App from './App'
 import './index.css'
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
+
+ModuleRegistry.registerModules([AllCommunityModule])
 
 const queryClient = new QueryClient({
     defaultOptions: {

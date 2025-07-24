@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import {ApiResponse, ApiError, PaginatedResponse} from '@/types'
+import { ApiError, PaginatedResponse} from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { ENV } from '@/constants'
 import toast from 'react-hot-toast'
@@ -83,28 +83,33 @@ class ApiClient {
         return response.data
     }
 
+    async getAny<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.get<T>(url, config)
+        return response.data
+    }
+
     async getNaked<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.client.get<T>(url, config)
         return response.data
     }
 
-    async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-        const response = await this.client.post<ApiResponse<T>>(url, data, config)
+    async post<T extends BaseEntity>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.post<T>(url, data, config)
         return response.data
     }
 
-    async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-        const response = await this.client.put<ApiResponse<T>>(url, data, config)
+    async put<T extends BaseEntity>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.put<T>(url, data, config)
         return response.data
     }
 
-    async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-        const response = await this.client.patch<ApiResponse<T>>(url, data, config)
+    async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<any> {
+        const response = await this.client.patch<T>(url, data, config)
         return response.data
     }
 
-    async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-        const response = await this.client.delete<ApiResponse<T>>(url, config)
+    async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.client.delete<T>(url, config)
         return response.data
     }
 
@@ -113,11 +118,11 @@ class ApiClient {
         url: string,
         file: File,
         onProgress?: (progress: number) => void
-    ): Promise<ApiResponse<T>> {
+    ): Promise<T> {
         const formData = new FormData()
         formData.append('file', file)
 
-        const response = await this.client.post<ApiResponse<T>>(url, formData, {
+        const response = await this.client.post<T>(url, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

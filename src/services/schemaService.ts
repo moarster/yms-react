@@ -6,7 +6,8 @@ export interface JsonSchema {
     title?: string
     description?: string
     type: string
-    properties: Record<string, JsonSchemaProperty>
+    properties?: Record<string, JsonSchemaProperty>
+    allOf?: JsonSchema[]
     required?: string[]
     additionalProperties?: boolean
 }

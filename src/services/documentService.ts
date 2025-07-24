@@ -1,6 +1,5 @@
-// services/documentService.ts
 import { apiClient } from './apiClient'
-import { ApiResponse, PaginatedResponse, ShipmentRfp, DocumentStatus, DocumentAction } from '@/types'
+import { PaginatedResponse, ShipmentRfp, DocumentStatus, DocumentActions,DocumentTask } from '@/types'
 
 export interface DocumentFilters {
     status?: DocumentStatus[]
@@ -22,8 +21,7 @@ export interface BulkActionRequest {
 }
 
 class DocumentService {
-    // Get shipment RFPs with filters
-    async getShipmentRfps(filters?: DocumentFilters): Promise<ApiResponse<PaginatedResponse<ShipmentRfp>>> {
+    async getShipmentRfps(filters?: DocumentFilters): Promise<PaginatedResponse<ShipmentRfp>> {
         const params = new URLSearchParams()
 
         if (filters?.status?.length) {
@@ -39,76 +37,62 @@ class DocumentService {
         if (filters?.sort) params.append('sort', filters.sort)
         if (filters?.direction) params.append('direction', filters.direction)
 
-        const response = await apiClient.get<ApiResponse<PaginatedResponse<ShipmentRfp>>>(
+        return await apiClient.getMany<ShipmentRfp>(
             `/domain/shipment-rfp/shipment-rfp?${params.toString()}`
         )
+    }
+
+    async getShipmentRfp(id: string): Promise<ShipmentRfp> {
+        return await apiClient.get<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`)
+    }
+
+    async createShipmentRfp(data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
+        const response = await apiClient.post<ShipmentRfp>('/domain/shipment-rfp/shipment-rfp', data)
         return response.data
     }
 
-    async getShipmentRfp(id: string): Promise<ApiResponse<ShipmentRfp>> {
-        const response = await apiClient.get<ApiResponse<ShipmentRfp>>(`/domain/shipment-rfp/shipment-rfp/${id}`)
-        return response.data
-    }
-
-    async createShipmentRfp(data: Partial<ShipmentRfp>): Promise<ApiResponse<ShipmentRfp>> {
-        const response = await apiClient.post<ApiResponse<ShipmentRfp>>('/domain/shipment-rfp/shipment-rfp', data)
-        return response.data
-    }
-
-    async updateShipmentRfp(id: string, data: Partial<ShipmentRfp>): Promise<ApiResponse<ShipmentRfp>> {
-        const response = await apiClient.put<ApiResponse<ShipmentRfp>>(`/domain/shipment-rfp/shipment-rfp/${id}`, data)
+    async updateShipmentRfp(id: string, data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
+        const response = await apiClient.put<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`, data)
         return response.data
     }
 
 
-    async executeAction(documentId: string, action: string, parameters?: Record<string, any>): Promise<ApiResponse<ShipmentRfp>> {
-        const response = await apiClient.patch<ApiResponse<ShipmentRfp>>(
+    async executeAction(documentId: string, action: string, parameters?: Record<string, any>): Promise<ShipmentRfp> {
+        const response = await apiClient.patch<ShipmentRfp>(
             `/domain/shipment-rfp/shipment-rfp/${documentId}/${action}`,
             parameters || {}
         )
         return response.data
     }
 
-    async getAvailableActions(documentId: string): Promise<ApiResponse<DocumentAction[]>> {
-        const response = await apiClient.get<ApiResponse<DocumentAction[]>>(
+    async getAvailableActions(documentId: string): Promise<DocumentTask[]> {
+        const response = await apiClient.getAny<DocumentActions>(
             `/domain/shipment-rfp/shipment-rfp/${documentId}/tasks`
         )
-        return response.data
-    }
-
-    // Bulk execute actions
-    async executeBulkAction(request: BulkActionRequest): Promise<ApiResponse<{
-        successful: string[]
-        failed: Array<{ id: string; error: string }>
-    }>> {
-        const response = await apiClient.post<ApiResponse<{
-            successful: string[]
-            failed: Array<{ id: string; error: string }>
-        }>>('/domain/shipment-rfp/bulk-actions', request)
-        return response.data
+        return response.tasks
     }
 
     // Upload attachment
-    async uploadAttachment(documentId: string, file: File, description?: string): Promise<ApiResponse<{
+    async uploadAttachment(documentId: string, file: File, description?: string): Promise<{
         id: string
         filename: string
         size: number
         contentType: string
         uploadedAt: string
-    }>> {
+    }> {
         const formData = new FormData()
         formData.append('file', file)
         if (description) {
             formData.append('description', description)
         }
 
-        const response = await apiClient.post<ApiResponse<{
+        const response = await apiClient.post<{
             id: string
             filename: string
             size: number
             contentType: string
             uploadedAt: string
-        }>>(
+        }>(
             `/domain/shipment-rfp/${documentId}/attachments`,
             formData,
             {
@@ -129,123 +113,7 @@ class DocumentService {
         return response.data
     }
 
-    // Delete attachment
-    async deleteAttachment(documentId: string, attachmentId: string): Promise<ApiResponse<void>> {
-        const response = await apiClient.delete<ApiResponse<void>>(
-            `/domain/shipment-rfp/${documentId}/attachments/${attachmentId}`
-        )
-        return response.data
-    }
 
-    // Export documents
-    async exportShipmentRfps(filters?: DocumentFilters): Promise<Blob> {
-        const params = new URLSearchParams()
-
-        if (filters?.status?.length) {
-            filters.status.forEach(status => params.append('status', status))
-        }
-        if (filters?.search) params.append('search', filters.search)
-        if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
-        if (filters?.dateTo) params.append('dateTo', filters.dateTo)
-        if (filters?.carrierId) params.append('carrierId', filters.carrierId)
-        if (filters?.clientId) params.append('clientId', filters.clientId)
-
-        const response = await apiClient.get(
-            `/domain/shipment-rfp/export?${params.toString()}`,
-            { responseType: 'blob' }
-        )
-        return response.data
-    }
-
-    // Get document statistics
-    async getStatistics(filters?: Pick<DocumentFilters, 'dateFrom' | 'dateTo' | 'carrierId' | 'clientId'>): Promise<ApiResponse<{
-        totalCount: number
-        statusCounts: Record<DocumentStatus, number>
-        recentActivity: Array<{
-            documentId: string
-            action: string
-            timestamp: string
-            userId: string
-        }>
-    }>> {
-        const params = new URLSearchParams()
-
-        if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
-        if (filters?.dateTo) params.append('dateTo', filters.dateTo)
-        if (filters?.carrierId) params.append('carrierId', filters.carrierId)
-        if (filters?.clientId) params.append('clientId', filters.clientId)
-
-        const response = await apiClient.get<ApiResponse<{
-            totalCount: number
-            statusCounts: Record<DocumentStatus, number>
-            recentActivity: Array<{
-                documentId: string
-                action: string
-                timestamp: string
-                userId: string
-            }>
-        }>>(`/domain/shipment-rfp/statistics?${params.toString()}`)
-        return response.data
-    }
-
-    // Validate document data
-    async validateDocument(data: Partial<ShipmentRfp>): Promise<ApiResponse<{
-        valid: boolean
-        errors: Array<{
-            field: string
-            message: string
-            code: string
-        }>
-        warnings: Array<{
-            field: string
-            message: string
-            code: string
-        }>
-    }>> {
-        const response = await apiClient.post<ApiResponse<{
-            valid: boolean
-            errors: Array<{
-                field: string
-                message: string
-                code: string
-            }>
-            warnings: Array<{
-                field: string
-                message: string
-                code: string
-            }>
-        }>>('/domain/shipment-rfp/validate', data)
-        return response.data
-    }
-
-    // Duplicate document
-    async duplicateShipmentRfp(id: string, modifications?: Partial<ShipmentRfp>): Promise<ApiResponse<ShipmentRfp>> {
-        const response = await apiClient.post<ApiResponse<ShipmentRfp>>(
-            `/domain/shipment-rfp/${id}/duplicate`,
-            modifications || {}
-        )
-        return response.data
-    }
-
-    // Get document history/audit trail
-    async getDocumentHistory(id: string): Promise<ApiResponse<Array<{
-        timestamp: string
-        action: string
-        userId: string
-        userName: string
-        changes: Record<string, { oldValue: any; newValue: any }>
-        comment?: string
-    }>>> {
-        const response = await apiClient.get<ApiResponse<Array<{
-            timestamp: string
-            action: string
-            userId: string
-            userName: string
-            changes: Record<string, { oldValue: any; newValue: any }>
-            comment?: string
-        }>>>(`/domain/shipment-rfp/${id}/history`)
-        return response.data
-    }
 }
 
 export const documentService = new DocumentService()
