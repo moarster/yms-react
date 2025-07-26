@@ -1,6 +1,6 @@
 // noinspection t
 
-import React, { useState, useMemo } from 'react'
+import React, {useState, useMemo, useEffect} from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Form from '@rjsf/mui'
@@ -444,12 +444,14 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ title, children, acti
 )
 
 const ShipmentRfpDetailPage: React.FC = () => {
+
+
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const { user } = useAuthStore()
     const { addNotification } = useUiStore()
     const queryClient = useQueryClient()
-    const [isEditMode, setIsEditMode] = useState(false)
+    const [isEditMode, setIsEditMode] = useState(true)
     const [formData, setFormData] = useState<any>({})
 
     const isLogist = authService.isLogist(user)
@@ -463,6 +465,12 @@ const ShipmentRfpDetailPage: React.FC = () => {
         },
         enabled: !!id,
     })
+
+    useEffect(() => {
+        if (rfp?.data) {
+            setFormData(rfp.data)
+        }
+    }, [rfp?.data])
 
     // Fetch RFP schema
     const { data: schema } = useQuery({

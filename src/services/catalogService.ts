@@ -54,7 +54,7 @@ class CatalogService {
     async getListItems(
         listKey: string,
         filters?: CatalogFilters
-    ): Promise<ApiResponse<PaginatedResponse<ListItem>>> {
+    ): Promise<PaginatedResponse<ListItem>> {
         const params = new URLSearchParams()
 
         if (filters?.search) params.append('search', filters.search)
@@ -63,10 +63,10 @@ class CatalogService {
         if (filters?.sort) params.append('sort', filters.sort)
         if (filters?.direction) params.append('direction', filters.direction)
 
-        const response = await apiClient.get<ApiResponse<PaginatedResponse<ListItem>>>(
-            `/lists/${listKey}/item?${params.toString()}`
+        const response = await apiClient.getMany<ListItem>(
+            `/lists/${listKey}/items?${params.toString()}`
         )
-        return response.data
+        return response
     }
 
     // Create catalog item

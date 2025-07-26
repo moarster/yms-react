@@ -54,7 +54,7 @@ export interface TableConfig {
 class SchemaService {
     async getAnySchema(key: string): Promise<JsonSchema> {
         const schema= await apiClient.getNaked<JsonSchema>(`/meta/urn:solvo:${key}/schema`)
-        return  merge(schema, {
+        const mergedSchema =  merge(schema, {
             mergeRefSibling: false,
             mergeCombinarySibling: false,
             onMergeError: (message, path, values) => {
@@ -62,6 +62,9 @@ class SchemaService {
                 return schema
             }
         }) as JsonSchema
+        delete mergedSchema.$schema
+
+        return mergedSchema
     }
 
 }
