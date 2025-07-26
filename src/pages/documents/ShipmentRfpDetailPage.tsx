@@ -1,4 +1,5 @@
-// src/pages/documents/ShipmentRfpDetailPage.tsx
+// noinspection t
+
 import React, { useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -8,9 +9,9 @@ import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import {
     ChevronLeftIcon,
     PencilIcon,
-    EyeIcon,
-    ClockIcon,
-    MapPinIcon,
+    PlusIcon,
+    XMarkIcon,
+    TrashIcon,
     ScaleIcon,
     DocumentIcon,
     PaperClipIcon,
@@ -27,22 +28,133 @@ import { authService } from '@/services/authService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import StatusBadge from '@/components/ui/StatusBadge'
 import toast from 'react-hot-toast'
-
-
+import ReferenceDropdown from '@/components/form/ReferenceDropdown'
+import FieldInfoTooltip from '@/components/form/FieldInfoTooltip'
 const CustomFieldTemplate = (props: any) => {
-    const { id, label, help, required, description, errors, children, schema } = props
+    const {  id, label, help, required, errors, children, schema, formData, onChange } = props
+    const description = schema.description || label || ""
+    const isReferenceField = id.startsWith('root__')
 
     // Check if this field should be in sidebar
     const isSidebarField = schema['x-layout'] === 'sidebar'
 
+    // Handle reference fields with custom dropdown
+    if (isReferenceField && schema.type === 'object') {
+        //const domain = schema.properties?.domain?.enum?.[0] || 'reference'
+        const domain = formData?.domain || 'reference'
+        const fieldValue = formData?.id
+        const entity = formData?.entity
+        const catalogKey = formData?.catalog
+
+        const handleReferenceChange = (value: any) => {
+            onChange(value)
+        }
+
+        const wrapperClass = isSidebarField ? "mb-4" : "mb-6"
+        const labelClass = isSidebarField
+            ? "block text-sm font-medium text-gray-700 mb-1"
+            : "block text-sm font-medium text-gray-900 mb-2"
+
+        return (
+            <div className={wrapperClass}>
+                <div className="flex items-center">
+                    <label htmlFor={id} className={labelClass}>
+                        {label}{required && ' *'}
+                    </label>
+                    <FieldInfoTooltip content={description} />
+                </div>
+                <ReferenceDropdown
+                    value={fieldValue}
+                    onChange={handleReferenceChange}
+                    catalog={catalogKey}
+                    domain={domain}
+                    placeholder={`Select ${label.toLowerCase()}...`}
+                    disabled={props.disabled}
+                    required={required}
+                    error={errors}
+                />
+            </div>
+        )
+    }
+
+    // Handle array of reference fields (like _candidates)
+    if (isReferenceField && schema.type === 'array' && schema.items?.type === 'object') {
+        const catalogKey = name.slice(1) // Remove the "_" prefix
+        const domain = schema.items.properties?.domain?.enum?.[0] || 'reference'
+
+        const fieldValues = formData?.[name] || []
+
+        const handleArrayAdd = (value: any) => {
+            const newValues = [...fieldValues, value]
+            onChange(newValues)
+        }
+
+        const handleArrayRemove = (index: number) => {
+            const newValues = fieldValues.filter((_: any, i: number) => i !== index)
+            onChange(newValues)
+        }
+
+        const wrapperClass = isSidebarField ? "mb-4" : "mb-6"
+        const labelClass = isSidebarField
+            ? "block text-sm font-medium text-gray-700 mb-1"
+            : "block text-sm font-medium text-gray-900 mb-2"
+
+        return (
+            <div className={wrapperClass}>
+                <div className="flex items-center">
+                    <label className={labelClass}>
+                        {label}{required && ' *'}
+                    </label>
+                    <FieldInfoTooltip content={description} />
+                </div>
+
+                {/* Selected items */}
+                {fieldValues.length > 0 && (
+                    <div className="mb-2 space-y-1">
+                        {fieldValues.map((item: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-1 rounded">
+                                <span className="text-sm text-gray-900">{item?.title || item?.id}</span>
+                                {!props.disabled && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleArrayRemove(index)}
+                                        className="text-red-500 hover:text-red-700 ml-2"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Add new item dropdown */}
+                {!props.disabled && (
+                    <ReferenceDropdown
+                        value={null}
+                        onChange={handleArrayAdd}
+                        catalog={catalogKey}
+                        domain={domain}
+                        placeholder={`Add ${label.toLowerCase()}...`}
+                        disabled={props.disabled}
+                    />
+                )}
+
+                {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
+            </div>
+        )
+    }
+
     if (isSidebarField) {
         return (
             <div className="mb-4">
-                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                    {label}{required && ' *'}
-                </label>
+                <div className="flex items-center">
+                    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                        {label}{required && ' *'}
+                    </label>
+                    <FieldInfoTooltip content={description} />
+                </div>
                 {children}
-                {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
                 {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
             </div>
         )
@@ -50,24 +162,227 @@ const CustomFieldTemplate = (props: any) => {
 
     return (
         <div className="mb-6">
-            <label htmlFor={id} className="block text-sm font-medium text-gray-900 mb-2">
-                {label}{required && ' *'}
-            </label>
+            <div className="flex items-center mb-2">
+                <label htmlFor={id} className="block text-sm font-medium text-gray-900">
+                    {label}{required && ' *'}
+                </label>
+                <FieldInfoTooltip content={description} />
+            </div>
             {children}
-            {description && <div className="text-sm text-gray-600 mt-1">{description}</div>}
             {help && <div className="text-xs text-gray-500 mt-1">{help}</div>}
             {errors && <div className="text-red-600 text-sm mt-1">{errors}</div>}
         </div>
     )
 }
 
+
 const CustomObjectFieldTemplate = (props: any) => {
-    const { title, description, properties, schema } = props
+    const { title, description, properties, schema, formData, onChange } = props
 
     // Check if this is an accordion section
     const isAccordion = schema['x-layout'] === 'accordion'
     const [isExpanded, setIsExpanded] = useState(true)
 
+    // Handle route points array specially
+    if (props.name === 'route' && schema.type === 'array') {
+        const routePoints = formData?.route || []
+
+        const addRoutePoint = () => {
+            const newRoutePoint = {
+                address: '',
+                contactPhone: '',
+                arrival: '',
+                departure: '',
+                _counterParty: null,
+                _cargoHandlingType: null,
+                cargoList: []
+            }
+            const newRoute = [...routePoints, newRoutePoint]
+            onChange(newRoute)
+        }
+
+        const removeRoutePoint = (index: number) => {
+            const newRoute = routePoints.filter((_: any, i: number) => i !== index)
+            onChange(newRoute)
+        }
+
+        const updateRoutePoint = (index: number, field: string, value: any) => {
+            const newRoute = [...routePoints]
+            newRoute[index] = { ...newRoute[index], [field]: value }
+            onChange(newRoute)
+        }
+
+        return (
+            <div className="card mb-6">
+                <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium text-gray-900">Route Points</h3>
+                        <button
+                            type="button"
+                            onClick={addRoutePoint}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            <PlusIcon className="h-4 w-4 mr-1" />
+                            Add Route Point
+                        </button>
+                    </div>
+                </div>
+                <div className="p-6">
+                    {routePoints.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">No route points added yet</p>
+                    ) : (
+                        <div className="space-y-6">
+                            {routePoints.map((point: any, index: number) => (
+                                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-medium text-gray-900">Point {index + 1}</h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeRoutePoint(index)}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Address */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Address *
+                                                </label>
+                                                <FieldInfoTooltip content="Full address for the route point including street, city, and postal code" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={point.address || ''}
+                                                onChange={(e) => updateRoutePoint(index, 'address', e.target.value)}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                                placeholder="Enter address"
+                                            />
+                                        </div>
+
+                                        {/* Contact Phone */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Contact Phone
+                                                </label>
+                                                <FieldInfoTooltip content="Contact phone number at this location" />
+                                            </div>
+                                            <input
+                                                type="tel"
+                                                value={point.contactPhone || ''}
+                                                onChange={(e) => updateRoutePoint(index, 'contactPhone', e.target.value)}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                                placeholder="Enter phone number"
+                                            />
+                                        </div>
+
+                                        {/* Counter Party (Reference Field) */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Counter Party *
+                                                </label>
+                                                <FieldInfoTooltip content="The organization or company at this route point" />
+                                            </div>
+                                            <ReferenceDropdown
+                                                value={point._counterParty}
+                                                onChange={(value) => updateRoutePoint(index, '_counterParty', value)}
+                                                catalog="counter-party"
+                                                domain="reference"
+                                                placeholder="Select counter party..."
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Cargo Handling Type (List Field) */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Cargo Handling Type *
+                                                </label>
+                                                <FieldInfoTooltip content="Type of cargo handling required at this location (loading, unloading, etc.)" />
+                                            </div>
+                                            <ReferenceDropdown
+                                                value={point._cargoHandlingType}
+                                                onChange={(value) => updateRoutePoint(index, '_cargoHandlingType', value)}
+                                                catalog="cargo-handling-type"
+                                                domain="lists"
+                                                placeholder="Select handling type..."
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Arrival */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Arrival *
+                                                </label>
+                                                <FieldInfoTooltip content="Expected arrival date and time at this location" />
+                                            </div>
+                                            <input
+                                                type="datetime-local"
+                                                value={point.arrival || ''}
+                                                onChange={(e) => updateRoutePoint(index, 'arrival', e.target.value)}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                            />
+                                        </div>
+
+                                        {/* Departure */}
+                                        <div>
+                                            <div className="flex items-center mb-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Departure
+                                                </label>
+                                                <FieldInfoTooltip content="Expected departure date and time from this location (optional)" />
+                                            </div>
+                                            <input
+                                                type="datetime-local"
+                                                value={point.departure || ''}
+                                                onChange={(e) => updateRoutePoint(index, 'departure', e.target.value)}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Cargo List - simplified for now */}
+                                    <div className="mt-4">
+                                        <div className="flex items-center mb-2">
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Cargo List
+                                            </label>
+                                            <FieldInfoTooltip content="List of cargo items to be handled at this route point" />
+                                        </div>
+                                        {point.cargoList?.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {point.cargoList.map((cargo: any, cargoIndex: number) => (
+                                                    <div key={cargoIndex} className="bg-gray-50 p-3 rounded">
+                                                        <p className="text-sm">
+                                                            <strong>Number:</strong> {cargo.number} |
+                                                            <strong> Weight:</strong> {cargo.cargoWeight}kg |
+                                                            <strong> Volume:</strong> {cargo.cargoVolume}m³
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 text-sm">No cargo items added</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    // Regular accordion handling
     if (isAccordion) {
         return (
             <div className="card mb-6">
@@ -417,7 +732,7 @@ const ShipmentRfpDetailPage: React.FC = () => {
                             id="rfp-form"
                             schema={schema as RJSFSchema}
                             uiSchema={uiSchema}
-                            formData={formData || rfp}
+                            formData={rfp.data || formData }
                             onChange={(e) => setFormData(e.formData)}
                             onSubmit={handleSubmit}
                             validator={validator}

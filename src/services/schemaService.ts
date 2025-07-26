@@ -1,4 +1,5 @@
 import {apiClient} from './apiClient'
+import { merge } from 'allof-merge'
 
 export interface JsonSchema {
     $schema?: string
@@ -52,7 +53,15 @@ export interface TableConfig {
 
 class SchemaService {
     async getAnySchema(key: string): Promise<JsonSchema> {
-        return await apiClient.getNaked<JsonSchema>(`/meta/urn:solvo:${key}/schema`)
+        const schema= await apiClient.getNaked<JsonSchema>(`/meta/urn:solvo:${key}/schema`)
+        return  merge(schema, {
+            mergeRefSibling: false,
+            mergeCombinarySibling: false,
+            onMergeError: (message, path, values) => {
+                console.warn(`Merge conflict at ${path}: ${message}`, values)
+                return schema
+            }
+        }) as JsonSchema
     }
 
 }

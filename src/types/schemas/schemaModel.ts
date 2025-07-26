@@ -1,9 +1,12 @@
-interface AnyLink {
+import {BaseEntity} from "@/types/dataModel.ts";
+
+export interface AnyLink {
     domain: string
     entity?: string
     catalog?: string
     id: string
     title?: string
+    entry?: BaseEntity
 }
 
 export interface ListLink<T extends string = string> extends AnyLink {
