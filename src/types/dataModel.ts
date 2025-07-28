@@ -33,20 +33,20 @@ export interface MetadataEntity extends Auditable{
     since?: Date;
     until?: Date;
 }
-
-export interface RichList extends BaseEntity {
-    referenceKey?: string;
+export interface List extends BaseEntity {
+    referenceKey: string;
+    type: 'CATALOG'|'LIST';
+}
+export interface RichList extends List {
     meta?: string;
     type: 'CATALOG';
+}
+export interface SimpleList extends List {
+    type: 'LIST';
 }
 
 export type RichListItem = DataEntity<AnyData>
 export type SimpleListItem = BaseEntity
-
-
-export interface SimpleList extends BaseEntity {
-    referenceKey?: string;
-}
 
 export const isBaseEntity = (obj: any): obj is BaseEntity => {
     return obj && typeof obj === 'object' ;

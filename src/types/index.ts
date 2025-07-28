@@ -1,11 +1,14 @@
 import {ShipmentRfpData} from "./schemas/shipmentRfpData.ts";
-import {BaseEntity, DataEntity, DomainEntity, RichList} from "@/types/dataModel.ts";
+import {BaseEntity, DataEntity, DomainEntity, RichList, SimpleList} from "@/types/dataModel.ts";
 import {AnyData} from "@/types/schemas/schemaModel.ts";
 
 export type CatalogItem = DataEntity<AnyData>
 export type ListItem = BaseEntity
 
 export type CatalogInfo = RichList
+export type ListInfo = SimpleList
+
+
 
 export * from './auth'
 
@@ -14,8 +17,6 @@ export * from './api'
 export * from './ui'
 
 export * from './app'
-
-
 
 export type ShipmentRfp = DomainEntity<ShipmentRfpData>
 

@@ -1,5 +1,7 @@
+// noinspection t
+
 import React, { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate,useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     ChevronLeftIcon,
@@ -15,6 +17,7 @@ import AutoTable from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
+import {CatalogItem} from "@/types";
 
 const CatalogItemsPage: React.FC = () => {
     const { catalogKey } = useParams<{ catalogKey: string }>()
@@ -27,32 +30,42 @@ const CatalogItemsPage: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingItem, setEditingItem] = useState<any>(null)
+    const location = useLocation()
+    const isListType = location.pathname.startsWith('/list/')
+    const type = isListType ? 'list' : 'catalog'
 
     // Fetch catalog info
     const { data: catalogInfo, isLoading: catalogLoading } = useQuery({
-        queryKey: ['catalog-info', catalogKey],
+        queryKey: [isListType ? 'list-info' : 'catalog-info', catalogKey],
         queryFn: async () => {
-            return await catalogService.getCatalogInfo(catalogKey!)
+            return isListType
+                ? await catalogService.getListInfo(catalogKey!)
+                : await catalogService.getCatalogInfo(catalogKey!)
         },
         enabled: !!catalogKey,
     })
 
-    // Fetch catalog items
+
     const { data: pagedItems, isLoading, error } = useQuery({
-        queryKey: ['catalog-items', catalogKey],
+        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
         queryFn: async () => {
-            return await catalogService.getCatalogItems(catalogKey!)
-
+            const result = await catalogService.getListItems(catalogKey!, type)
+            return result
         },
         enabled: !!catalogKey,
     })
-    const items = pagedItems?.content?.map(item => item.data) || []
 
-    // Fetch catalog schema
+    const items = pagedItems?.content?.map(item => {
+        if (isListType) {
+            return { title: item.title }
+        } else {
+            return (item as CatalogItem)?.data
+        }
+    }) || []
     const { data: schema } = useQuery({
         queryKey: ['catalog-schema', catalogKey],
         queryFn: () => schemaService.getAnySchema(catalogKey!),
-        enabled: !!catalogKey,
+        enabled: !!catalogKey && !isListType,
     })
 
     // Delete items mutation
@@ -79,7 +92,10 @@ const CatalogItemsPage: React.FC = () => {
 
     // Handle row click (view/edit)
     const handleRowClick = (row: any) => {
-        navigate(`/catalogs/${catalogKey}/items/${row.id}`)
+        if (isListType) {
+            return; // Lists don't have detailed views
+        }
+        navigate(`/${type}/${catalogKey}/items/${row.id}`)
     }
 
     // Handle edit action
@@ -97,7 +113,7 @@ const CatalogItemsPage: React.FC = () => {
 
     // Handle view action
     const handleView = (row: any) => {
-        navigate(`/catalogs/${catalogKey}/items/${row.id}`)
+        navigate(`/${type}/${catalogKey}/items/${row.id}`) // /catalogs or /lists
     }
 
     // Handle bulk delete
@@ -123,7 +139,7 @@ const CatalogItemsPage: React.FC = () => {
         )
     }
 
-    if (error || !catalogInfo || !schema) {
+    if (error || !catalogInfo || (!schema && type !== 'list')) {
         return (
             <div className="text-center py-12">
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Catalog not found</h3>
@@ -201,13 +217,13 @@ const CatalogItemsPage: React.FC = () => {
                 <div className="card">
                     <AutoTable
                         data={items}
-                        schema={schema}
+                        schema={catalogInfo?.type === 'LIST' ? undefined : schema}
                         loading={isLoading}
                         onRowClick={handleRowClick}
                         onSelectionChange={handleSelectionChange}
-                        onEdit={handleEdit}
+                        onEdit={catalogInfo?.type === 'LIST' ? undefined : handleEdit}
                         onDelete={handleDelete}
-                        onView={handleView}
+                        onView={catalogInfo?.type === 'LIST' ? undefined : handleView}
                         enableBulkActions={true}
                         enableActions={true}
                         showToolbar={true}
@@ -217,7 +233,7 @@ const CatalogItemsPage: React.FC = () => {
                             pagination: true,
                             pageSize: 25,
                             enableSorting: true,
-                            enableFiltering: true,
+                            enableFiltering: catalogInfo?.type !== 'LIST',
                             enableSelection: true
                         }}
                     />

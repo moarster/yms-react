@@ -122,8 +122,19 @@ const AppContent: React.FC = () => {
                                         </ProtectedRoute>
                                     }
                                 />
+                                {/* Catalog routes */}
                                 <Route
-                                    path="/catalogs/:catalogKey"
+                                    path="/catalog/:catalogKey"
+                                    element={
+                                        <ProtectedRoute requiredPermission="CATALOG_READ">
+                                            <CatalogItemsPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* List routes */}
+                                <Route
+                                    path="/list/:catalogKey"
                                     element={
                                         <ProtectedRoute requiredPermission="CATALOG_READ">
                                             <CatalogItemsPage />

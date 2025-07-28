@@ -1,5 +1,5 @@
 import {apiClient} from './apiClient'
-import {ApiResponse, CatalogInfo, CatalogItem, ListItem, PaginatedResponse} from '@/types'
+import {ApiResponse, CatalogInfo, CatalogItem, ListInfo, ListItem, PaginatedResponse} from '@/types'
 
 export interface CatalogFilters {
     search?: string
@@ -13,21 +13,25 @@ export interface CatalogFilters {
 class CatalogService {
     // Get all available catalogs
     async getCatalogs(): Promise<CatalogInfo[]> {
-        const response = await apiClient.getMany<CatalogInfo>('/reference')
+        const response = await apiClient.getMany<CatalogInfo>('/catalogs')
+        return response.content
+    }
+
+    async getLists(): Promise<ListInfo[]> {
+        const response = await apiClient.getMany<ListInfo>('/lists')
         return response.content
     }
 
 
     // Get catalog info
     async getCatalogInfo(catalogKey: string): Promise<CatalogInfo> {
-        return await apiClient.get<CatalogInfo>(`/reference/${catalogKey}/info`)
+        return await apiClient.get<CatalogInfo>(`/catalogs/${catalogKey}/info`)
     }
 
-    // Get list info
-    async getListInfo(listKey: string): Promise<ApiResponse<CatalogInfo>> {
-        const response = await apiClient.get<ApiResponse<CatalogInfo>>(`/lists/${listKey}`)
-        return response.data
+    async getListInfo(catalogKey: string): Promise<ListInfo> {
+        return await apiClient.get<ListInfo>(`/lists/api/${catalogKey}/info`)
     }
+
 
     async getCatalogItems(
         catalogKey: string,
@@ -53,6 +57,7 @@ class CatalogService {
     // Get list items with filters
     async getListItems(
         listKey: string,
+        listType: `list` | `catalog`,
         filters?: CatalogFilters
     ): Promise<PaginatedResponse<ListItem>> {
         const params = new URLSearchParams()
@@ -63,10 +68,10 @@ class CatalogService {
         if (filters?.sort) params.append('sort', filters.sort)
         if (filters?.direction) params.append('direction', filters.direction)
 
-        const response = await apiClient.getMany<ListItem>(
-            `/lists/${listKey}/items?${params.toString()}`
+        return await apiClient.getMany<ListItem>(
+            listType==='list'?`/lists/api/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
         )
-        return response
+
     }
 
     // Create catalog item

@@ -1,3 +1,5 @@
+// noinspection t
+
 import React, {useMemo, useCallback, useState} from 'react'
 import {
     DataGrid,
@@ -285,6 +287,127 @@ const generateColumnDefs = (
     return columns
 }
 
+const generateSchemalessColumnDefs = (
+    data: any[],
+    enableActions: boolean,
+    onEdit?: (row: any) => void,
+    onDelete?: (row: any) => void,
+    onView?: (row: any) => void
+): GridColDef[] => {
+    const columns: GridColDef[] = []
+
+    if (!data || data.length === 0) {
+        return [{
+            field: 'id',
+            headerName: 'ID',
+            width: 100,
+        }]
+    }
+
+    // Get all unique keys from the data
+    const allKeys = new Set<string>()
+    data.forEach(row => {
+        if (row && typeof row === 'object') {
+            Object.keys(row).forEach(key => allKeys.add(key))
+        }
+    })
+
+    // Create columns for each key
+    allKeys.forEach(key => {
+        if (key === 'id') return // Skip id as it's handled by DataGrid
+
+        const colDef: GridColDef = {
+            field: key,
+            headerName: key.charAt(0).toUpperCase() + key.slice(1),
+            width: 150,
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => {
+                const value = params.value
+
+                // Handle objects with title property
+                if (value && typeof value === 'object' && value.title) {
+                    return <span>{value.title}</span>
+                }
+
+                // Handle arrays
+                if (Array.isArray(value)) {
+                    const displayValue = value.map(item =>
+                        typeof item === 'object' && item.title ? item.title : String(item)
+                    ).join(', ')
+
+                    return (
+                        <Tooltip title={displayValue}>
+                            <Chip
+                                label={`${value.length} items`}
+                                size="small"
+                                variant="outlined"
+                            />
+                        </Tooltip>
+                    )
+                }
+
+                // Default: convert to string
+                return <span>{value != null ? String(value) : ''}</span>
+            }
+        }
+
+        columns.push(colDef)
+    })
+
+    // Add actions column if enabled
+    if (enableActions && (onEdit || onDelete || onView)) {
+        const actionsColumn: GridColDef = {
+            field: 'actions',
+            type: 'actions',
+            headerName: 'Actions',
+            width: 120,
+            cellClassName: 'actions',
+            getActions: ({row}) => {
+                const actions = []
+
+                if (onView) {
+                    actions.push(
+                        <GridActionsCellItem
+                            icon={<ViewIcon/>}
+                            label="View"
+                            onClick={() => onView(row)}
+                            color="inherit"
+                        />
+                    )
+                }
+
+                if (onEdit) {
+                    actions.push(
+                        <GridActionsCellItem
+                            icon={<EditIcon/>}
+                            label="Edit"
+                            onClick={() => onEdit(row)}
+                            color="inherit"
+                        />
+                    )
+                }
+
+                if (onDelete) {
+                    actions.push(
+                        <GridActionsCellItem
+                            icon={<DeleteIcon/>}
+                            label="Delete"
+                            onClick={() => onDelete(row)}
+                            color="inherit"
+                        />
+                    )
+                }
+
+                return actions
+            },
+        }
+
+        columns.push(actionsColumn)
+    }
+
+    return columns
+}
+
 const getDefaultWidth = (property: JsonSchemaProperty): number => {
     switch (property.type) {
         case 'boolean':
@@ -406,14 +529,11 @@ const AutoTable: React.FC<AutoTableProps> = ({
     if (schema && !schema.properties && schema.allOf) schema.properties = schema.allOf[0]?.properties
     const columnDefs = useMemo(() => {
         if (!schema || !schema.properties) {
-            return [{
-                field: 'id',
-                headerName: 'ID',
-                width: 100,
-            }]
+            return generateSchemalessColumnDefs(data, enableActions, onEdit, onDelete, onView)
         }
         return generateColumnDefs(schema.properties, enableActions, onEdit, onDelete, onView)
-    }, [schema, enableActions, onEdit, onDelete, onView])
+    }, [schema, data, enableActions, onEdit, onDelete, onView])
+
 
     const processedData = useMemo(() => {
         if (!data || !Array.isArray(data)) {
@@ -456,16 +576,6 @@ const AutoTable: React.FC<AutoTableProps> = ({
 
 
 
-    // Don't render if we don't have proper data structure
-    if (!schema || !schema.properties) {
-        return (
-            <Box className={className} sx={{ height, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                    Invalid schema provided
-                </Typography>
-            </Box>
-        )
-    }
 
 
 

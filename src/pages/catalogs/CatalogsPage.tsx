@@ -3,12 +3,13 @@ import {Link} from 'react-router-dom'
 import {useQuery} from '@tanstack/react-query'
 import {ArchiveBoxIcon, EyeIcon, ListBulletIcon, PencilIcon, TableCellsIcon} from '@heroicons/react/24/outline'
 import {catalogService} from '@/services/catalogService'
-import {CatalogInfo} from '@/types'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
+import {List} from "@/types/dataModel.ts";
+import {ListInfo} from "@/types";
 
 interface CatalogCardProps {
-    catalog: CatalogInfo
+    catalog: List
 }
 
 const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {
@@ -47,14 +48,14 @@ const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {
                     </div>
                     <div className="flex space-x-2">
                         <Link
-                            to={`/catalogs/${catalog.referenceKey}`}
+                            to={`/${catalog.type === 'LIST' ? 'list' : 'catalog'}/${catalog.referenceKey}`}
                             className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                         >
                             <EyeIcon className="h-4 w-4 mr-1" />
                             View Items
                         </Link>
                         <Link
-                            to={`/catalogs/${catalog.referenceKey}/edit`}
+                            to={`/${catalog.type === 'LIST' ? 'list' : 'catalog'}/${catalog.referenceKey}/edit`}
                             className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                         >
                             <PencilIcon className="h-4 w-4 mr-1" />
@@ -68,12 +69,23 @@ const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {
 }
 
 const CatalogsPage: React.FC = () => {
-    const { data: catalogs, isLoading, error } = useQuery({
+    const { data: catalogs, isLoading: catalogsLoading, error: catalogsError } = useQuery({
         queryKey: ['catalogs'],
         queryFn: async () => {
             return await catalogService.getCatalogs()
         },
     })
+
+    const { data: lists, isLoading: listsLoading, error: listsError} = useQuery({
+        queryKey: ['lists'],
+        queryFn: async () => {
+            return await catalogService.getLists()
+        },
+    })
+    // Combined loading state
+    const isLoading = catalogsLoading || listsLoading
+    // Combined error state (you can handle each error separately if needed)
+    const error = catalogsError || listsError
 
     if (isLoading) {
         return <LoadingSpinner size="lg" text="Loading catalogs..." />
@@ -82,9 +94,6 @@ const CatalogsPage: React.FC = () => {
     if (error) {
         return <ErrorMessage message="Failed to load catalogs" />
     }
-
-    const lists = catalogs?.filter(c => c.type === 'LIST') || []
-    const catalogsItems = catalogs//?.filter(c => c.type === 'CATALOG') || []
 
     return (
         <div className="space-y-6">
@@ -117,7 +126,7 @@ const CatalogsPage: React.FC = () => {
                         </div>
                         <div className="ml-5">
                             <div className="text-sm font-medium text-gray-500">Simple Lists</div>
-                            <div className="text-2xl font-semibold text-gray-900">{lists.length}</div>
+                            <div className="text-2xl font-semibold text-gray-900">{lists?.length}</div>
                         </div>
                     </div>
                 </div>
@@ -129,7 +138,7 @@ const CatalogsPage: React.FC = () => {
                         </div>
                         <div className="ml-5">
                             <div className="text-sm font-medium text-gray-500">Structured Catalogs</div>
-                            <div className="text-2xl font-semibold text-gray-900">{catalogsItems.length}</div>
+                            <div className="text-2xl font-semibold text-gray-900">{catalogs?.length}</div>
                         </div>
                     </div>
                 </div>
@@ -141,31 +150,31 @@ const CatalogsPage: React.FC = () => {
                         </div>
                         <div className="ml-5">
                             <div className="text-sm font-medium text-gray-500">Total Catalogs</div>
-                            <div className="text-2xl font-semibold text-gray-900">{catalogs?.length || 0}</div>
+                            <div className="text-2xl font-semibold text-gray-900">{(catalogs?.length || 0) + (lists?.length || 0)}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Simple Lists Section */}
-            {lists.length > 0 && (
+            {lists?.length  && (
                 <div>
                     <h2 className="text-lg font-medium text-gray-900 mb-4">Simple Lists</h2>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {lists.map((catalog) => (
-                            <CatalogCard key={catalog.referenceKey} catalog={catalog} />
+                            <CatalogCard key={catalog.referenceKey} catalog={{...catalog, type:'LIST'}} />
                         ))}
                     </div>
                 </div>
             )}
 
             {/* Structured Catalogs Section */}
-            {catalogsItems.length > 0 && (
+            {catalogs?.length  && (
                 <div>
                     <h2 className="text-lg font-medium text-gray-900 mb-4">Structured Catalogs</h2>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {catalogsItems.map((catalog) => (
-                            <CatalogCard key={catalog.referenceKey} catalog={catalog} />
+                        {catalogs.map((catalog) => (
+                            <CatalogCard key={catalog.referenceKey} catalog={{...catalog, type:'CATALOG'}} />
                         ))}
                     </div>
                 </div>
