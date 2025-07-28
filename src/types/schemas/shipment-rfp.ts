@@ -1,33 +1,24 @@
-import {ListLink, ReferenceLink, Attachment, AnyData} from './schemaModel.ts'
+import { ListLink, ReferenceLink, Attachment,DomainEntity } from '@/types'
 
-export interface ShipmentRfpData extends AnyData {
-    type: 'shipment-rfp'
-    // Required fields from schema
+export interface ShipmentRfpData {
     _shipmentType: ListLink<'shipment-type'>
     _transportationType: ListLink<'transportation-type'>
     _routeDirection: ReferenceLink<'route-direction'>
     _currency: ListLink<'currency'>
-
-    // Optional core fields
     _candidates?: ReferenceLink<'counter-party'>[]
     _carrier?: ReferenceLink<'counter-party'>
     price?: number
     _requiredVehicleType?: ReferenceLink<'vehicle-type'>
-
-    // Text fields
     customRequirements?: string // max 1000 chars
-    innerComment?: string // max 1000 chars, logist only
+    innerComment?: string
     comment?: string // max 1000 chars
     admittanceComment?: string // max 1000 chars
     refusalComment?: string // max 1000 chars
 
-    // Route with cargo
     route: RoutePoint[]
 
-    // Express shipment flag
     express?: boolean
 
-    // Additional entities
     _shipmentPlanningDepartment?: ReferenceLink<'shipment-planning-department'>
     _vehicle?: ReferenceLink<'vehicle'>
     trailerNumber?: string
@@ -39,14 +30,12 @@ export interface ShipmentRfpData extends AnyData {
     driverContactPhone?: string
     _client?: ReferenceLink<'counter-party'>
 
-    // Actual carrier info
     actualCarrier?: ActualCarrier
     _contract?: ReferenceLink<'contract'>
     letterOfAttorney?: LetterOfAttorney
     requestForVehicleDispatch?: Attachment
     _refusalReason?: ReferenceLink<'shipment-rfp-refusal-reason'>
 
-    // Attachments
     attachments: Attachment[]
 }
 
@@ -84,5 +73,16 @@ export interface LetterOfAttorney {
 }
 
 
+export const validateINN = (inn: string): boolean =>
+    /^\d{10}$|^\d{12}$/.test(inn)
 
+export const validateRoutePoint = (point: RoutePoint): string[] => {
+    const errors: string[] = []
+    if (!point.address?.trim()) errors.push('Address is required')
+    if (point.address?.length > 255) errors.push('Address too long (max 255 chars)')
+    if (!point.arrival) errors.push('Arrival time is required')
+    if (point.cargoList.length === 0) errors.push('At least one cargo item is required')
+    return errors
+}
 
+export type ShipmentRfp = DomainEntity<ShipmentRfpData>

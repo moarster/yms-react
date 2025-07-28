@@ -5,11 +5,10 @@ import {ArchiveBoxIcon, EyeIcon, ListBulletIcon, PencilIcon, TableCellsIcon} fro
 import {catalogService} from '@/services/catalogService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
-import {List} from "@/types/dataModel.ts";
-import {ListInfo} from "@/types";
+import {CatalogBase} from "@/types";
 
 interface CatalogCardProps {
-    catalog: List
+    catalog: CatalogBase
 }
 
 const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {

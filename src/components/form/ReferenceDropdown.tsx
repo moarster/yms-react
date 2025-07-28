@@ -1,16 +1,15 @@
-// src/components/form/ReferenceDropdown.tsx
 import React, { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { catalogService } from '@/services/catalogService'
-import { AnyLink } from '@/types/schemas/schemaModel'
+import { BaseLink } from '@/types'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface ReferenceDropdownProps {
-    value?: AnyLink | null
-    onChange: (value: AnyLink | null) => void
+    value?: BaseLink | null
+    onChange: (value: BaseLink | null) => void
     catalog: string
-    domain: 'lists' | 'reference'
+    domain: 'lists' | 'catalogs'
     placeholder?: string
     disabled?: boolean
     required?: boolean
@@ -74,7 +73,7 @@ const ReferenceDropdown: React.FC<ReferenceDropdownProps> = ({
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const handleSelect = (option: AnyLink) => {
+    const handleSelect = (option: BaseLink) => {
         onChange(option)
         setIsOpen(false)
         setSearchTerm('')

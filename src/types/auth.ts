@@ -1,32 +1,7 @@
-import Keycloak from 'keycloak-js'
+import type Keycloak from 'keycloak-js'
 
-export interface AuthState {
-    user: User | null
-    token: string | null
-    isAuthenticated: boolean
-    isLoading: boolean
-    keycloak?: Keycloak
-    authMode: 'keycloak' | 'demo'
-    isDemoMode: boolean
-}
-
-
-export interface User {
-    id: string
-    email: string
-    name: string
-    roles: UserRole[]
-    organization?: Organization
-    // Keycloak specific fields
-    keycloakId?: string
-    preferredUsername?: string
-}
-
-export interface UserRole {
-    id: string
-    name: 'LOGIST' | 'CARRIER' | 'ADMIN'
-    permissions: string[]
-}
+export type UserRole = 'LOGIST' | 'CARRIER' | 'ADMIN'
+export type AuthMode = 'keycloak' | 'demo'
 
 export interface Organization {
     id: string
@@ -37,3 +12,35 @@ export interface Organization {
     phone?: string
     email?: string
 }
+
+export interface User {
+    id: string
+    email: string
+    name: string
+    roles: UserRole[]
+    organization?: Organization
+    // Keycloak specific
+    keycloakId?: string
+    preferredUsername?: string
+}
+
+export interface AuthState {
+    user: User | null
+    token: string | null
+    isAuthenticated: boolean
+    isLoading: boolean
+    keycloak?: Keycloak
+    authMode: AuthMode
+    isDemoMode: boolean
+}
+
+// Permission helpers
+export const hasRole = (user: User | null, role: UserRole): boolean =>
+    user?.roles.includes(role) ?? false
+
+export const hasAnyRole = (user: User | null, roles: UserRole[]): boolean =>
+    roles.some(role => hasRole(user, role))
+
+export const isLogist = (user: User | null): boolean => hasRole(user, 'LOGIST')
+export const isCarrier = (user: User | null): boolean => hasRole(user, 'CARRIER')
+export const isAdmin = (user: User | null): boolean => hasRole(user, 'ADMIN')

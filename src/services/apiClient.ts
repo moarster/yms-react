@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ApiError, PaginatedResponse} from '@/types'
+import { ApiError, PaginatedResponse, BaseEntity} from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { ENV } from '@/constants'
 import toast from 'react-hot-toast'
-import {BaseEntity} from "@/types/dataModel.ts";
 
 class ApiClient {
     private client: AxiosInstance

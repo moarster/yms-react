@@ -1,6 +1,6 @@
-import {BaseEntity} from "@/types/dataModel.ts";
+import { BaseEntity } from './base'
 
-export interface ApiResponse<T extends BaseEntity> {
+export interface ApiResponse<T> {
     body: T
     success: boolean
     message?: string
@@ -9,10 +9,10 @@ export interface ApiResponse<T extends BaseEntity> {
 
 export interface PaginatedResponse<T extends BaseEntity> {
     content: T[]
-    page: Pageable
+    page: PageInfo
 }
 
-export interface Pageable {
+export interface PageInfo {
     number: number
     size: number
     totalElements: number
@@ -26,7 +26,32 @@ export interface Pageable {
 export interface ApiError {
     message: string
     code: string
-    details?: Record<string, any>
+    details?: Record<string, unknown>
     timestamp?: string
     path?: string
 }
+
+// Common pagination params
+export interface PaginationParams {
+    page?: number
+    size?: number
+    sort?: string
+    direction?: 'asc' | 'desc'
+}
+
+// Search and filter params
+export interface SearchParams extends PaginationParams {
+    query?: string
+    filters?: Record<string, unknown>
+}
+
+// Response type helpers
+export type SuccessResponse<T> = ApiResponse<T> & { success: true }
+export type ErrorResponse = ApiResponse<never> & { success: false; message: string }
+
+// Type guard for API responses
+export const isApiError = (response: unknown): response is ApiError =>
+    typeof response === 'object' &&
+    response !== null &&
+    'message' in response &&
+    'code' in response
