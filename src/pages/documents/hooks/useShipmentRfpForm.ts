@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import {FormConfig} from "@/types";
 
 export const useShipmentRfpForm = (
     schema: any,
@@ -18,7 +19,7 @@ export const useShipmentRfpForm = (
                 cargoDetails: { 'ui:title': 'Cargo Details', 'ui:layout': 'accordion' },
             },
             formData
-        }
+        } as FormConfig
     }, [schema, formData])
 
     return {

@@ -23,7 +23,7 @@ const ShipmentRfpDetailPage: React.FC = () => {
         user
     } = useShipmentRfpDetail()
 
-    const { canEdit, canPublish, canCancel } = useShipmentRfpPermissions(rfp, user, isCreating)
+    const { canEdit, canPublish, canCancel } = useShipmentRfpPermissions(rfp!, user, isCreating)
 
     const handleFormChange = (data: any) => setFormData(data)
 
@@ -35,7 +35,7 @@ const ShipmentRfpDetailPage: React.FC = () => {
         }
     }
 
-    const { formConfig } = useShipmentRfpForm(schema, formData, handleFormChange, handleFormSubmit)
+    const { formConfig ,  onFormChange,  onFormSubmit } = useShipmentRfpForm(schema, formData, handleFormChange, handleFormSubmit)
     const { sidebarSections, actions } = useShipmentRfpSidebar(rfp, canPublish, canCancel)
 
     const commonFormProps = {
@@ -45,9 +45,9 @@ const ShipmentRfpDetailPage: React.FC = () => {
             { label: 'Shipment RFPs', href: '/shipment-rfps' },
             { label: isCreating ? 'Create New RFP' : rfp?.title || 'RFP Details' }
         ],
-        formConfig,
-        onFormChange: handleFormChange,
-        onFormSubmit: handleFormSubmit,
+        formConfig: formConfig!,
+        onFormChange,
+        onFormSubmit,
         sidebarSections,
         actions,
         isLoading,
