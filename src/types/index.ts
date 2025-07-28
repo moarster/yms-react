@@ -16,10 +16,7 @@ export * from './api'
 
 export * from './ui'
 
-export * from './app'
-
 export type ShipmentRfp = DomainEntity<ShipmentRfpData>
-
 
 export type DocumentStatus =
     | 'NEW'
@@ -46,21 +43,5 @@ export interface ApiError {
     message: string
     code: string
     details?: Record<string, any>
-}
-
-
-export interface Notification {
-    id: string
-    type: 'info' | 'success' | 'warning' | 'error'
-    title: string
-    message: string
-    timestamp: string
-    read: boolean
-    actions?: NotificationAction[]
-}
-
-export interface NotificationAction {
-    label: string
-    action: () => void
 }
 

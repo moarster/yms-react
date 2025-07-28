@@ -10,21 +10,6 @@ export interface AuthState {
     isDemoMode: boolean
 }
 
-export interface AuthContextType extends AuthState {
-    login: (email?: string, password?: string) => Promise<void>
-    logout: () => void
-    refreshToken: () => Promise<void>
-    setUser: (user: User) => void
-    setLoading: (loading: boolean) => void
-    switchToDemoMode: () => void
-    switchToKeycloakMode: () => void
-}
-
-export interface DemoUser {
-    email: string
-    password: string
-    user: User
-}
 
 export interface User {
     id: string

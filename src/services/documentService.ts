@@ -48,12 +48,12 @@ class DocumentService {
 
     async createShipmentRfp(data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
         const response = await apiClient.post<ShipmentRfp>('/domain/shipment-rfp/shipment-rfp', data)
-        return response.data
+        return response
     }
 
     async updateShipmentRfp(id: string, data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
         const response = await apiClient.put<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`, data)
-        return response.data
+        return response
     }
 
 
@@ -70,47 +70,6 @@ class DocumentService {
             `/domain/shipment-rfp/shipment-rfp/${documentId}/tasks`
         )
         return response.tasks
-    }
-
-    // Upload attachment
-    async uploadAttachment(documentId: string, file: File, description?: string): Promise<{
-        id: string
-        filename: string
-        size: number
-        contentType: string
-        uploadedAt: string
-    }> {
-        const formData = new FormData()
-        formData.append('file', file)
-        if (description) {
-            formData.append('description', description)
-        }
-
-        const response = await apiClient.post<{
-            id: string
-            filename: string
-            size: number
-            contentType: string
-            uploadedAt: string
-        }>(
-            `/domain/shipment-rfp/${documentId}/attachments`,
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
-        )
-        return response.data
-    }
-
-    // Download attachment
-    async downloadAttachment(documentId: string, attachmentId: string): Promise<Blob> {
-        const response = await apiClient.get(
-            `/domain/shipment-rfp/${documentId}/attachments/${attachmentId}/download`,
-            { responseType: 'blob' }
-        )
-        return response.data
     }
 
 
