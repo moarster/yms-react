@@ -1,5 +1,5 @@
 import {apiClient} from './apiClient'
-import {CatalogInfo, CatalogItem, ListInfo, ListItem, PaginatedResponse} from '@/types'
+import {Catalog, CatalogItem, SimpleList, ListItem, PaginatedResponse} from '@/types'
 
 export interface CatalogFilters {
     search?: string
@@ -12,24 +12,24 @@ export interface CatalogFilters {
 
 class CatalogService {
     // Get all available catalogs
-    async getCatalogs(): Promise<CatalogInfo[]> {
-        const response = await apiClient.getMany<CatalogInfo>('/catalogs')
+    async getCatalogs(): Promise<Catalog[]> {
+        const response = await apiClient.getMany<Catalog>('/catalogs')
         return response.content
     }
 
-    async getLists(): Promise<ListInfo[]> {
-        const response = await apiClient.getMany<ListInfo>('/lists')
+    async getLists(): Promise<SimpleList[]> {
+        const response = await apiClient.getMany<SimpleList>('/lists')
         return response.content
     }
 
 
     // Get catalog info
-    async getCatalogInfo(catalogKey: string): Promise<CatalogInfo> {
-        return await apiClient.get<CatalogInfo>(`/catalogs/${catalogKey}/info`)
+    async getCatalogInfo(catalogKey: string): Promise<Catalog> {
+        return await apiClient.get<Catalog>(`/catalogs/${catalogKey}/info`)
     }
 
-    async getListInfo(catalogKey: string): Promise<ListInfo> {
-        return await apiClient.get<ListInfo>(`/lists/api/${catalogKey}/info`)
+    async getListInfo(catalogKey: string): Promise<SimpleList> {
+        return await apiClient.get<SimpleList>(`/lists/api/${catalogKey}/info`)
     }
 
 

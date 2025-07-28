@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient'
-import { PaginatedResponse, ShipmentRfp, DocumentStatus, DocumentActions,DocumentTask } from '@/types'
+import { PaginatedResponse, ShipmentRfp, DocumentStatus, WorkflowTask , WorkflowActions} from '@/types'
 
 export interface DocumentFilters {
     status?: DocumentStatus[]
@@ -65,8 +65,8 @@ class DocumentService {
         return response.data
     }
 
-    async getAvailableActions(documentId: string): Promise<DocumentTask[]> {
-        const response = await apiClient.getAny<DocumentActions>(
+    async getAvailableActions(documentId: string): Promise<WorkflowTask[]> {
+        const response = await apiClient.getAny<WorkflowActions>(
             `/domain/shipment-rfp/shipment-rfp/${documentId}/tasks`
         )
         return response.tasks
