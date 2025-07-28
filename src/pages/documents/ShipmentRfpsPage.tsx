@@ -3,10 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
     PlusIcon,
-    EyeIcon,
-    CalendarIcon,
-    TruckIcon,
-    MapPinIcon
+    TruckIcon
 } from '@heroicons/react/24/outline'
 import { documentService } from '@/services/documentService'
 import { schemaService } from '@/services/schemaService'
@@ -16,7 +13,6 @@ import { ShipmentRfp, DocumentStatus } from '@/types'
 import AutoTable from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
-import { format } from 'date-fns'
 import clsx from 'clsx'
 
 interface StatusFilterProps {
@@ -58,100 +54,6 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatuses, onStatusC
     )
 }
 
-const IdCellRenderer = (params: any) => {
-    const id = params.value
-    if (!id) return ''
-    return (
-        <div className="font-mono text-sm text-gray-600">
-            #{id.slice(-8)}
-        </div>
-    )
-}
-
-const TitleCellRenderer = (params: any) => {
-    const title = params.value
-    if (!title) return ''
-    return (
-        <div>
-            <div className="font-medium text-gray-900">{title}</div>
-            <div className="text-sm text-gray-500 truncate max-w-xs">
-                {title}
-            </div>
-        </div>
-    )
-}
-
-const RouteCellRenderer = (params: any) => {
-    const data = params.data
-    if (!data?.pickupLocation || !data?.deliveryLocation) return ''
-
-    return (
-        <div className="flex items-center space-x-1 text-sm text-gray-600">
-            <MapPinIcon className="h-4 w-4" />
-            <span className="truncate max-w-24">{data.pickupLocation.address}</span>
-            <span>→</span>
-            <span className="truncate max-w-24">{data.deliveryLocation.address}</span>
-        </div>
-    )
-}
-
-const PickupDateCellRenderer = (params: any) => {
-    const data = params.data
-    if (!data?.timeline?.pickupDate) return ''
-
-    return (
-        <div className="flex items-center space-x-1 text-sm text-gray-600">
-            <CalendarIcon className="h-4 w-4" />
-            <span>{format(new Date(data.timeline.pickupDate), 'MMM dd, yyyy')}</span>
-        </div>
-    )
-}
-
-const CargoCellRenderer = (params: any) => {
-    const data = params.data
-    if (!data?.cargoDetails) return ''
-
-    return (
-        <div className="text-sm text-gray-600">
-            <div>{data.cargoDetails.weight} kg</div>
-            <div className="text-xs text-gray-500">{data.cargoDetails.cargoType}</div>
-        </div>
-    )
-}
-
-const CarrierCellRenderer = (params: any) => {
-    const data = params.data
-    const carrier = data?.data?._carrier
-
-    return (
-        <div className="text-sm text-gray-600">
-            {carrier?.title || (
-                <span className="text-gray-400 italic">Not assigned</span>
-            )}
-        </div>
-    )
-}
-
-const ActionsCellRenderer = (params: any) => {
-    const navigate = useNavigate()
-
-    const handleViewClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        navigate(`/shipment-rfps/${params.data.id}`)
-    }
-
-    return (
-        <div className="flex space-x-2">
-            <button
-                onClick={handleViewClick}
-                className="text-primary-600 hover:text-primary-900"
-                title="View Details"
-            >
-                <EyeIcon className="h-4 w-4" />
-            </button>
-        </div>
-    )
-}
 
 const ShipmentRfpsPage: React.FC = () => {
     const navigate = useNavigate()
