@@ -14,7 +14,8 @@ export interface FormConfig {
 export interface SidebarSection {
     title: string
     icon?: IconComponent
-    content: React.ReactNode
+    content?: React.ReactNode
+    items?: Array<{ label: string; value: string; type?: string }>
 }
 
 export interface CustomSection {
@@ -25,25 +26,35 @@ export interface CustomSection {
     position: 'before-form' | 'after-form'
 }
 
+export interface FormAction {
+    label: string
+    onClick: () => void
+    loading?: boolean
+    disabled?: boolean
+    icon?: IconComponent
+}
+
 export interface FormActions {
-    primary?: {
-        label: string
-        onClick: () => void
-        loading?: boolean
-        disabled?: boolean
-    }
-    secondary?: {
-        label: string
-        onClick: () => void
-        disabled?: boolean
-    }
-    additional?: Array<{
-        label: string
-        onClick: () => void
+    edit?: FormAction
+    save?: FormAction
+    cancel?: FormAction
+    delete?: FormAction
+    additional?: Array<FormAction & {
         variant?: 'outline' | 'danger' | 'success'
-        disabled?: boolean
     }>
 }
+
+export interface WorkflowTask {
+    label: string
+    onClick: () => void
+    loading?: boolean
+    disabled?: boolean
+    icon?: IconComponent
+    variant?: 'primary' | 'secondary' | 'danger' | 'success'
+    requiresConfirmation?: boolean
+}
+
+
 
 export interface CommonFormProps {
     title: string
@@ -59,8 +70,11 @@ export interface CommonFormProps {
     sidebarSections?: SidebarSection[]
     customSections?: CustomSection[]
 
-    // Header actions (edit, save, cancel buttons)
-    actions?: FormActions
+    // Header - Form Actions (edit, save, cancel)
+    formActions?: FormActions
+
+    // Footer - Workflow Tasks (publish, assign, etc.)
+    workflowTasks?: WorkflowTask[]
 
     // Loading states
     isLoading?: boolean
@@ -72,5 +86,4 @@ export interface CommonFormProps {
 
     // Additional customization
     className?: string
-    hideFormActions?: boolean
 }

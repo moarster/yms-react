@@ -2,10 +2,10 @@ import React from 'react'
 import { CommonFormProps } from '@/types/form'
 import { FormHeader } from './layout/FormHeader'
 import { FormSidebar } from './layout/FormSidebar'
-import { FormActions } from './layout/FormActions'
 import { CustomSections } from './layout/CustomSections'
 import { FormContainer } from './layout/FormContainer'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import {WorkflowTasksFooter} from "@/components/form/layout/WorkflowTasksFooter.tsx";
 
 const CommonForm: React.FC<CommonFormProps> = ({
                                                    title,
@@ -16,12 +16,12 @@ const CommonForm: React.FC<CommonFormProps> = ({
                                                    onFormSubmit,
                                                    sidebarSections = [],
                                                    customSections = [],
-                                                   actions,
+                                                   formActions,
+                                                   workflowTasks = [],
                                                    isLoading = false,
+                                                   isSubmitting = false,
                                                    isEditMode = true,
-                                                   onEditModeChange,
-                                                   className = '',
-                                                   hideFormActions = false
+                                                   className = ''
                                                }) => {
     if (isLoading) {
         return (
@@ -34,30 +34,37 @@ const CommonForm: React.FC<CommonFormProps> = ({
     const hasSidebar = sidebarSections.length > 0
 
     return (
-        <div className={`space-y-6 ${className}`}>
+        <div className={`min-h-screen bg-gray-50 ${className}`}>
             <FormHeader
                 title={title}
                 subtitle={subtitle}
                 breadcrumbs={breadcrumbs}
                 isEditMode={isEditMode}
-                onEditModeChange={onEditModeChange}
-                canEdit={!!onEditModeChange}
+                formActions={formActions}
             />
 
             <CustomSections sections={customSections} position="before-form" />
 
-            <div className={`grid ${hasSidebar ? 'grid-cols-1 gap-6 lg:grid-cols-4' : 'grid-cols-1'}`}>
-                <FormContainer
-                    formConfig={formConfig}
-                    onFormChange={onFormChange}
-                    onFormSubmit={onFormSubmit}
-                    isEditMode={isEditMode}
-                    hideFormActions={hideFormActions}
-                    hasSidebar={hasSidebar}
-                />
+            <div className="flex-1 flex">
+                {/* Main Form Area */}
+                <div className="flex-1 p-6">
+                    <div className="bg-white rounded-lg shadow">
+                        <div className="p-6">
+                            <FormContainer
+                                formConfig={formConfig}
+                                onFormChange={onFormChange}
+                                onFormSubmit={onFormSubmit}
+                                isEditMode={isEditMode}
+                                isSubmitting={isSubmitting}
+                                hideFormActions={true} // Always hide since we use header/footer
+                            />
+                        </div>
+                    </div>
+                </div>
+
 
                 {hasSidebar && (
-                    <div className="lg:col-span-1">
+                    <div className="w-80 p-6">
                         <FormSidebar sections={sidebarSections} />
                     </div>
                 )}
@@ -65,7 +72,7 @@ const CommonForm: React.FC<CommonFormProps> = ({
 
             <CustomSections sections={customSections} position="after-form" />
 
-            {actions && !hideFormActions && <FormActions {...actions} />}
+            <WorkflowTasksFooter tasks={workflowTasks} />
         </div>
     )
 }

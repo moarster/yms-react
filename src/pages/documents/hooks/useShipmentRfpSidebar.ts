@@ -1,8 +1,13 @@
 import { useMemo } from 'react'
-import { UsersIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { UsersIcon } from '@heroicons/react/24/outline'
 import type { SidebarSection } from '@/types/form'
 
-export const useShipmentRfpSidebar = (rfp: any, canPublish: boolean, canCancel: boolean) => {
+interface UseShipmentRfpSidebarProps {
+    rfp: any
+}
+
+export const useShipmentRfpSidebar = ({ rfp }: UseShipmentRfpSidebarProps) => {
+
     const sidebarSections: SidebarSection[] = useMemo(() => {
         if (!rfp) return []
 
@@ -32,32 +37,36 @@ export const useShipmentRfpSidebar = (rfp: any, canPublish: boolean, canCancel: 
             })
         }
 
+        if (rfp.createdBy) {
+            sections.push({
+                title: 'Created By',
+                items: [
+                    {
+                        label: 'Creator',
+                        value: rfp.createdBy.name || rfp.createdBy.email
+                    },
+                    {
+                        label: 'Created At',
+                        value: new Date(rfp.createdAt).toLocaleDateString()
+                    }
+                ]
+            })
+        }
+
+        // Add rates if any
+        if (rfp.rates && rfp.rates.length > 0) {
+            sections.push({
+                title: 'Submitted Rates',
+                items: rfp.rates.map((rate: any, idx: number) => ({
+                    label: `Rate ${idx + 1}`,
+                    value: `${rate.amount} ${rate.currency}`
+                }))
+            })
+        }
+
         return sections
     }, [rfp])
 
-    const actions = useMemo(() => {
-        const actionList = []
-
-        if (canPublish) {
-            actionList.push({
-                label: 'Publish RFP',
-                icon: CheckCircleIcon,
-                variant: 'primary' as const,
-                onClick: () => {/* publish logic */}
-            })
-        }
-
-        if (canCancel) {
-            actionList.push({
-                label: 'Cancel RFP',
-                icon: XCircleIcon,
-                variant: 'danger' as const,
-                onClick: () => {/* cancel logic */}
-            })
-        }
-
-        return actionList
-    }, [canPublish, canCancel])
-
-    return { sidebarSections, actions }
+    return { sidebarSections }
 }
+

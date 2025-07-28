@@ -9,8 +9,8 @@ interface FormContainerProps {
     onFormChange: (data: any) => void
     onFormSubmit: (data: any) => void
     isEditMode: boolean
+    isSubmitting?: boolean
     hideFormActions?: boolean
-    hasSidebar: boolean
 }
 
 export const FormContainer: React.FC<FormContainerProps> = ({
@@ -18,13 +18,18 @@ export const FormContainer: React.FC<FormContainerProps> = ({
                                                                 onFormChange,
                                                                 onFormSubmit,
                                                                 isEditMode,
-                                                                hideFormActions = false,
-                                                                hasSidebar
+                                                                isSubmitting = false
                                                             }) => {
     const FieldTemplate = createFieldTemplate()
 
+    const handleSubmit = (data: any) => {
+        if (!isSubmitting) {
+            onFormSubmit(data)
+        }
+    }
+
     return (
-        <div className={`${hasSidebar ? "lg:col-span-3" : ""}`}>
+        <>
             {formConfig.schema && (
                 <Form
                     id="common-form"
@@ -32,20 +37,19 @@ export const FormContainer: React.FC<FormContainerProps> = ({
                     uiSchema={formConfig.uiSchema}
                     formData={formConfig.formData}
                     onChange={(e) => onFormChange(e.formData)}
-                    onSubmit={onFormSubmit}
+                    onSubmit={handleSubmit}
                     validator={validator}
-                    disabled={formConfig.disabled || !isEditMode}
+                    disabled={formConfig.disabled || !isEditMode || isSubmitting}
                     templates={{
                         FieldTemplate,
                     }}
                 >
-                    {hideFormActions && (
-                        <div style={{ display: 'none' }}>
-                            <button type="submit" />
-                        </div>
-                    )}
+                    {/* Always hide form's default submit button since we use header/footer */}
+                    <div style={{ display: 'none' }}>
+                        <button type="submit" />
+                    </div>
                 </Form>
             )}
-        </div>
+        </>
     )
 }

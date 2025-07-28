@@ -1,16 +1,16 @@
 export type DocumentStatus = 'NEW' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED' | 'PUBLISHED'
 
-export interface WorkflowTask {
+export interface UserTask {
     name: string
     elementId: string
     jobId: string
     assignee?: string
 }
 
-export interface WorkflowActions {
+export interface UserTasks {
     processInstanceKey: number
     entity: string
-    tasks: WorkflowTask[]
+    tasks: UserTask[]
     timestamp: number
 }
 

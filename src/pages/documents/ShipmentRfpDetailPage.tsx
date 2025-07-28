@@ -5,6 +5,9 @@ import { useShipmentRfpDetail } from './hooks/useShipmentRfpDetail'
 import { useShipmentRfpPermissions } from './hooks/useShipmentRfpPermissions'
 import { useShipmentRfpForm } from './hooks/useShipmentRfpForm'
 import { useShipmentRfpSidebar } from './hooks/useShipmentRfpSidebar'
+import {useDocumentFormActions} from "@/pages/documents/hooks/useDocumentFormActions.ts";
+import { useShipmentRfpWorkflowTasks } from './hooks/useShipmentRfpWorkflowTasks'
+import {useDocumentWorkflowActions} from "@/pages/documents/hooks/useDocumentWorkflowActions.ts";
 
 const ShipmentRfpDetailPage: React.FC = () => {
     const navigate = useNavigate()
@@ -35,9 +38,62 @@ const ShipmentRfpDetailPage: React.FC = () => {
         }
     }
 
-    const { formConfig ,  onFormChange,  onFormSubmit } = useShipmentRfpForm(schema, formData, handleFormChange, handleFormSubmit)
-    const { sidebarSections, actions } = useShipmentRfpSidebar(rfp, canPublish, canCancel)
+    const formActions = useDocumentFormActions({
+        isEditMode,
+        isLoading,
+        isSaving: createMutation.isPending || updateMutation.isPending,
+        canEdit,
+        canDelete: false,
+        onEdit: () => setIsEditMode(true),
+        onSave: () => {
+            // Trigger form submit programmatically
+            const formElement = document.getElementById('common-form') as HTMLFormElement
+            if (formElement) {
+                formElement.requestSubmit()
+            }
+        },
+        onCancel: () => {
+            if (isEditMode) {
+                setIsEditMode(false)
+            } else {
+                navigate('/shipment-rfps')
+            }
+        }
+    })
 
+
+
+    const workflowActions = useDocumentWorkflowActions({
+        documentId: rfp?.id || '',
+        documentType: 'shipment-rfp',
+        onSuccess: (action) => {
+            console.log(`Workflow action ${action} completed`)
+        }
+    })
+
+    // Workflow tasks for footer
+    const { workflowTasks } = useShipmentRfpWorkflowTasks({
+        rfp,
+        canPublish,
+        canAssign:true,
+        canComplete:true,
+        canCancel,
+        userRole: user?.roles?.[0]?.name as 'LOGIST' | 'CARRIER' | 'ADMIN',
+        onPublish: workflowActions.publish,
+        onAssign: () => {
+            // You might want to open a carrier selection modal here
+            console.log('Open carrier assignment modal')
+        },
+        onComplete: workflowActions.complete,
+        onCancel: workflowActions.cancel
+    })
+    const { sidebarSections } = useShipmentRfpSidebar({ rfp })
+    const { formConfig, onFormChange, onFormSubmit } = useShipmentRfpForm(
+        schema,
+        formData,
+        handleFormChange,
+        handleFormSubmit
+    )
     const commonFormProps = {
         title: isCreating ? 'Create Shipment RFP' : rfp?.title || 'RFP Details',
         subtitle: isCreating ? 'Create a new shipment request for proposal' : undefined,
@@ -49,7 +105,8 @@ const ShipmentRfpDetailPage: React.FC = () => {
         onFormChange,
         onFormSubmit,
         sidebarSections,
-        actions,
+        formActions,
+        workflowTasks,
         isLoading,
         isEditMode,
         onEditModeChange: canEdit ? setIsEditMode : undefined,
