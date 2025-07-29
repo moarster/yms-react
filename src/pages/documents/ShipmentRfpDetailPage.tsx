@@ -1,13 +1,17 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import CommonForm from '@/components/form/CommonForm'
-import { useShipmentRfpDetail } from './hooks/useShipmentRfpDetail'
-import { useShipmentRfpPermissions } from './hooks/useShipmentRfpPermissions'
-import { useShipmentRfpForm } from './hooks/useShipmentRfpForm'
-import { useShipmentRfpSidebar } from './hooks/useShipmentRfpSidebar'
 import {useDocumentFormActions} from "@/pages/documents/hooks/useDocumentFormActions.ts";
-import { useShipmentRfpWorkflowTasks } from './hooks/useShipmentRfpWorkflowTasks'
 import {useDocumentWorkflowActions} from "@/pages/documents/hooks/useDocumentWorkflowActions.ts";
+import {ShipmentRfp} from "@/types";
+
+import { useShipmentRfpDetail } from './hooks/useShipmentRfpDetail'
+import { useShipmentRfpForm } from './hooks/useShipmentRfpForm'
+import { useShipmentRfpPermissions } from './hooks/useShipmentRfpPermissions'
+import { useShipmentRfpSidebar } from './hooks/useShipmentRfpSidebar'
+import { useShipmentRfpWorkflowTasks } from './hooks/useShipmentRfpWorkflowTasks'
+
 
 const ShipmentRfpDetailPage: React.FC = () => {
     const navigate = useNavigate()
@@ -28,9 +32,9 @@ const ShipmentRfpDetailPage: React.FC = () => {
 
     const { canEdit, canPublish, canCancel } = useShipmentRfpPermissions(rfp!, user, isCreating)
 
-    const handleFormChange = (data: any) => setFormData(data)
+    const handleFormChange = (data: object) => setFormData(data)
 
-    const handleFormSubmit = (data: any) => {
+    const handleFormSubmit = (data: ShipmentRfp) => {
         if (isCreating) {
             createMutation.mutate(data)
         } else {
@@ -66,8 +70,8 @@ const ShipmentRfpDetailPage: React.FC = () => {
     const workflowActions = useDocumentWorkflowActions({
         documentId: rfp?.id || '',
         documentType: 'shipment-rfp',
-        onSuccess: (action) => {
-            console.log(`Workflow action ${action} completed`)
+        onSuccess: (_action) => {
+            //console.log(`Workflow action ${action} completed`)
         }
     })
 
@@ -82,7 +86,7 @@ const ShipmentRfpDetailPage: React.FC = () => {
         onPublish: workflowActions.publish,
         onAssign: () => {
             // You might want to open a carrier selection modal here
-            console.log('Open carrier assignment modal')
+            //console.log('Open carrier assignment modal')
         },
         onComplete: workflowActions.complete,
         onCancel: workflowActions.cancel

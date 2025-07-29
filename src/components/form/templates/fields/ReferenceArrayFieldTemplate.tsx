@@ -1,9 +1,11 @@
-import React from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { FieldTemplateProps } from '../types'
-import { getFieldLayout } from '../layout/FieldLayoutProvider'
-import ReferenceDropdown from '@/components/form/ReferenceDropdown'
+import React from 'react'
+
 import FieldInfoTooltip from '@/components/form/FieldInfoTooltip'
+import ReferenceDropdown from '@/components/form/ReferenceDropdown'
+
+import { getFieldLayout } from '../layout/FieldLayoutProvider'
+import { FieldTemplateProps } from '../types'
 
 export const ReferenceArrayFieldTemplate: React.FC<FieldTemplateProps> = ({
                                                                               label,

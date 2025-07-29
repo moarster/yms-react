@@ -1,7 +1,7 @@
-import { FieldTemplateProps } from './types'
-import { StandardFieldTemplate } from './fields/StandardFieldTemplate'
-import { ReferenceFieldTemplate } from './fields/ReferenceFieldTemplate'
 import { ReferenceArrayFieldTemplate } from './fields/ReferenceArrayFieldTemplate'
+import { ReferenceFieldTemplate } from './fields/ReferenceFieldTemplate'
+import { StandardFieldTemplate } from './fields/StandardFieldTemplate'
+import { FieldTemplateProps } from './types'
 
 export const createFieldTemplate = () => (props: FieldTemplateProps) => {
     const { id, schema } = props

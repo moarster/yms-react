@@ -1,16 +1,17 @@
 import { useMemo } from 'react'
-import {FormConfig} from "@/types";
+
+import {FormConfig,JsonSchema} from "@/types";
 
 export const useShipmentRfpForm = (
-    schema: any,
-    formData: any,
-    onFormChange: (data: any) => void,
-    onFormSubmit: (data: any) => void
+    schema: JsonSchema,
+    formData: object,
+    onFormChange: (data: object) => void,
+    onFormSubmit: (data: object) => void
 ) => {
     const formConfig = useMemo(() => {
         if (!schema) return null
         return {
-            schema: schema.schema,
+            schema,
             uiSchema: {
                 title: { 'ui:widget': 'text', 'ui:options': { className: 'text-xl font-semibold' } },
                 description: { 'ui:widget': 'textarea', 'ui:options': { rows: 4 } },

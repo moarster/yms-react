@@ -1,9 +1,11 @@
-import { useMemo } from 'react'
 import { UsersIcon } from '@heroicons/react/24/outline'
+import { useMemo } from 'react'
+
+import {ShipmentRfp} from "@/types";
 import type { SidebarSection } from '@/types/form'
 
 interface UseShipmentRfpSidebarProps {
-    rfp: any
+    rfp: ShipmentRfp
 }
 
 export const useShipmentRfpSidebar = ({ rfp }: UseShipmentRfpSidebarProps) => {
@@ -54,10 +56,10 @@ export const useShipmentRfpSidebar = ({ rfp }: UseShipmentRfpSidebarProps) => {
         }
 
         // Add rates if any
-        if (rfp.rates && rfp.rates.length > 0) {
+        if (rfp.bids && rfp.bids.length > 0) {
             sections.push({
                 title: 'Submitted Rates',
-                items: rfp.rates.map((rate: any, idx: number) => ({
+                items: rfp.bids.map((rate: object, idx: number) => ({
                     label: `Rate ${idx + 1}`,
                     value: `${rate.amount} ${rate.currency}`
                 }))

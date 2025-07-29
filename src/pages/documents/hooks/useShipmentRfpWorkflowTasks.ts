@@ -1,15 +1,16 @@
-import { useMemo } from 'react'
 import {
-    XCircleIcon,
+    DocumentCheckIcon,
     PaperAirplaneIcon,
     UserGroupIcon,
-    DocumentCheckIcon
-} from '@heroicons/react/24/outline'
+    XCircleIcon} from '@heroicons/react/24/outline'
+import { useMemo } from 'react'
+
+import {ShipmentRfp} from "@/types";
 import { WorkflowTask } from '@/types/form'
 import { DocumentStatus } from '@/types/workflow'
 
 interface UseShipmentRfpWorkflowTasksProps {
-    rfp: any
+    rfp: ShipmentRfp
     canPublish: boolean
     canAssign: boolean
     canComplete: boolean

@@ -1,5 +1,5 @@
+import { MapPinIcon,PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import React from 'react'
-import { PlusIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline'
 
 interface RouteSectionProps {
     routePoints: any[]

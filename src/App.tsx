@@ -1,27 +1,21 @@
-// src/App.tsx
-import React, { useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
-import { authService } from '@/services/authService'
 
-// Auth components
+import React, { useEffect } from 'react'
+import { Navigate,Route, Routes } from 'react-router-dom'
+
 import KeycloakProvider from '@/components/auth/KeycloakProvider'
 import LoginPage from '@/components/auth/LoginPage'
-
-// Layout components
 import AppLayout from '@/components/layout/AppLayout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-
-// Page components
-import DashboardPage from '@/pages/DashboardPage'
-import CatalogsPage from '@/pages/catalogs/CatalogsPage'
 import CatalogItemsPage from '@/pages/catalogs/CatalogItemsPage'
-import ShipmentRfpsPage from '@/pages/documents/ShipmentRfpsPage'
+import CatalogsPage from '@/pages/catalogs/CatalogsPage'
+import DashboardPage from '@/pages/DashboardPage'
 import ShipmentRfpDetailPage from '@/pages/documents/ShipmentRfpDetailPage'
-import CreateShipmentRfpPage from '@/pages/documents/CreateShipmentRfpPage'
-import ProfilePage from '@/pages/ProfilePage'
+import ShipmentRfpsPage from '@/pages/documents/ShipmentRfpsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import ProfilePage from '@/pages/ProfilePage'
+import { authService } from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
+import { useUiStore } from '@/stores/uiStore'
 
 // Protected route component
 interface ProtectedRouteProps {
@@ -155,7 +149,7 @@ const AppContent: React.FC = () => {
                                     path="/shipment-rfps/new"
                                     element={
                                         <ProtectedRoute requiredPermission="RFP_CREATE">
-                                            <CreateShipmentRfpPage />
+                                            <ShipmentRfpDetailPage />
                                         </ProtectedRoute>
                                     }
                                 />

@@ -1,50 +1,47 @@
 // noinspection t
 
-import React, {useMemo, useCallback, useState} from 'react'
 import {
-    DataGrid,
-    GridColDef,
-    GridRowSelectionModel,
-    GridSortModel,
-    GridFilterModel,
-    GridRowParams,
-    GridValueGetterParams,
-    GridRenderCellParams,
-    GridToolbar,
-    GridSlots,
-    GridActionsCellItem,
-    GridRowId
-} from '@mui/x-data-grid'
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    Visibility as ViewIcon
+} from '@mui/icons-material'
 import {
     Box,
     Chip,
-    Typography,
-    IconButton,
-    Tooltip,
+    createTheme,
     LinearProgress,
     ThemeProvider,
-    createTheme
-} from '@mui/material'
+    Tooltip,
+    Typography} from '@mui/material'
 import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Visibility as ViewIcon
-} from '@mui/icons-material'
-import {JsonSchema, JsonSchemaProperty, TableConfig} from '@/services/schemaService'
+    DataGrid,
+    GridActionsCellItem,
+    GridColDef,
+    GridFilterModel,
+    GridRenderCellParams,
+    GridRowParams,
+    GridRowSelectionModel,
+    GridSlots,
+    GridSortModel,
+} from '@mui/x-data-grid'
 import {format} from 'date-fns'
+import React, {useCallback, useMemo, useState} from 'react'
+
+import {JsonSchema, JsonSchemaProperty, TableConfig} from '@/services/schemaService'
+
 import DataGridErrorBoundary from './DataGridErrorBoundary'
 
 interface AutoTableProps {
-    data: any[]
+    data: object[]
     schema: JsonSchema
     config?: Partial<TableConfig>
     loading?: boolean
-    onRowClick?: (data: any) => void
-    onSelectionChange?: (selectedRows: any[]) => void
-    onDataChange?: (data: any[]) => void
-    onEdit?: (row: any) => void
-    onDelete?: (row: any) => void
-    onView?: (row: any) => void
+    onRowClick?: (data: object) => void
+    onSelectionChange?: (selectedRows: object[]) => void
+    onDataChange?: (data: object[]) => void
+    onEdit?: (row: object) => void
+    onDelete?: (row: object) => void
+    onView?: (row: object) => void
     className?: string
     height?: number | string
     enableBulkActions?: boolean
@@ -510,7 +507,6 @@ const AutoTable: React.FC<AutoTableProps> = ({
                                                  loading = false,
                                                  onRowClick,
                                                  onSelectionChange,
-                                                 onDataChange,
                                                  onEdit,
                                                  onDelete,
                                                  onView,
@@ -552,9 +548,9 @@ const AutoTable: React.FC<AutoTableProps> = ({
             noRowsOverlay: CustomNoRowsOverlay,
         }
 
-        // if (showToolbar) {
-        //     slotsConfig.toolbar = GridToolbar
-        // }
+        if (showToolbar) {
+            slotsConfig.toolbar = GridToolbar
+        }
 
         return slotsConfig
     }, [showToolbar])
@@ -604,7 +600,7 @@ const AutoTable: React.FC<AutoTableProps> = ({
                         onFilterModelChange={setFilterModel}
 
                         // Pagination - ensure proper initialization
-                        pagination={config.pagination !== false}
+                        pagination={config.pagination=== true}
                         paginationMode="client"
                         pageSizeOptions={[10, 25, 50, 100]}
                         initialState={{

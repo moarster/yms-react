@@ -1,5 +1,6 @@
 // components/form/layout/FormSidebar.tsx - Updated to handle items array
 import React from 'react'
+
 import { SidebarSection } from '@/types/form'
 
 interface FormSidebarProps {

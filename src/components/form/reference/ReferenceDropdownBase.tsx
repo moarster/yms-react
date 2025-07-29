@@ -1,5 +1,6 @@
-import React from 'react'
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import React from 'react'
+
 import { BaseLink } from '@/types'
 
 interface ReferenceDropdownBaseProps {

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
+
 import { documentService } from '@/services/documentService'
 
 interface UseDocumentWorkflowActionsProps {
@@ -22,7 +23,7 @@ export const useDocumentWorkflowActions = ({
             queryClient.invalidateQueries({ queryKey: [documentType, documentId] })
             onSuccess?.('publish')
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to publish document')
         }
     })
@@ -34,7 +35,7 @@ export const useDocumentWorkflowActions = ({
             queryClient.invalidateQueries({ queryKey: [documentType, documentId] })
             onSuccess?.('assign')
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to assign carrier')
         }
     })
@@ -46,19 +47,19 @@ export const useDocumentWorkflowActions = ({
             queryClient.invalidateQueries({ queryKey: [documentType, documentId] })
             onSuccess?.('complete')
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to complete document')
         }
     })
 
     const cancelMutation = useMutation({
-        mutationFn: () => documentService.cancelDocument(documentId),
+        mutationFn: () => documentService.executeAction(documentId, 'cancel'),
         onSuccess: () => {
             toast.success('Document cancelled successfully')
             queryClient.invalidateQueries({ queryKey: [documentType, documentId] })
             onSuccess?.('cancel')
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to cancel document')
         }
     })

@@ -1,5 +1,6 @@
+import { DocumentIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useMemo } from 'react'
-import { PencilIcon, DocumentIcon, TrashIcon } from '@heroicons/react/24/outline'
+
 import { FormActions } from '@/types/form'
 
 interface UseDocumentFormActionsProps {

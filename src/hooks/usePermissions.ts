@@ -1,5 +1,5 @@
-import { useAuthStore } from '@/stores/authStore'
 import { authService } from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
 
 export const usePermissions = () => {
     const { user } = useAuthStore()

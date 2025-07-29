@@ -1,19 +1,21 @@
-import React, { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
     PlusIcon,
     TruckIcon
 } from '@heroicons/react/24/outline'
+import { useQuery } from '@tanstack/react-query'
+import clsx from 'clsx'
+import React, { useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+
+import AutoTable from '@/components/ui/AutoTable'
+import ErrorMessage from '@/components/ui/ErrorMessage'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { authService } from '@/services/authService'
 import { documentService } from '@/services/documentService'
 import { schemaService } from '@/services/schemaService'
 import { useAuthStore } from '@/stores/authStore'
-import { authService } from '@/services/authService'
-import { ShipmentRfp, DocumentStatus } from '@/types'
-import AutoTable from '@/components/ui/AutoTable'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import ErrorMessage from '@/components/ui/ErrorMessage'
-import clsx from 'clsx'
+import { DocumentStatus,ShipmentRfp } from '@/types'
+
 
 interface StatusFilterProps {
     selectedStatuses: DocumentStatus[]
@@ -65,7 +67,7 @@ const ShipmentRfpsPage: React.FC = () => {
     const [selectedStatuses, setSelectedStatuses] = useState<DocumentStatus[]>(
         searchParams.get('status')?.split(',') as DocumentStatus[] || []
     )
-    const [selectedRfps, setSelectedRfps] = useState<ShipmentRfp[]>([])
+    const [ setSelectedRfps] = useState<ShipmentRfp[]>([])
 
     // Fetch shipment RFP schema
     const { data: schema, isLoading: schemaLoading } = useQuery({
@@ -98,7 +100,7 @@ const ShipmentRfpsPage: React.FC = () => {
     }
 
     // Handle row selection
-    const handleSelectionChange = (selectedRows: any[]) => {
+    const handleSelectionChange = (selectedRows: ShipmentRfp[]) => {
         setSelectedRfps(selectedRows)
     }
 

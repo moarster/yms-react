@@ -1,6 +1,6 @@
+import { ArrowLeftIcon,HomeIcon } from '@heroicons/react/24/outline'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 const NotFoundPage: React.FC = () => {
     return (

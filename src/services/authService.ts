@@ -1,6 +1,8 @@
 import  Keycloak  from 'keycloak-js'
-import { User, ApiResponse } from '@/types'
-import { authConfig, demoUsers } from '../config/keycloak'
+
+import { ApiResponse,User } from '@/types'
+
+import {authConfig, demoUsers, keycloakConfig} from '../config/keycloak'
 
 
 interface LoginResponse {
@@ -16,6 +18,81 @@ interface RefreshTokenResponse {
 
 class AuthService {
     private keycloak: Keycloak | null = null
+
+    // Change password method
+    async changePassword(newPassword: string): Promise<ApiResponse<void>> {
+        if (!this.keycloak) {
+            return {
+                body: undefined,
+                success: false,
+                message: 'Keycloak not initialized'
+            }
+        }
+
+        try {
+            // First, ensure we have a valid access token
+            await this.keycloak.updateToken()
+
+            // Get the current user's ID
+            const userInfo = await this.keycloak.loadUserInfo() as User
+            const userId = userInfo.id
+
+            // Construct the URL for the admin API
+            const adminUrl = keycloakConfig.url + '/admin/realms/' + keycloakConfig.realm + '/users/' + userId
+            
+            // Get the user's current credentials
+            const credentials = await fetch(adminUrl, {
+                headers: {
+                    'Authorization': 'Bearer ' + this.keycloak.token,
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+
+            // Find the current password credential
+            const currentCredential = credentials.credentials.find((c: { type: string }) => c.type === 'password')
+            if (!currentCredential) {
+                return {
+                    body: undefined,
+                    success: false,
+                    message: 'No password credential found'
+                }
+            }
+
+            // Create the update request
+            const updateData = {
+                credentials: [
+                    {
+                        type: 'password',
+                        value: newPassword,
+                        temporary: false
+                    }
+                ]
+            }
+
+            // Update the password
+            await fetch(adminUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + this.keycloak.token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            })
+
+            return {
+                body: undefined,
+                success: true,
+                message: 'Password changed successfully'
+            }
+        } catch (error) {
+            console.error('Password change error:', error)
+            return {
+                body: undefined,
+                success: false,
+                message: error instanceof Error ? error.message : 'An error occurred while changing password'
+            }
+        }
+    }
 
     // Initialize Keycloak
     initKeycloak(keycloakInstance: Keycloak) {
@@ -135,7 +212,7 @@ class AuthService {
                 },
                 success: true,
             }
-        } catch (error) {
+        } catch (_) {
             throw new Error('Demo token refresh failed')
         }
     }

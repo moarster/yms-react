@@ -1,7 +1,9 @@
-import React from 'react'
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
+import React from 'react'
+
 import { FormConfig } from '@/types/form'
+
 import { createFieldTemplate } from '../templates/FieldTemplates'
 
 interface FormContainerProps {

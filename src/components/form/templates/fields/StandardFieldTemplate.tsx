@@ -1,7 +1,9 @@
 import React from 'react'
-import { FieldTemplateProps } from '../types'
-import { getFieldLayout } from '../layout/FieldLayoutProvider'
+
 import FieldInfoTooltip from '@/components/form/FieldInfoTooltip'
+
+import { getFieldLayout } from '../layout/FieldLayoutProvider'
+import { FieldTemplateProps } from '../types'
 
 export const StandardFieldTemplate: React.FC<FieldTemplateProps> = ({
                                                                         id,

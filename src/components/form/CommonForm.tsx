@@ -1,11 +1,13 @@
 import React from 'react'
+
+import {WorkflowTasksFooter} from "@/components/form/layout/WorkflowTasksFooter.tsx";
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { CommonFormProps } from '@/types/form'
-import { FormHeader } from './layout/FormHeader'
-import { FormSidebar } from './layout/FormSidebar'
+
 import { CustomSections } from './layout/CustomSections'
 import { FormContainer } from './layout/FormContainer'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import {WorkflowTasksFooter} from "@/components/form/layout/WorkflowTasksFooter.tsx";
+import { FormHeader } from './layout/FormHeader'
+import { FormSidebar } from './layout/FormSidebar'
 
 const CommonForm: React.FC<CommonFormProps> = ({
                                                    title,

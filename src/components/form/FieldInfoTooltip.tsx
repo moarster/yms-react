@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 interface FieldInfoTooltipProps {

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+
 import { Notification } from '@/types'
 
 interface UiStore {

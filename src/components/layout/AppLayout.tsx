@@ -1,8 +1,10 @@
 import React from 'react'
+
 import { useUiStore } from '@/stores/uiStore'
-import Sidebar from './Sidebar'
-import Header from './Header'
+
 import NotificationCenter from '../ui/NotificationCenter'
+import Header from './Header'
+import Sidebar from './Sidebar'
 
 interface AppLayoutProps {
     children: React.ReactNode

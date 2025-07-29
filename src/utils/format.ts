@@ -23,7 +23,7 @@ export const formatters = {
     },
 
     // Number formatting
-    currency: (amount: number, currency: string = 'RUB') => {
+    currency: (amount: number, currency = 'RUB') => {
         return new Intl.NumberFormat('ru-RU', {
             style: 'currency',
             currency,
@@ -53,7 +53,7 @@ export const formatters = {
     },
 
     // Text formatting
-    truncate: (text: string, length: number = 50) => {
+    truncate: (text: string, length = 50) => {
         if (text.length <= length) return text
         return text.substring(0, length).trim() + '...'
     },

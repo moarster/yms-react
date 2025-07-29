@@ -1,3 +1,5 @@
+import {JsonSchema} from "@/services/schemaService.ts";
+
 export interface FieldTemplateProps {
     id: string
     label: string
@@ -5,9 +7,9 @@ export interface FieldTemplateProps {
     required?: boolean
     errors?: string
     children: React.ReactNode
-    schema: any
-    formData?: any
-    onChange: (value: any) => void
+    schema: JsonSchema
+    formData?: object
+    onChange: (value: object) => void
     name?: string
     disabled?: boolean
 }

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Transition } from '@headlessui/react'
 import {
     CheckCircleIcon,
@@ -6,9 +5,11 @@ import {
     InformationCircleIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline'
+import clsx from 'clsx'
+import React from 'react'
+
 import { useUiStore } from '@/stores/uiStore'
 import { Notification } from '@/types'
-import clsx from 'clsx'
 
 const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
     const { removeNotification } = useUiStore()

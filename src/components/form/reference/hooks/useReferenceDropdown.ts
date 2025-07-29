@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef,useState } from 'react'
+
 import { catalogService } from '@/services/catalogService'
 import { BaseLink } from '@/types'
 

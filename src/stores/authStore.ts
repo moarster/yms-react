@@ -1,8 +1,10 @@
+import Keycloak from 'keycloak-js'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import Keycloak from 'keycloak-js'
-import { User, AuthState } from '@/types'
+
 import { authService } from '@/services/authService'
+import { AuthState,User } from '@/types'
+
 import { authConfig } from '../config/keycloak'
 
 interface AuthStore extends AuthState {

@@ -1,10 +1,12 @@
+import './index.css'
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import { BrowserRouter } from 'react-router-dom'
+
 import App from './App'
-import './index.css'
 
 
 const queryClient = new QueryClient({
@@ -12,7 +14,7 @@ const queryClient = new QueryClient({
         queries: {
             staleTime: 5 * 60 * 1000,  // 5 minutes
             //cacheTime: 10 * 60 * 1000, // 10 minutes
-            retry: (failureCount, error: any) => {
+            retry: (failureCount, error: Error) => {
                 if (error?.response?.status === 401) return false
                 return failureCount < 3
             },

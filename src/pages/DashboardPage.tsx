@@ -1,18 +1,18 @@
+import {
+    ArchiveBoxIcon,
+    ChartBarIcon,
+    ClipboardDocumentListIcon,
+    ExclamationTriangleIcon,
+    TruckIcon,
+    UsersIcon} from '@heroicons/react/24/outline'
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import {
-    ClipboardDocumentListIcon,
-    ArchiveBoxIcon,
-    TruckIcon,
-    UsersIcon,
-    ChartBarIcon,
-    ExclamationTriangleIcon
-} from '@heroicons/react/24/outline'
-import { useAuthStore } from '@/stores/authStore'
-import { authService } from '@/services/authService'
-import { useQuery } from '@tanstack/react-query'
-import { documentService } from '@/services/documentService'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { authService } from '@/services/authService'
+import { documentService } from '@/services/documentService'
+import { useAuthStore } from '@/stores/authStore'
 
 interface StatsCardProps {
     name: string

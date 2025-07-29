@@ -1,5 +1,12 @@
+import {
+    DocumentStatus,
+    PaginatedResponse,
+    ShipmentRfp,
+    UserTask,
+    UserTasks,
+} from '@/types'
+
 import { apiClient } from './apiClient'
-import { PaginatedResponse, ShipmentRfp, DocumentStatus, WorkflowTask , WorkflowActions} from '@/types'
 
 export interface DocumentFilters {
     status?: DocumentStatus[]
@@ -14,11 +21,6 @@ export interface DocumentFilters {
     direction?: 'asc' | 'desc'
 }
 
-export interface BulkActionRequest {
-    action: string
-    documentIds: string[]
-    parameters?: Record<string, any>
-}
 
 class DocumentService {
     async getShipmentRfps(filters?: DocumentFilters): Promise<PaginatedResponse<ShipmentRfp>> {
@@ -46,27 +48,26 @@ class DocumentService {
         return await apiClient.get<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`)
     }
 
-    async createShipmentRfp(data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
+    async createShipmentRfp(data: ShipmentRfp): Promise<ShipmentRfp> {
         const response = await apiClient.post<ShipmentRfp>('/domain/shipment-rfp/shipment-rfp', data)
         return response
     }
 
-    async updateShipmentRfp(id: string, data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
+    async updateShipmentRfp(id: string, data: ShipmentRfp): Promise<ShipmentRfp> {
         const response = await apiClient.put<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`, data)
         return response
     }
 
 
-    async executeAction(documentId: string, action: string, parameters?: Record<string, any>): Promise<ShipmentRfp> {
+    async executeAction(documentId: string, action: string, data: Partial<ShipmentRfp>): Promise<ShipmentRfp> {
         const response = await apiClient.patch<ShipmentRfp>(
-            `/domain/shipment-rfp/shipment-rfp/${documentId}/${action}`,
-            parameters || {}
+            `/domain/shipment-rfp/shipment-rfp/${documentId}/${action}`,data
         )
-        return response.data
+        return response
     }
 
-    async getAvailableActions(documentId: string): Promise<WorkflowTask[]> {
-        const response = await apiClient.getAny<WorkflowActions>(
+    async getAvailableActions(documentId: string): Promise<UserTask[]> {
+        const response = await apiClient.getAny<UserTasks>(
             `/domain/shipment-rfp/shipment-rfp/${documentId}/tasks`
         )
         return response.tasks

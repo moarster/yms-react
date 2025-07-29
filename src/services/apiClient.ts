@@ -1,8 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ApiError, PaginatedResponse, BaseEntity} from '@/types'
-import { useAuthStore } from '@/stores/authStore'
-import { ENV } from '@/constants'
 import toast from 'react-hot-toast'
+
+import { ENV } from '@/constants'
+import { useAuthStore } from '@/stores/authStore'
+import { ApiError, BaseEntity,PaginatedResponse} from '@/types'
+
 
 class ApiClient {
     private client: AxiosInstance
@@ -92,17 +94,17 @@ class ApiClient {
         return response.data
     }
 
-    async post<T extends BaseEntity>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    async post<T extends BaseEntity>(url: string, data?: T, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.client.post<T>(url, data, config)
         return response.data
     }
 
-    async put<T extends BaseEntity>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    async put<T extends BaseEntity>(url: string, data?: T, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.client.put<T>(url, data, config)
         return response.data
     }
 
-    async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<any> {
+    async patch<T>(url: string, data?: Partial<T>, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.client.patch<T>(url, data, config)
         return response.data
     }

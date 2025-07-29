@@ -1,8 +1,10 @@
 import React from 'react'
-import { FieldTemplateProps } from '../types'
-import { getFieldLayout } from '../layout/FieldLayoutProvider'
-import ReferenceDropdown from '@/components/form/ReferenceDropdown'
+
 import FieldInfoTooltip from '@/components/form/FieldInfoTooltip'
+import ReferenceDropdown from '@/components/form/ReferenceDropdown'
+
+import { getFieldLayout } from '../layout/FieldLayoutProvider'
+import { FieldTemplateProps } from '../types'
 
 export const ReferenceFieldTemplate: React.FC<FieldTemplateProps> = ({
                                                                          id,

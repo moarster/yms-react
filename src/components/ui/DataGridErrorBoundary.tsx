@@ -1,6 +1,6 @@
-import { Component, ErrorInfo, ReactNode } from 'react'
-import { Box, Typography, Button, Alert } from '@mui/material'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
+import { Alert,Box, Button, Typography } from '@mui/material'
+import { Component, ErrorInfo, ReactNode } from 'react'
 
 interface Props {
     children: ReactNode

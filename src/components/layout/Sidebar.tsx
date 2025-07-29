@@ -1,17 +1,18 @@
+import {
+    ArchiveBoxIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    HomeIcon,
+    TruckIcon,
+    UserIcon} from '@heroicons/react/24/outline'
+import clsx from 'clsx'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import {
-    HomeIcon,
-    ArchiveBoxIcon,
-    TruckIcon,
-    UserIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon
-} from '@heroicons/react/24/outline'
-import { useUiStore } from '@/stores/uiStore'
-import { useAuthStore } from '@/stores/authStore'
+
 import { authService } from '@/services/authService'
-import clsx from 'clsx'
+import { useAuthStore } from '@/stores/authStore'
+import { useUiStore } from '@/stores/uiStore'
+
 
 interface NavigationItem {
     name: string

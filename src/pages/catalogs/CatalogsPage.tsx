@@ -1,10 +1,11 @@
+import {ArchiveBoxIcon, EyeIcon, ListBulletIcon, PencilIcon, TableCellsIcon} from '@heroicons/react/24/outline'
+import {useQuery} from '@tanstack/react-query'
 import React from 'react'
 import {Link} from 'react-router-dom'
-import {useQuery} from '@tanstack/react-query'
-import {ArchiveBoxIcon, EyeIcon, ListBulletIcon, PencilIcon, TableCellsIcon} from '@heroicons/react/24/outline'
-import {catalogService} from '@/services/catalogService'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+
 import ErrorMessage from '@/components/ui/ErrorMessage'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import {catalogService} from '@/services/catalogService'
 import {CatalogBase} from "@/types";
 
 interface CatalogCardProps {

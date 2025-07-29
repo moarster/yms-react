@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+
 import { SidebarSection } from '@/types/form'
 
 interface SidebarFieldConfig {
@@ -51,18 +52,18 @@ export const useDocumentSidebar = ({
 }
 
 // Helper functions
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: object, path: string): object {
     return path.split('.').reduce((current, key) => current?.[key], obj)
 }
 
-function formatFieldValue(value: any, type?: string): string {
+function formatFieldValue(value: string, type?: string): string {
     if (value === null || value === undefined) return ''
 
     switch (type) {
         case 'date':
             return new Date(value).toLocaleDateString()
-        case 'user':
-            return typeof value === 'object' ? (value.name || value.email) : value
+        // case 'user':
+        //     return typeof value === 'object' ? (value.name || value.email) : value
         default:
             return String(value)
     }

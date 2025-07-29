@@ -6,7 +6,7 @@ type IconComponent = React.ComponentType<{ className?: string }>
 export interface FormConfig {
     schema: RJSFSchema
     uiSchema?: UiSchema
-    formData?: any
+    formData?: object
     disabled?: boolean
     showErrorList?: boolean
 }
@@ -63,8 +63,8 @@ export interface CommonFormProps {
 
     // Form configuration
     formConfig: FormConfig
-    onFormChange: (data: any) => void
-    onFormSubmit: (data: any) => void
+    onFormChange: (data: object) => void
+    onFormSubmit: (data: object) => void
 
     // Layout customization
     sidebarSections?: SidebarSection[]

@@ -1,6 +1,7 @@
 import React from 'react'
-import { WorkflowTask } from '@/types/form'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { WorkflowTask } from '@/types/form'
 
 interface WorkflowTasksFooterProps {
     tasks?: WorkflowTask[]

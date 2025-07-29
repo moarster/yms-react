@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import {
+    ArrowRightOnRectangleIcon,
     BellIcon,
-    UserIcon,
     Cog6ToothIcon,
-    ArrowRightOnRectangleIcon
-} from '@heroicons/react/24/outline'
+    UserIcon} from '@heroicons/react/24/outline'
+import clsx from 'clsx'
+import React, { useState } from 'react'
+
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
-import clsx from 'clsx'
 
 const Header: React.FC = () => {
     const { user, logout } = useAuthStore()

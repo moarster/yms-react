@@ -1,4 +1,4 @@
-import { ListLink, ReferenceLink, Attachment,DomainEntity } from '@/types'
+import { Attachment,DomainEntity,ListLink, ReferenceLink } from '@/types'
 
 export interface ShipmentRfpData {
     _shipmentType: ListLink<'shipment-type'>
@@ -85,4 +85,7 @@ export const validateRoutePoint = (point: RoutePoint): string[] => {
     return errors
 }
 
-export type ShipmentRfp = DomainEntity<ShipmentRfpData>
+export interface ShipmentRfp extends DomainEntity<ShipmentRfpData>{
+    bids: object[]
+}
+

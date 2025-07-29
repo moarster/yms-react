@@ -1,5 +1,6 @@
+import {Catalog, CatalogItem, ListItem, PaginatedResponse,SimpleList} from '@/types'
+
 import {apiClient} from './apiClient'
-import {Catalog, CatalogItem, SimpleList, ListItem, PaginatedResponse} from '@/types'
 
 export interface CatalogFilters {
     search?: string

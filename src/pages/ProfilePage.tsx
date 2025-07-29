@@ -1,22 +1,24 @@
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
 import {
-    UserIcon,
-    KeyIcon,
     BuildingOfficeIcon,
+    CheckCircleIcon,
     EyeIcon,
     EyeSlashIcon,
-    CheckCircleIcon,
+    KeyIcon,
+    UserIcon,
 } from '@heroicons/react/24/outline'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { z } from 'zod'
+
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
-import { authService } from '@/services/authService'
 import { User } from '@/types'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import toast from 'react-hot-toast'
+
 
 // Profile form schema
 const profileSchema = z.object({
@@ -100,7 +102,7 @@ const ProfilePage: React.FC = () => {
                 message: 'Your profile information has been updated successfully',
             })
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to update profile')
         },
     })
@@ -108,7 +110,7 @@ const ProfilePage: React.FC = () => {
     // Change password mutation
     const changePasswordMutation = useMutation({
         mutationFn: async (data: PasswordFormData) => {
-            await authService.changePassword(data.currentPassword, data.newPassword)
+            await authService.changePassword( data.newPassword)
         },
         onSuccess: () => {
             resetPasswordForm()
@@ -119,7 +121,7 @@ const ProfilePage: React.FC = () => {
                 message: 'Your password has been changed successfully',
             })
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.message || 'Failed to change password')
         },
     })

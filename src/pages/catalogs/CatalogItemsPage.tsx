@@ -1,35 +1,36 @@
 // noinspection t
 
-import React, { useState } from 'react'
-import { useParams, Link, useNavigate,useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
+    ArrowDownTrayIcon,
     ChevronLeftIcon,
     PlusIcon,
     TrashIcon,
-    ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline'
-import { catalogService } from '@/services/catalogService'
-import { schemaService } from '@/services/schemaService'
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link, useLocation,useNavigate,useParams } from 'react-router-dom'
+
 import AutoTable from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
-import toast from 'react-hot-toast'
+import { catalogService } from '@/services/catalogService'
+import { schemaService } from '@/services/schemaService'
+//import { useAuthStore } from '@/stores/authStore'
+//import { useUiStore } from '@/stores/uiStore'
 import {CatalogItem} from "@/types";
 
 const CatalogItemsPage: React.FC = () => {
     const { catalogKey } = useParams<{ catalogKey: string }>()
     const navigate = useNavigate()
-    const { user } = useAuthStore()
-    const { addNotification } = useUiStore()
+    //const { user } = useAuthStore()
+    //const { addNotification } = useUiStore()
     const queryClient = useQueryClient()
 
-    const [selectedItems, setSelectedItems] = useState<any[]>([])
+    const [selectedItems, setSelectedItems] = useState<object[]>([])
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
-    const [editingItem, setEditingItem] = useState<any>(null)
+    const [ setEditingItem] = useState<object>(null)
     const location = useLocation()
     const isListType = location.pathname.startsWith('/list/')
     const type = isListType ? 'list' : 'catalog'
@@ -80,18 +81,18 @@ const CatalogItemsPage: React.FC = () => {
             setSelectedItems([])
             toast.success('Items deleted successfully')
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error(error.response?.data?.message || 'Failed to delete items')
         },
     })
 
     // Handle row selection
-    const handleSelectionChange = (selected: any[]) => {
+    const handleSelectionChange = (selected: CatalogItem[]) => {
         setSelectedItems(selected)
     }
 
     // Handle row click (view/edit)
-    const handleRowClick = (row: any) => {
+    const handleRowClick = (row: CatalogItem) => {
         if (isListType) {
             return; // Lists don't have detailed views
         }
@@ -99,21 +100,21 @@ const CatalogItemsPage: React.FC = () => {
     }
 
     // Handle edit action
-    const handleEdit = (row: any) => {
+    const handleEdit = (row: CatalogItem) => {
         setEditingItem(row)
         setShowEditModal(true)
     }
 
     // Handle delete action
-    const handleDelete = (row: any) => {
+    const handleDelete = (row: CatalogItem) => {
         if (confirm('Are you sure you want to delete this item?')) {
             deleteMutation.mutate([row.id])
         }
     }
 
     // Handle view action
-    const handleView = (row: any) => {
-        navigate(`/${type}/${catalogKey}/items/${row.id}`) // /catalogs or /lists
+    const handleView = (row: CatalogItem) => {
+        navigate(`/${type}/${catalogKey}/items/${row.id}`)
     }
 
     // Handle bulk delete
