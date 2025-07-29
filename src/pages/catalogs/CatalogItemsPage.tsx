@@ -6,22 +6,26 @@ import {
     PlusIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import React, {useState} from 'react'
 import toast from 'react-hot-toast'
-import { Link, useLocation,useNavigate,useParams } from 'react-router-dom'
+import {Link, useLocation, useNavigate, useParams} from 'react-router-dom'
 
-import { AutoTable } from '@/components/ui/AutoTable'
+import {AutoTable, TableRow} from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
-import { catalogService } from '@/services/catalogService'
-import { schemaService } from '@/services/schemaService'
+import {catalogService} from '@/services/catalogService'
+import {schemaService} from '@/services/schemaService'
 //import { useAuthStore } from '@/stores/authStore'
 //import { useUiStore } from '@/stores/uiStore'
 import {CatalogItem} from "@/types";
 
+interface CatalogItemRow extends TableRow, CatalogItem {
+
+}
+
 const CatalogItemsPage: React.FC = () => {
-    const { catalogKey } = useParams<{ catalogKey: string }>()
+    const {catalogKey} = useParams<{ catalogKey: string }>()
     const navigate = useNavigate()
     //const { user } = useAuthStore()
     //const { addNotification } = useUiStore()
@@ -30,13 +34,13 @@ const CatalogItemsPage: React.FC = () => {
     const [selectedItems, setSelectedItems] = useState<object[]>([])
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
-    const [ setEditingItem] = useState<object>(null)
+    const [setEditingItem] = useState<object>()
     const location = useLocation()
     const isListType = location.pathname.startsWith('/list/')
     const type = isListType ? 'list' : 'catalog'
 
     // Fetch catalog info
-    const { data: catalogInfo, isLoading: catalogLoading } = useQuery({
+    const {data: catalogInfo, isLoading: catalogLoading} = useQuery({
         queryKey: [isListType ? 'list-info' : 'catalog-info', catalogKey],
         queryFn: async () => {
             return isListType
@@ -47,7 +51,7 @@ const CatalogItemsPage: React.FC = () => {
     })
 
 
-    const { data: pagedItems, isLoading, error } = useQuery({
+    const {data: pagedItems, isLoading, error} = useQuery({
         queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
         queryFn: async () => {
             const result = await catalogService.getListItems(catalogKey!, type)
@@ -58,12 +62,15 @@ const CatalogItemsPage: React.FC = () => {
 
     const items = pagedItems?.content?.map(item => {
         if (isListType) {
-            return { title: item.title }
+            return {
+                id: item.id,
+                title: item.title
+            }
         } else {
             return (item as CatalogItem)?.data
         }
     }) || []
-    const { data: schema } = useQuery({
+    const {data: schema} = useQuery({
         queryKey: ['catalog-schema', catalogKey],
         queryFn: () => schemaService.getAnySchema(catalogKey!),
         enabled: !!catalogKey && !isListType,
@@ -77,7 +84,7 @@ const CatalogItemsPage: React.FC = () => {
             )
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['catalog-items', catalogKey] })
+            queryClient.invalidateQueries({queryKey: ['catalog-items', catalogKey]})
             setSelectedItems([])
             toast.success('Items deleted successfully')
         },
@@ -94,13 +101,13 @@ const CatalogItemsPage: React.FC = () => {
     // Handle row click (view/edit)
     const handleRowClick = (row: CatalogItem) => {
         if (isListType) {
-            return; // Lists don't have detailed views
+            return;
         }
         navigate(`/${type}/${catalogKey}/items/${row.id}`)
     }
 
     // Handle edit action
-    const handleEdit = (row: CatalogItem) => {
+    const handleEdit = (row: CatalogItemRow) => {
         setEditingItem(row)
         setShowEditModal(true)
     }
@@ -135,7 +142,7 @@ const CatalogItemsPage: React.FC = () => {
     if (catalogLoading || isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
+                <LoadingSpinner size="lg"/>
             </div>
         )
     }
@@ -161,7 +168,7 @@ const CatalogItemsPage: React.FC = () => {
                         to="/catalogs"
                         className="inline-flex items-center text-gray-500 hover:text-gray-700"
                     >
-                        <ChevronLeftIcon className="h-5 w-5 mr-1" />
+                        <ChevronLeftIcon className="h-5 w-5 mr-1"/>
                         Back to Catalogs
                     </Link>
                 </div>
@@ -186,7 +193,7 @@ const CatalogItemsPage: React.FC = () => {
                                     disabled={deleteMutation.isPending}
                                     className="btn-danger"
                                 >
-                                    <TrashIcon className="h-4 w-4 mr-2" />
+                                    <TrashIcon className="h-4 w-4 mr-2"/>
                                     Delete Selected
                                 </button>
                             </>
@@ -197,7 +204,7 @@ const CatalogItemsPage: React.FC = () => {
                             onClick={handleExport}
                             className="btn-secondary"
                         >
-                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2"/>
                             Export
                         </button>
 
@@ -205,7 +212,7 @@ const CatalogItemsPage: React.FC = () => {
                             onClick={() => setShowCreateModal(true)}
                             className="btn-primary"
                         >
-                            <PlusIcon className="h-4 w-4 mr-2" />
+                            <PlusIcon className="h-4 w-4 mr-2"/>
                             Add {catalogInfo.type === 'LIST' ? 'Item' : 'Entry'}
                         </button>
                     </div>
@@ -216,7 +223,7 @@ const CatalogItemsPage: React.FC = () => {
             <div className="space-y-6">
                 {/* Data Table */}
                 <div className="card">
-                    <AutoTable
+                    <AutoTable<CatalogItemRow>
                         data={items}
                         schema={catalogInfo?.type === 'LIST' ? undefined : schema}
                         loading={isLoading}

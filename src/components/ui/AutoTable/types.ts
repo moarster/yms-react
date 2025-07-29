@@ -4,7 +4,7 @@ import { JsonSchema, JsonSchemaProperty } from '@/types'
 
 // Base row entity - no more any!
 export interface TableRow extends Record<string, unknown> {
-    id: string | number
+    id?: string
 }
 
 // Action callbacks with proper typing
