@@ -1,5 +1,3 @@
-// noinspection t
-
 import {
     Delete as DeleteIcon,
     Edit as EditIcon,
@@ -27,7 +25,8 @@ import {
 import {format} from 'date-fns'
 import React, {useCallback, useMemo, useState} from 'react'
 
-import {JsonSchema, JsonSchemaProperty, TableConfig} from '@/services/schemaService'
+import {TableConfig} from '@/services/schemaService'
+import {JsonSchema,JsonSchemaProperty} from "@/types";
 
 import DataGridErrorBoundary from './DataGridErrorBoundary'
 
