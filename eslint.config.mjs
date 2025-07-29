@@ -10,7 +10,8 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
 export default [
   {
-    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts']
+    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts',
+    '**/ReferenceArrayFieldTemplate.tsx']
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

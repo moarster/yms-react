@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 
+import {DomainEntity} from "@/types";
 import { SidebarSection } from '@/types/form'
 
 interface SidebarFieldConfig {
@@ -13,11 +14,11 @@ interface SidebarSectionConfig {
     title: string
     icon?: React.ComponentType<{ className?: string }>
     fields: SidebarFieldConfig[]
-    condition?: (document: any) => boolean
+    condition?: (document: DomainEntity) => boolean
 }
 
 interface UseDocumentSidebarProps {
-    document: any
+    document: DomainEntity
     sectionConfigs: SidebarSectionConfig[]
 }
 

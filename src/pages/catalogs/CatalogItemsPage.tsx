@@ -11,7 +11,7 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useLocation,useNavigate,useParams } from 'react-router-dom'
 
-import AutoTable from '@/components/ui/AutoTable'
+import { AutoTable } from '@/components/ui/AutoTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import { catalogService } from '@/services/catalogService'

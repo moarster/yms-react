@@ -1,19 +1,31 @@
-import { MapPinIcon,PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import {MapPinIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline'
 import React from 'react'
 
+import { RoutePoint} from "@/types";
+
 interface RouteSectionProps {
-    routePoints: any[]
-    onChange: (routePoints: any[]) => void
+    routePoints: RoutePoint[]
+    onChange: (routePoints: RoutePoint[]) => void
     disabled?: boolean
 }
 
-const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disabled }) => {
+const RouteSection: React.FC<RouteSectionProps> = ({routePoints, onChange, disabled}) => {
     const addRoutePoint = () => {
-        const newPoint = {
+        const newPoint: RoutePoint = {
             address: '',
             arrival: '',
-            _counterParty: null,
-            _cargoHandlingType: null,
+            _counterParty: {
+                id: '',
+                domain: 'reference',
+                entity: 'item',
+                catalog: 'counter-party'
+            },
+            _cargoHandlingType: {
+                id: '',
+                domain: 'lists',
+                entity: 'item',
+                catalog: 'cargo-handling-type'
+            },
             cargoList: []
         }
         onChange([...routePoints, newPoint])
@@ -23,9 +35,9 @@ const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disa
         onChange(routePoints.filter((_, i) => i !== index))
     }
 
-    const updateRoutePoint = (index: number, field: string, value: any) => {
+    const updateRoutePoint = (index: number, field: string, value: RoutePoint) => {
         const updated = [...routePoints]
-        updated[index] = { ...updated[index], [field]: value }
+        updated[index] = {...updated[index], [field]: value}
         onChange(updated)
     }
 
@@ -33,7 +45,7 @@ const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disa
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <MapPinIcon className="h-5 w-5 text-gray-400" />
+                    <MapPinIcon className="h-5 w-5 text-gray-400"/>
                     <h3 className="text-lg font-medium text-gray-900">Route Points</h3>
                 </div>
                 {!disabled && (
@@ -42,7 +54,7 @@ const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disa
                         onClick={addRoutePoint}
                         className="btn-outline btn-sm"
                     >
-                        <PlusIcon className="h-4 w-4 mr-2" />
+                        <PlusIcon className="h-4 w-4 mr-2"/>
                         Add Point
                     </button>
                 )}
@@ -50,7 +62,7 @@ const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disa
 
             {routePoints.length === 0 && !disabled && (
                 <div className="text-center py-8 text-gray-500">
-                    <MapPinIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <MapPinIcon className="h-12 w-12 mx-auto mb-4 text-gray-300"/>
                     <p>No route points added yet</p>
                     <button
                         type="button"
@@ -72,7 +84,7 @@ const RouteSection: React.FC<RouteSectionProps> = ({ routePoints, onChange, disa
                                 onClick={() => removeRoutePoint(index)}
                                 className="text-red-600 hover:text-red-800"
                             >
-                                <TrashIcon className="h-4 w-4" />
+                                <TrashIcon className="h-4 w-4"/>
                             </button>
                         )}
                     </div>

@@ -2,14 +2,15 @@ import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import React from 'react'
 
+import {BaseEntity} from "@/types";
 import { FormConfig } from '@/types/form'
 
 import { createFieldTemplate } from '../templates/FieldTemplates'
 
 interface FormContainerProps {
     formConfig: FormConfig
-    onFormChange: (data: any) => void
-    onFormSubmit: (data: any) => void
+    onFormChange: (data: BaseEntity) => void
+    onFormSubmit: (data: BaseEntity) => void
     isEditMode: boolean
     isSubmitting?: boolean
     hideFormActions?: boolean
@@ -24,7 +25,7 @@ export const FormContainer: React.FC<FormContainerProps> = ({
                                                             }) => {
     const FieldTemplate = createFieldTemplate()
 
-    const handleSubmit = (data: any) => {
+    const handleSubmit = (data: BaseEntity) => {
         if (!isSubmitting) {
             onFormSubmit(data)
         }

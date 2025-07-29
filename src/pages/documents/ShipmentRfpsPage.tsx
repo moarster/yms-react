@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
-import AutoTable from '@/components/ui/AutoTable'
+import AutoTable from '@/components/ui/AutoTable/AutoTable.tsx'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { authService } from '@/services/authService'

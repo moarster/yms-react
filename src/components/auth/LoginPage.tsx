@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
                 title: 'Welcome back!',
                 message: 'You have successfully logged in.',
             })
-        } catch (error: any) {
+        } catch (error: unknown) {
             const message = error?.message || 'Login failed. Please try again.'
             toast.error(message)
             addNotification({
