@@ -1,6 +1,6 @@
 import {
     DocumentStatus,
-    PaginatedResponse,
+    PaginatedResponse, PaginationParams,
     ShipmentRfp,
     UserTask,
     UserTasks,
@@ -8,36 +8,20 @@ import {
 
 import { apiClient } from './apiClient'
 
-export interface DocumentFilters {
+export interface ShipmentRfpSearchParams extends PaginationParams {
     status?: DocumentStatus[]
-    search?: string
-    dateFrom?: string
-    dateTo?: string
-    carrierId?: string
-    clientId?: string
-    page?: number
-    size?: number
-    sort?: string
-    direction?: 'asc' | 'desc'
 }
 
-
 class DocumentService {
-    async getShipmentRfps(filters?: DocumentFilters): Promise<PaginatedResponse<ShipmentRfp>> {
+    async getShipmentRfps(searchParams?: ShipmentRfpSearchParams): Promise<PaginatedResponse<ShipmentRfp>> {
         const params = new URLSearchParams()
-
-        if (filters?.status?.length) {
-            filters.status.forEach(status => params.append('status', status))
+        if (searchParams?.status?.length) {
+            searchParams.status.forEach(status => params.append('status', status))
         }
-        if (filters?.search) params.append('search', filters.search)
-        if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
-        if (filters?.dateTo) params.append('dateTo', filters.dateTo)
-        if (filters?.carrierId) params.append('carrierId', filters.carrierId)
-        if (filters?.clientId) params.append('clientId', filters.clientId)
-        if (filters?.page !== undefined) params.append('page', filters.page.toString())
-        if (filters?.size !== undefined) params.append('size', filters.size.toString())
-        if (filters?.sort) params.append('sort', filters.sort)
-        if (filters?.direction) params.append('direction', filters.direction)
+        if (searchParams?.page !== undefined) params.append('page', searchParams.page.toString())
+        if (searchParams?.size !== undefined) params.append('size', searchParams.size.toString())
+        if (searchParams?.sort) params.append('sort', searchParams.sort)
+        if (searchParams?.direction) params.append('direction', searchParams.direction)
 
         return await apiClient.getMany<ShipmentRfp>(
             `/domain/shipment-rfp/shipment-rfp?${params.toString()}`

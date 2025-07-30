@@ -1,3 +1,5 @@
+// noinspection t
+
 import {
     PlusIcon,
     TruckIcon
@@ -67,7 +69,7 @@ const ShipmentRfpsPage: React.FC = () => {
     const [selectedStatuses, setSelectedStatuses] = useState<DocumentStatus[]>(
         searchParams.get('status')?.split(',') as DocumentStatus[] || []
     )
-    const [ setSelectedRfps] = useState<ShipmentRfp[]>([])
+    const [ _selectedRfps, setSelectedRfps] = useState<ShipmentRfp[]>([])
 
     // Fetch shipment RFP schema
     const { data: schema, isLoading: schemaLoading } = useQuery({
@@ -99,12 +101,10 @@ const ShipmentRfpsPage: React.FC = () => {
         }
     }
 
-    // Handle row selection
     const handleSelectionChange = (selectedRows: ShipmentRfp[]) => {
         setSelectedRfps(selectedRows)
     }
 
-    // Handle row click
     const handleRowClick = (rfp: ShipmentRfp) => {
         navigate(`/shipment-rfps/${rfp.id}`)
     }
@@ -125,7 +125,8 @@ const ShipmentRfpsPage: React.FC = () => {
 
     const rfps = rfpsData?.content?.map(item => ({
         ...(item.data || {}),
-        id: item.id
+        id: item.id,
+        status: item.status,
     })) || []
     const stats = [
         {
@@ -225,14 +226,14 @@ const ShipmentRfpsPage: React.FC = () => {
                 <AutoTable
                     data={rfps}
                     schema={schema}
-                    loading={rfpsLoading}
+                    loading={rfpsLoading && schemaLoading}
                     onRowClick={handleRowClick}
                     onSelectionChange={handleSelectionChange}
                     enableBulkActions={isLogist}
                     height="70vh"
                     config={{
                         pagination: true,
-                        pageSize: 25,
+                        pageSize: rfpsData?.page.size,
                         enableSorting: true,
                         enableFiltering: true,
                         enableSelection: isLogist

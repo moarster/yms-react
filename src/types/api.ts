@@ -31,7 +31,7 @@ export interface ApiError {
     path?: string
 }
 
-// Common pagination params
+
 export interface PaginationParams {
     page?: number
     size?: number
@@ -39,10 +39,22 @@ export interface PaginationParams {
     direction?: 'asc' | 'desc'
 }
 
-// Search and filter params
+export type UIFilterOperand =
+    | 'EQ'
+    | 'LIKE'
+    | 'IN'
+    | 'GT'
+    | 'LT'
+    | 'BETWEEN';
+
+export interface FilterDescription {
+    fieldName: string;
+    value: string[];
+    operand: UIFilterOperand;
+}
+
 export interface SearchParams extends PaginationParams {
-    query?: string
-    filters?: Record<string, unknown>
+    filters?: FilterDescription[];
 }
 
 // Response type helpers

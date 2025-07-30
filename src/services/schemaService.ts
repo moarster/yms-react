@@ -18,7 +18,7 @@ export interface TableConfig {
 
 class SchemaService {
     async getAnySchema(key: string): Promise<JsonSchema> {
-        const schema= await apiClient.getNaked<JsonSchema>(`/meta/urn:solvo:${key}/schema`)
+        const schema= await apiClient.getAny<JsonSchema>(`/meta/urn:solvo:${key}/schema`)
         const mergedSchema =  merge(schema, {
             mergeRefSibling: false,
             mergeCombinarySibling: false,

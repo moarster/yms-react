@@ -1,9 +1,8 @@
 import {  GridRenderCellParams } from '@mui/x-data-grid'
 
-import { JsonSchema, JsonSchemaProperty } from '@/types'
+import {Identifiable, JsonSchema, JsonSchemaProperty} from '@/types'
 
-// Base row entity - no more any!
-export interface TableRow extends Record<string, unknown> {
+export interface TableRow extends Record<string, unknown>,Identifiable {
     id?: string
 }
 

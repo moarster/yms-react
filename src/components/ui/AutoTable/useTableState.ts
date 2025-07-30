@@ -3,9 +3,9 @@ import {
     GridRowSelectionModel,
     GridSortModel
 } from '@mui/x-data-grid'
-import { useCallback, useMemo, useState } from 'react'
+import {useCallback, useMemo, useState} from 'react'
 
-import { TableRow, TableSelection } from './types'
+import {TableRow, TableSelection} from './types'
 
 interface UseTableStateProps<TRow extends TableRow> {
     data: TRow[]
@@ -17,20 +17,24 @@ export const useTableState = <TRow extends TableRow>({
                                                          selection
                                                      }: UseTableStateProps<TRow>) => {
     // Internal state
-    const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+    const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>()
     const [sortModel, setSortModel] = useState<GridSortModel>([])
-    const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] })
+    const [filterModel, setFilterModel] = useState<GridFilterModel>({items: []})
 
     // Process data (could add filtering, sorting here if needed)
-    const processedData = useMemo(() => data, [data])
-
-    // Handle selection changes with proper typing
+    //const processedData = useMemo(() => data, [data])
+    const processedData = useMemo(() => {
+        return data.map((row, index) => ({
+            ...row,
+            id: row.id || `row-${index}`
+        }))
+    }, [data])
     const handleSelectionChange = useCallback((newSelection: GridRowSelectionModel) => {
         setSelectionModel(newSelection)
 
         if (selection.onSelectionChange) {
             const selectedRows = data.filter(row =>
-                newSelection.includes(row.id)
+                row.id && newSelection.ids.has(row.id)
             )
             selection.onSelectionChange(selectedRows)
         }

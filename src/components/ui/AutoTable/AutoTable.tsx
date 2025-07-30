@@ -26,7 +26,7 @@ const AutoTable = <TRow extends TableRow = TableRow>({
                                                          onSelectionChange,
                                                      }: AutoTableProps<TRow>) => {
 
-    // Extract actions for cleaner code
+
     const actions = useMemo(() => ({
         onEdit,
         onDelete,
@@ -34,13 +34,13 @@ const AutoTable = <TRow extends TableRow = TableRow>({
         onRowClick,
     }), [onEdit, onDelete, onView, onRowClick])
 
-    // Extract selection for cleaner code
+
     const selection = useMemo(() => ({
         onSelectionChange,
         enableBulkActions,
     }), [onSelectionChange, enableBulkActions])
 
-    // Use table state hook
+
     const {
         selectionModel,
         sortModel,
@@ -57,7 +57,7 @@ const AutoTable = <TRow extends TableRow = TableRow>({
         [schema, data, actions, enableActions]
     )
 
-    // Handle row clicks with proper typing
+
     const handleRowClick = useCallback((params: GridRowParams<TRow>) => {
         if (onRowClick) {
             onRowClick(params.row)
@@ -97,7 +97,7 @@ const AutoTable = <TRow extends TableRow = TableRow>({
                         onFilterModelChange={setFilterModel}
 
                         // Pagination
-                        pagination={config.pagination === true}
+                        pagination={true}
                         paginationMode="client"
                         pageSizeOptions={[10, 25, 50, 100]}
                         initialState={{
@@ -118,12 +118,9 @@ const AutoTable = <TRow extends TableRow = TableRow>({
                         disableColumnSelector={false}
                         disableDensitySelector={false}
 
-                        // Auto-size handling
-                        autoHeight={false}
-
                         // Hide footer if no data to prevent state errors
-                        hideFooter={processedData.length === 0 && loading}
-
+                        //hideFooter={processedData.length === 0 && loading}
+                        hideFooter={config.pagination === false && !loading}
                         // Styling
                         sx={{
                             ...tableStyles.dataGrid,
