@@ -10,7 +10,7 @@ export interface Auditable {
 }
 
 export interface Titled {
-    title: string
+    title?: string
     description?: string
 }
 

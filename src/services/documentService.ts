@@ -1,7 +1,8 @@
 import {
-    DocumentStatus,
+    DocumentStatus, DomainEntity,
     PaginatedResponse, PaginationParams,
     ShipmentRfp,
+    ShipmentRfpData,
     UserTask,
     UserTasks,
 } from '@/types'
@@ -32,8 +33,8 @@ class DocumentService {
         return await apiClient.get<ShipmentRfp>(`/domain/shipment-rfp/shipment-rfp/${id}`)
     }
 
-    async createShipmentRfp(data: ShipmentRfp): Promise<ShipmentRfp> {
-        const response = await apiClient.post<ShipmentRfp>('/domain/shipment-rfp/shipment-rfp', data)
+    async createShipmentRfp(data: ShipmentRfpData): Promise<ShipmentRfp> {
+        const response = await apiClient.post<DomainEntity<ShipmentRfpData>>('/domain/shipment-rfp/shipment-rfp', {data})
         return response
     }
 
@@ -57,6 +58,24 @@ class DocumentService {
         return response.tasks
     }
 
+    async createShipmentRfpFromWizard(data: Partial<ShipmentRfpData>): Promise<ShipmentRfp> {
+        // Transform wizard data to API format
+        const transformedData = this.transformWizardData(data)
+        return await this.createShipmentRfp( transformedData)
+    }
+
+    private transformWizardData(wizardData: Partial<ShipmentRfpData>): ShipmentRfpData {
+        return {
+            ...wizardData,
+            // Ensure all required fields are present with defaults
+            _shipmentType: wizardData._shipmentType || { id: '', name: '' },
+            _transportationType: wizardData._transportationType || { id: '', name: '' },
+            _currency: wizardData._currency || { id: '', name: '' },
+            route: wizardData.route || [],
+            attachments: wizardData.attachments || [],
+            express: wizardData.express || false
+        } as ShipmentRfpData
+    }
 
 }
 

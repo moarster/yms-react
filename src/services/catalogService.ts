@@ -1,6 +1,7 @@
 import {Catalog, CatalogItem, ListItem, PaginatedResponse,SimpleList} from '@/types'
 
 import {apiClient} from './apiClient'
+import {WizardLists} from "@/types/wizard.ts";
 
 export interface CatalogFilters {
     search?: string
@@ -75,6 +76,35 @@ class CatalogService {
 
     }
 
+    async getWizardLists(): Promise<WizardLists> {
+        const [
+            shipmentTypes,
+            transportationTypes,
+            currencies,
+            vehicleTypes,
+            cargoNatures,
+            counterParties,
+            cargoHandlingTypes
+        ] = await Promise.allSettled([
+            this.getCatalogItems('shipment-type'),
+            this.getCatalogItems('transportation-type'),
+            this.getCatalogItems('currency'),
+            this.getCatalogItems('vehicle-type'),
+            this.getCatalogItems('cargo-nature'),
+            this.getCatalogItems('counter-party'),
+            this.getCatalogItems('cargo-handling-type')
+        ])
+
+        return {
+            shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value : [],
+            transportationTypes: transportationTypes.status === 'fulfilled' ? transportationTypes.value : [],
+            currencies: currencies.status === 'fulfilled' ? currencies.value : [],
+            vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value : [],
+            cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value : [],
+            counterParties: counterParties.status === 'fulfilled' ? counterParties.value : [],
+            cargoHandlingTypes: cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value : []
+        }
+    }
 
     // Delete catalog item
     async deleteCatalogItem(catalogKey: string, itemId: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { Attachment,DomainEntity,ListLink, ReferenceLink } from '@/types'
 
-export interface ShipmentRfpData {
+export interface ShipmentRfpData extends Record<string, unknown>{
     _shipmentType: ListLink<'shipment-type'>
     _transportationType: ListLink<'transportation-type'>
     _routeDirection: ReferenceLink<'route-direction'>
@@ -86,6 +86,6 @@ export const validateRoutePoint = (point: RoutePoint): string[] => {
 }
 
 export interface ShipmentRfp extends DomainEntity<ShipmentRfpData>{
-    bids: object[]
+    bids?: object[]
 }
 

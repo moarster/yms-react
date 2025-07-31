@@ -169,7 +169,7 @@ const ShipmentRfpsPage: React.FC = () => {
                     </p>
                 </div>
 
-                {isLogist && (
+                {true && (
                     <div className="flex space-x-3">
                         <Link to="/shipment-rfps/new" className="btn-primary">
                             <PlusIcon className="h-4 w-4 mr-2" />

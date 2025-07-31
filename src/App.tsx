@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react'
 import { Navigate,Route, Routes } from 'react-router-dom'
 
@@ -11,11 +10,13 @@ import CatalogsPage from '@/pages/catalogs/CatalogsPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ShipmentRfpDetailPage from '@/pages/documents/ShipmentRfpDetailPage'
 import ShipmentRfpsPage from '@/pages/documents/ShipmentRfpsPage'
+import ShipmentRfpWizardPage from '@/pages/documents/ShipmentRfpWizardPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfilePage from '@/pages/ProfilePage'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
+import MockWizard from "@/components/wizards/MockWizard.tsx";
 
 // Protected route component
 interface ProtectedRouteProps {
@@ -149,7 +150,8 @@ const AppContent: React.FC = () => {
                                     path="/shipment-rfps/new"
                                     element={
                                         <ProtectedRoute requiredPermission="RFP_CREATE">
-                                            <ShipmentRfpDetailPage />
+                                            {/*<ShipmentRfpWizardPage />*/}
+                                            <MockWizard />
                                         </ProtectedRoute>
                                     }
                                 />
