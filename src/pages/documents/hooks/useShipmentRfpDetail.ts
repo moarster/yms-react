@@ -16,7 +16,6 @@ export const useShipmentRfpDetail = () => {
     const [isEditMode, setIsEditMode] = useState(false)
     const isCreating = id === 'new'
 
-    // Queries
     const rfpQuery = useQuery({
         queryKey: ['rfp', id],
         queryFn: () => documentService.getShipmentRfp(id!),
@@ -28,7 +27,6 @@ export const useShipmentRfpDetail = () => {
         queryFn: () => schemaService.getAnySchema('shipment-rfp')
     })
 
-    // Mutations
     const createMutation = useMutation({
         mutationFn: documentService.createShipmentRfp,
         onSuccess: () => {

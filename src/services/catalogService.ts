@@ -86,23 +86,23 @@ class CatalogService {
             counterParties,
             cargoHandlingTypes
         ] = await Promise.allSettled([
-            this.getCatalogItems('shipment-type'),
-            this.getCatalogItems('transportation-type'),
-            this.getCatalogItems('currency'),
+            this.getListItems('shipment-type', 'list'),
+            this.getListItems('transportation-type', 'list'),
+            this.getListItems('currency', 'list'),
             this.getCatalogItems('vehicle-type'),
-            this.getCatalogItems('cargo-nature'),
+            this.getListItems('cargo-nature', 'list'),
             this.getCatalogItems('counter-party'),
-            this.getCatalogItems('cargo-handling-type')
+            this.getListItems('cargo-handling-type', 'list')
         ])
 
         return {
-            shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value : [],
-            transportationTypes: transportationTypes.status === 'fulfilled' ? transportationTypes.value : [],
-            currencies: currencies.status === 'fulfilled' ? currencies.value : [],
-            vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value : [],
-            cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value : [],
-            counterParties: counterParties.status === 'fulfilled' ? counterParties.value : [],
-            cargoHandlingTypes: cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value : []
+            shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value.content : [],
+            transportationTypes: transportationTypes.status === 'fulfilled' ? transportationTypes.value.content : [],
+            currencies: currencies.status === 'fulfilled' ? currencies.value.content : [],
+            vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value.content : [],
+            cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value.content : [],
+            counterParties: counterParties.status === 'fulfilled' ? counterParties.value.content : [],
+            cargoHandlingTypes: cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value.content : []
         }
     }
 

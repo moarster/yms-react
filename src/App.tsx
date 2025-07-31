@@ -150,8 +150,8 @@ const AppContent: React.FC = () => {
                                     path="/shipment-rfps/new"
                                     element={
                                         <ProtectedRoute requiredPermission="RFP_CREATE">
-                                            {/*<ShipmentRfpWizardPage />*/}
-                                            <MockWizard />
+                                            <ShipmentRfpWizardPage />
+                                            {/*<MockWizard />*/}
                                         </ProtectedRoute>
                                     }
                                 />

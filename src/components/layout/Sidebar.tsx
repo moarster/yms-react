@@ -127,7 +127,7 @@ const Sidebar: React.FC = () => {
                                 {user.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">
-                                {user.roles.map(r => r.name).join(', ')}
+                                {user.roles.join(', ')}
                             </p>
                         </div>
                     </div>

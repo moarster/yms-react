@@ -1,4 +1,9 @@
-import { AlertCircle,FileText, Upload, X } from 'lucide-react'
+import {
+    ArrowUpTrayIcon as Upload,
+    DocumentTextIcon as FileText,
+    ExclamationCircleIcon as AlertCircle,
+    XMarkIcon as X,
+} from '@heroicons/react/24/outline';
 import React, { useCallback, useState } from 'react'
 
 import { Attachment } from '@/types'

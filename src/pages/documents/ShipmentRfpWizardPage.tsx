@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 import ShipmentRfpWizard from '@/components/wizards/ShipmentRfpWizard'
-import { schemaService } from '@/services/schemaService'
+import {catalogService} from "@/services/catalogService.ts";
 import { ShipmentRfpData } from '@/types'
 
 import { useShipmentRfpDetail } from './hooks/useShipmentRfpDetail'
@@ -17,7 +17,7 @@ const ShipmentRfpWizardPage: React.FC = () => {
     const { data: lists, isLoading: listsLoading } = useQuery({
         queryKey: ['rfp-wizard-lists'],
         queryFn: async () => {
-            const [
+            const {
                 shipmentTypes,
                 transportationTypes,
                 currencies,
@@ -25,15 +25,7 @@ const ShipmentRfpWizardPage: React.FC = () => {
                 cargoNatures,
                 counterParties,
                 cargoHandlingTypes
-            ] = await Promise.all([
-                schemaService.getReferenceList('shipment-type'),
-                schemaService.getReferenceList('transportation-type'),
-                schemaService.getReferenceList('currency'),
-                schemaService.getReferenceList('vehicle-type'),
-                schemaService.getReferenceList('cargo-nature'),
-                schemaService.getReferenceList('counter-party'),
-                schemaService.getReferenceList('cargo-handling-type')
-            ])
+            } = await catalogService.getWizardLists()
 
             return {
                 shipmentTypes,
@@ -48,25 +40,25 @@ const ShipmentRfpWizardPage: React.FC = () => {
     })
 
     const [formData, setFormData] = useState<Partial<ShipmentRfpData>>({
-        _shipmentType: { id: '', name: '' },
-        _transportationType: { id: '', name: '' },
-        _currency: { id: '', name: '' },
+        _shipmentType: { id: '', title: '' },
+        _transportationType: { id: '', title: '' },
+        _currency: { id: '', title: '' },
         express: false,
         route: [{
             address: '',
             contactPhone: '',
             arrival: '',
             departure: '',
-            _counterParty: { id: '', name: '' },
-            _cargoHandlingType: { id: '', name: '' },
+            _counterParty: { id: '', title: '' },
+            _cargoHandlingType: { id: '', title: '' },
             cargoList: [{
                 number: '',
                 cargoWeight: 0,
                 cargoVolume: 0,
-                _cargoNature: { id: '', name: '' }
+                _cargoNature: { id: '', title: '' }
             }]
         }],
-        _requiredVehicleType: { id: '', name: '' },
+        _requiredVehicleType: { id: '', title: '' },
         customRequirements: '',
         comment: '',
         innerComment: '',

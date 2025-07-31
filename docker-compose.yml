@@ -1,0 +1,22 @@
+services:
+  carrier-portal-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: carrier-portal-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.carrier-portal.rule=Host(`carrier-portal.dev`)"
+      - "traefik.http.services.carrier-portal.loadbalancer.server.port=80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

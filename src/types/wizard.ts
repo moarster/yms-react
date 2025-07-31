@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ShipmentRfpData } from '@/types'
+import {BaseEntity, CatalogItem, ShipmentRfpData, Titled} from '@/types'
 
 export interface WizardStep {
     id: string
@@ -20,21 +20,15 @@ export interface WizardProps<T> {
     className?: string
 }
 
-export interface ReferenceListItem {
-    id: string
-    name: string
-    code?: string
-    description?: string
-}
 
 export interface WizardLists {
-    shipmentTypes: ReferenceListItem[]
-    transportationTypes: ReferenceListItem[]
-    currencies: ReferenceListItem[]
-    vehicleTypes: ReferenceListItem[]
-    cargoNatures: ReferenceListItem[]
-    counterParties: ReferenceListItem[]
-    cargoHandlingTypes: ReferenceListItem[]
+    shipmentTypes: BaseEntity[]
+    transportationTypes: BaseEntity[]
+    currencies: BaseEntity[]
+    vehicleTypes: CatalogItem[]
+    cargoNatures: BaseEntity[]
+    counterParties: CatalogItem[]
+    cargoHandlingTypes: BaseEntity[]
 }
 
 export interface ShipmentRfpWizardProps {

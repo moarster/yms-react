@@ -1,0 +1,21 @@
+services:
+  carrier-portal-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: carrier-portal-dev
+    ports:
+      - "4444:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://kvm-yarddev.solvo.ru:8083
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

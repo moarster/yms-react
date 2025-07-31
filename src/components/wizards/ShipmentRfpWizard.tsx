@@ -1,3 +1,5 @@
+// noinspection D
+
 import {
     ArrowLeftIcon as ArrowLeft,
     ArrowRightIcon as ArrowRight,
@@ -12,7 +14,7 @@ import React, { useEffect,useState } from 'react';
 
 import FileUpload from '@/components/form/FileUpload';
 import { useWizardValidation } from '@/hooks/useWizardValidation';
-import { ShipmentRfpWizardProps, WizardFormData } from '@/types';
+import { RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                                                  initialData,
@@ -23,7 +25,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                                              }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState<WizardFormData>(initialData);
-    const { isStepValid, getStepErrors, canProceedToNext, canSubmit } = useWizardValidation(formData);
+    const {  getStepErrors, canProceedToNext, canSubmit } = useWizardValidation(formData);
 
     useEffect(() => {
         setFormData(initialData);
@@ -91,15 +93,15 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                 contactPhone: '',
                 arrival: '',
                 departure: '',
-                _counterParty: { id: '', name: '' },
-                _cargoHandlingType: { id: '', name: '' },
+                _counterParty: { id: '', title: '',domain: 'reference' , entity: 'item', catalog: 'counter-party' },
+                _cargoHandlingType: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-handling-type' } ,
                 cargoList: [{
                     number: '',
                     cargoWeight: 0,
                     cargoVolume: 0,
-                    _cargoNature: { id: '', name: '' }
+                    _cargoNature: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-nature' }
                 }]
-            }]
+            } as RoutePoint]
         }));
     };
 
@@ -113,7 +115,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                         number: '',
                         cargoWeight: 0,
                         cargoVolume: 0,
-                        _cargoNature: { id: '', name: '' }
+                        _cargoNature: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-nature' }
                     }]
                 } : point
             ) || []
@@ -159,7 +161,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     >
                         <option value="">Выберите</option>
                         {lists.shipmentTypes.map(type => (
-                            <option key={type.id} value={type.id}>{type.name}</option>
+                            <option key={type.id} value={type.id}>{type.title}</option>
                         ))}
                     </select>
                 </div>
@@ -172,13 +174,13 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                         value={formData._transportationType?.id || ''}
                         onChange={(e) => {
                             const selected = lists.transportationTypes.find(t => t.id === e.target.value);
-                            updateFormData('_transportationType', selected || { id: '', name: '' });
+                            updateFormData('_transportationType', selected || { id: '', title: '' });
                         }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Выберите</option>
                         {lists.transportationTypes.map(type => (
-                            <option key={type.id} value={type.id}>{type.name}</option>
+                            <option key={type.id} value={type.id}>{type.title}</option>
                         ))}
                     </select>
                 </div>
@@ -191,13 +193,13 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                         value={formData._currency?.id || ''}
                         onChange={(e) => {
                             const selected = lists.currencies.find(c => c.id === e.target.value);
-                            updateFormData('_currency', selected || { id: '', name: '' });
+                            updateFormData('_currency', selected || { id: '', title: '' });
                         }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Выберите</option>
                         {lists.currencies.map(currency => (
-                            <option key={currency.id} value={currency.id}>{currency.name}</option>
+                            <option key={currency.id} value={currency.id}>{currency.title}</option>
                         ))}
                     </select>
                 </div>
