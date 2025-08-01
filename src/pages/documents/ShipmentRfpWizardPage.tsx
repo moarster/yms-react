@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import ShipmentRfpWizard from '@/components/wizards/ShipmentRfpWizard'
 import {catalogService} from "@/services/catalogService.ts";
-import {ShipmentRfp, ShipmentRfpData} from '@/types'
+import { ShipmentRfpData} from '@/types'
 import { createShipmentRfpData } from '@/types/factories/linkFactory'
 
 import { useShipmentRfpMutations } from './hooks/useShipmentRfpMutations'

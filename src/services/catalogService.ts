@@ -71,7 +71,7 @@ class CatalogService {
         if (filters?.direction) params.append('direction', filters.direction)
 
         return await apiClient.getMany<ListItem>(
-            listType==='list'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
+            listType==='list'?`/lists/api/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
         )
 
     }

@@ -13,6 +13,12 @@ import {
 import React, {useEffect, useState} from 'react';
 
 import FileUpload from '@/components/form/FileUpload';
+import {
+   CheckboxInput,
+   DateInput,
+   NumberInput,
+   ReferenceInput,
+   TextInput } from '@/components/form/inputs';
 import {useWizardValidation} from '@/hooks/useWizardValidation';
 import {BaseEntity, Cargo, isBaseEntity, RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
 import {createCargo, createRoutePoint, LinkFactories} from '@/types/factories/linkFactory'
@@ -230,72 +236,38 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
     const renderBasicInfo = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Вид транспортировки *
-                    </label>
-                    <select
-                        value={formData._shipmentType?.id || ''}
-                        onChange={(e) =>
-                            updateReferenceField('_shipmentType', e.target.value, lists.shipmentTypes, LinkFactories.shipmentType)}
-
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="">Выберите</option>
-                        {lists.shipmentTypes.map(type => (
-                            <option key={type.id} value={type.id}>{type.title}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Вид отгрузки *
-                    </label>
-                    <select
-                        value={formData._transportationType?.id || ''}
-                        onChange={(e) =>
-                            updateReferenceField('_transportationType', e.target.value, lists.transportationTypes, LinkFactories.transportationType)}
-
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="">Выберите</option>
-                        {lists.transportationTypes.map(type => (
-                            <option key={type.id} value={type.id}>{type.title}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Валюта *
-                    </label>
-                    <select
-                        value={formData._currency?.id || ''}
-                        onChange={(e) =>
-                            updateReferenceField('_currency', e.target.value, lists.currencies, LinkFactories.currency)}
-
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="">Выберите</option>
-                        {lists.currencies.map(currency => (
-                            <option key={currency.id} value={currency.id}>{currency.title}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="flex items-center">
-                    <input
-                        type="checkbox"
-                        id="express"
-                        checked={formData.express}
-                        onChange={(e) => updateFormData('express', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="express" className="ml-2 text-sm text-gray-700">
-                        Экспресс отгрузка
-                    </label>
-                </div>
+                <ReferenceInput
+                  label="Вид транспортировки"
+                  required
+                  value={formData._shipmentType||LinkFactories.shipmentType()}
+                  onChange={(value) => updateFormData('_shipmentType', value)}
+                  options={lists.shipmentTypes}
+                  placeholder="Выберите"
+                  emptyFactory={LinkFactories.shipmentType}
+                />
+                <ReferenceInput
+                    label="Вид отгрузки"
+                    required
+                    value={formData._transportationType||LinkFactories.transportationType()}
+                    onChange={(value) => updateFormData('_transportationType', value)}
+                    options={lists.transportationTypes}
+                    placeholder="Выберите"
+                    emptyFactory={LinkFactories.transportationType}
+                />
+                <ReferenceInput
+                    label="Валюта"
+                    required
+                    value={formData._currency||LinkFactories.currency()}
+                    onChange={(value) => updateFormData('_currency', value)}
+                    options={lists.currencies}
+                    placeholder="Выберите"
+                    emptyFactory={LinkFactories.currency}
+                />
+                <CheckboxInput
+                  value={formData.express||false}
+                  onChange={(value) => updateFormData('express', value)}
+                  text="Экспресс отгрузка"
+                />
             </div>
         </div>
     );
@@ -325,81 +297,46 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Адрес *
-                            </label>
-                            <input
-                                type="text"
-                                value={point.address}
-                                onChange={(e) => updateRouteData(routeIndex, 'address', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Введите адрес"
-                            />
-                        </div>
+                        <TextInput
+                            label="Адрес"
+                            type="text"
+                            required
+                            value={point.address}
+                            onChange={(value) => updateRouteData(routeIndex, 'address', value)}
+                            placeholder="Введите адрес"
+                        />
+                        <ReferenceInput
+                            label="Контрагент"
+                            required
+                            value={point._counterParty||LinkFactories.counterParty()}
+                            onChange={(value) => updateRouteData(routeIndex, '_counterParty', value)}
+                            options={lists.counterParties}
+                            placeholder="Выберите"
+                            emptyFactory={LinkFactories.counterParty}
+                        />
+                        <ReferenceInput
+                            label="Тип обработки груза"
+                            required
+                            value={point._cargoHandlingType||LinkFactories.cargoHandlingType()}
+                            onChange={(value) => updateRouteData(routeIndex, '_cargoHandlingType', value)}
+                            options={lists.cargoHandlingTypes}
+                            placeholder="Выберите"
+                            emptyFactory={LinkFactories.cargoHandlingType}
+                        />
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Контрагент *
-                            </label>
-                            <select
-                                value={point._counterParty.id}
-                                onChange={(e) => {
-                                    const selected = lists.counterParties.find(t => t.id === e.target.value);
-                                    updateRouteData(routeIndex, '_counterParty', selected || LinkFactories.counterParty);
-                                }}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="">Выберите</option>
-                                {lists.counterParties.map(party => (
-                                    <option key={party.id} value={party.id}>{party.title}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <TextInput
+                           label="Телефон"
+                           type="tel"
+                           value={point.contactPhone||''}
+                           onChange={(value) => updateRouteData(routeIndex, 'contactPhone', value)}
+                           placeholder="+7 (900) 000-00-00"
+                         />
+                        <DateInput
+                           label="Плановое время прибытия"
+                           value={point.arrival}
+                           onChange={(value) => updateRouteData(routeIndex, 'arrival', value)}
+                         />
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Тип обработки груза *
-                            </label>
-                            <select
-                                value={point._cargoHandlingType.title}
-                                onChange={(e) => {
-                                    const selected = lists.cargoHandlingTypes.find(t => t.id === e.target.value);
-                                    updateRouteData(routeIndex, '_cargoHandlingType', selected || LinkFactories.cargoHandlingType());
-                                }}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="">Выберите</option>
-                                {lists.cargoHandlingTypes.map(type => (
-                                    <option key={type.id} value={type.id}>{type.title}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Телефон
-                            </label>
-                            <input
-                                type="tel"
-                                value={point.contactPhone}
-                                onChange={(e) => updateRouteData(routeIndex, 'contactPhone', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="+7 (900) 000-00-00"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Плановое время прибытия
-                            </label>
-                            <input
-                                type="datetime-local"
-                                value={point.arrival}
-                                onChange={(e) => updateRouteData(routeIndex, 'arrival', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
                     </div>
 
                     <div className="border-t pt-4">
@@ -419,64 +356,40 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                         {point.cargoList.map((cargo, cargoIndex) => (
                             <div key={cargoIndex}
                                  className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 p-3 bg-white rounded border">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Номер груза *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={cargo.number}
-                                        onChange={(e) => updateCargoData(routeIndex, cargoIndex, 'number', e.target.value)}
-                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="№ груза"
-                                    />
-                                </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Вес (кг)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={cargo.cargoWeight}
-                                        onChange={(e) => updateCargoData(routeIndex, cargoIndex, 'cargoWeight', parseFloat(e.target.value) || 0)}
-                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
+                                <TextInput
+                                  label="Номер груза *"
+                                  type="text"
+                                  value={cargo.number}
+                                  onChange={(value) => updateCargoData(routeIndex, cargoIndex, 'number', value || '')}
+                                />
+                                <NumberInput
+                                    label="Вес (кг)"
+                                    value={cargo.cargoWeight}
+                                    onChange={(value) => updateCargoData(routeIndex, cargoIndex, 'cargoWeight', value || 0)}
+                                    className="text-sm"
+                                    step={0.01}
+                                    min={0}
+                                />
+                                <NumberInput
+                                    label="Объем (м³)"
+                                    value={cargo.cargoVolume}
+                                    onChange={(value) => updateCargoData(routeIndex, cargoIndex, 'cargoVolume', value || 0)}
+                                    className="text-sm"
+                                    step={0.01}
+                                    min={0}
+                                />
 
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Объем (м³)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={cargo.cargoVolume}
-                                        onChange={(e) => updateCargoData(routeIndex, cargoIndex, 'cargoVolume', parseFloat(e.target.value) || 0)}
-                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
+                                <ReferenceInput
+                                    label="Характер груза"
+                                    required
+                                    value={cargo._cargoNature||LinkFactories.cargoNature()}
+                                    onChange={(value) => updateCargoData(routeIndex, cargoIndex, '_cargoNature', value)}
+                                    options={lists.cargoNatures}
+                                    placeholder="Выберите"
+                                    emptyFactory={LinkFactories.cargoNature}
+                                />
 
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Характер груза *
-                                    </label>
-                                    <select
-
-                                        value={cargo._cargoNature.id}
-                                        onChange={(e) => {
-                                            const selected = lists.cargoNatures.find(t => t.id === e.target.value);
-                                            updateCargoData(routeIndex, cargoIndex, '_cargoNature', selected || LinkFactories.cargoNature());
-                                        }}
-                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="">Выберите</option>
-                                        {lists.cargoNatures.map(nature => (
-                                            <option key={nature.id} value={nature.id}>{nature.title}</option>
-                                        ))}
-                                    </select>
-                                </div>
                                 <div className="flex items-end justify-center">
                                     {point.cargoList.length > 1 && (
                                         <button
@@ -505,23 +418,16 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
 
     const renderTransport = () => (
         <div className="space-y-6">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Требуемый тип ТС *
-                </label>
-                <select
-                    value={formData._requiredVehicleType?.id}
-                    onChange={(e) =>
-                        updateReferenceField('_requiredVehicleType', e.target.value, lists.vehicleTypes, LinkFactories.vehicleType)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="">Выберите тип транспортного средства</option>
-                    {lists.vehicleTypes.map(type => (
-                        <option key={type.id} value={type.id}>{type.title}</option>
-                    ))}
-                </select>
-            </div>
 
+            <ReferenceInput
+                label="Требуемый тип"
+                required
+                value={formData._requiredVehicleType||LinkFactories.vehicleType()}
+                onChange={(value) => updateFormData('_requiredVehicleType', value)}
+                options={lists.vehicleTypes}
+                placeholder="Выберите"
+                emptyFactory={LinkFactories.vehicleType}
+            />
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Особые требования
