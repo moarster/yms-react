@@ -1,8 +1,9 @@
 import {ChevronDownIcon} from '@heroicons/react/24/outline'
 import React, {useEffect, useRef, useState} from 'react'
 
-import {BaseEntity} from "@/types";
+import {BaseEntity, isDataEntity} from "@/types";
 
+import {InputError, InputLabel} from '../common'
 import {BaseInputProps} from './types'
 
 interface ReferenceInputProps extends BaseInputProps {
@@ -36,7 +37,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     // Filter options based on search
     const filteredOptions = searchable && searchTerm
         ? options.filter(option =>
-            option.title.toLowerCase().includes(searchTerm.toLowerCase())
+            (option.title ?? (isDataEntity(option) ? option.data?.title as string ?? "" : "")).toLowerCase().includes(searchTerm.toLowerCase())
         )
         : options
 
@@ -67,12 +68,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
 
     return (
         <div className={className}>
-            {label && (
-                <label htmlFor={inputId} className="label">
-                    {label}
-                    {required && <span className="text-red-500 ml-1">*</span>}
-                </label>
-            )}
+            {label && <InputLabel htmlFor={inputId} label={label} required={required}/>}
 
             <div className="relative" ref={dropdownRef}>
                 <button
@@ -102,7 +98,8 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
                                 title="Clear selection"
                             >
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         )}
@@ -155,9 +152,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
                 )}
             </div>
 
-            {error && (
-                <p className="mt-1 text-sm text-red-600">{error}</p>
-            )}
+            <InputError error={error} />
         </div>
     )
 }

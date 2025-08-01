@@ -5,7 +5,6 @@ import KeycloakProvider from '@/components/auth/KeycloakProvider'
 import LoginPage from '@/components/auth/LoginPage'
 import AppLayout from '@/components/layout/AppLayout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import MockWizard from "@/components/wizards/MockWizard.tsx";
 import CatalogItemsPage from '@/pages/catalogs/CatalogItemsPage'
 import CatalogsPage from '@/pages/catalogs/CatalogsPage'
 import DashboardPage from '@/pages/DashboardPage'

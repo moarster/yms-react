@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { InputError } from '../common'
 import { BaseInputProps } from './types'
 
 interface CheckboxInputProps extends BaseInputProps {
@@ -40,9 +41,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
                     </label>
                 )}
             </div>
-            {error && (
-                <p className="mt-1 text-sm text-red-600">{error}</p>
-            )}
+            <InputError error={error} />
         </div>
     )
 }

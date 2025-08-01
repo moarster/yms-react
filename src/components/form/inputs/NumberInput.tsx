@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { InputError,InputLabel } from '../common'
 import { BaseInputProps } from './types'
 
 interface NumberInputProps extends BaseInputProps {
@@ -39,12 +40,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
 
     return (
         <div className={className}>
-            {label && (
-                <label htmlFor={inputId} className="label">
-                    {label}
-                    {required && <span className="text-red-500 ml-1">*</span>}
-                </label>
-            )}
+            {label && <InputLabel htmlFor={inputId} label={label} required={required} />}
             <input
                 id={inputId}
                 type="number"
@@ -57,9 +53,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
                 step={step}
                 className={`input ${error ? 'input-error' : ''}`}
             />
-            {error && (
-                <p className="mt-1 text-sm text-red-600">{error}</p>
-            )}
+            <InputError error={error} />
         </div>
     )
 }

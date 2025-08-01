@@ -20,7 +20,7 @@ import {
    ReferenceInput,
    TextInput } from '@/components/form/inputs';
 import {useWizardValidation} from '@/hooks/useWizardValidation';
-import {BaseEntity, Cargo, isBaseEntity, RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
+import { Cargo, isBaseEntity, RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
 import {createCargo, createRoutePoint, LinkFactories} from '@/types/factories/linkFactory'
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
@@ -224,16 +224,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         }
     };
 
-    const updateReferenceField = <T extends keyof WizardFormData>(
-        field: T,
-        selectedId: string,
-        options: BaseEntity[],
-        emptyValue: () => WizardFormData[T]
-    ) => {
-        const selected = options.find(item => item.id === selectedId);
-        updateFormData(field, selected || emptyValue());
-    };
-    const renderBasicInfo = () => (
+   const renderBasicInfo = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ReferenceInput
@@ -274,19 +265,19 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
 
     const renderRoute = () => (
         <div className="space-y-6">
-            {formData.route.map((point, routeIndex) => (
+            {formData.route?.map((point, routeIndex) => (
                 <div key={routeIndex} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-medium text-gray-900 flex items-center">
                             <MapPin className="h-5 w-5 mr-2 text-blue-500"/>
                             Точка {routeIndex + 1}
                         </h3>
-                        {formData.route.length > 1 && (
+                        {(formData?.route?.length ?? 0) > 1 && (
                             <button
                                 onClick={() => {
                                     setFormData(prev => ({
                                         ...prev,
-                                        route: prev.route.filter((_, i) => i !== routeIndex)
+                                        route: prev?.route?.filter((_, i) => i !== routeIndex)
                                     }));
                                 }}
                                 className="text-red-600 hover:text-red-800 text-sm"
@@ -301,6 +292,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                             label="Адрес"
                             type="text"
                             required
+                            className='md:col-span-2'
                             value={point.address}
                             onChange={(value) => updateRouteData(routeIndex, 'address', value)}
                             placeholder="Введите адрес"
@@ -441,7 +433,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     placeholder="Водитель Исполнителя обязан в соответствии с п. 5.16. договора проверить надлежащую расстановку груза с целью исключения превышения максимально допустимой нагрузки на ось и с учетом допустимой массы ТС, в том числе указанных в специальном разрешении."
                 />
                 <div className="text-sm text-gray-500 mt-1">
-                    {formData.customRequirements.length}/1000 символов
+                    ${formData.customRequirements?.length ?? 0}/1000 символов
                 </div>
             </div>
         </div>
