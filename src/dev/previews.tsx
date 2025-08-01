@@ -1,8 +1,9 @@
 import {ComponentPreview, Previews} from "@react-buddy/ide-toolbox";
 
-import {PaletteTree} from "./palette";
 import {ReferenceDropdownBase} from "@/components/form/reference/ReferenceDropdownBase.tsx";
-import ShipmentRfpWizard from "@/components/wizards/MockWizard.tsx";
+import ShipmentRfpWizard from "@/components/wizards/ShipmentRfpWizard.tsx";
+
+import {PaletteTree} from "./palette";
 
 const ComponentPreviews = () => {
     return (

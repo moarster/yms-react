@@ -9,7 +9,7 @@ export interface ShipmentRfpData extends Record<string, unknown>{
     _carrier?: ReferenceLink<'counter-party'>
     price?: number
     _requiredVehicleType?: ReferenceLink<'vehicle-type'>
-    customRequirements?: string // max 1000 chars
+    customRequirements?: string
     innerComment?: string
     comment?: string // max 1000 chars
     admittanceComment?: string // max 1000 chars

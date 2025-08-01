@@ -66,7 +66,6 @@ export const useWizardValidation = (formData: WizardFormData) => {
                 errors.push('Комментарий не должен превышать 1000 символов')
             }
 
-            // Validate actual carrier if provided
             if (formData.actualCarrier?.taxIdentificationNumber) {
                 if (!validateINN(formData.actualCarrier.taxIdentificationNumber)) {
                     errors.push('Некорректный ИНН (должен содержать 10 или 12 цифр)')

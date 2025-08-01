@@ -16,7 +16,6 @@ import ProfilePage from '@/pages/ProfilePage'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
-import MockWizard from "@/components/wizards/MockWizard.tsx";
 
 // Protected route component
 interface ProtectedRouteProps {

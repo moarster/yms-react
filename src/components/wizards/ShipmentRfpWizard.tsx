@@ -10,11 +10,12 @@ import {
     MapPinIcon as MapPin,
     TruckIcon as Truck,
 } from '@heroicons/react/24/outline';
-import React, { useEffect,useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
 import FileUpload from '@/components/form/FileUpload';
-import { useWizardValidation } from '@/hooks/useWizardValidation';
-import { RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
+import {useWizardValidation} from '@/hooks/useWizardValidation';
+import {BaseEntity, Cargo, isBaseEntity, RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
+import {createCargo, createRoutePoint, LinkFactories} from '@/types/factories/linkFactory'
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                                                  initialData,
@@ -25,7 +26,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                                              }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState<WizardFormData>(initialData);
-    const {  getStepErrors, canProceedToNext, canSubmit } = useWizardValidation(formData);
+    const {getStepErrors, canProceedToNext, canSubmit} = useWizardValidation(formData);
 
     useEffect(() => {
         setFormData(initialData);
@@ -58,50 +59,118 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         }
     ];
 
-    const updateFormData = (field: keyof WizardFormData, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    const updateFormData = (
+        field: keyof WizardFormData,
+        value: unknown
+    ) => {
+        setFormData(prev => {
+            if (typeof field === 'string' && field.startsWith('_')) {
+                const existingValue = prev[field];
+
+
+                if (typeof existingValue === 'object' && existingValue !== null && 'id' in existingValue && isBaseEntity(value)) {
+                    return {
+                        ...prev,
+                        [field]: {
+                            ...existingValue,
+                            id: value.id,
+                            title: value.title,
+                            entry: value
+                        }
+                    };
+                }
+            }
+
+            return {
+                ...prev,
+                [field]: value
+            };
+        });
     };
 
-    const updateRouteData = (index: number, field: string, value: any) => {
+    const updateRouteData = (index: number, field: keyof RoutePoint, value: unknown) => {
         setFormData(prev => ({
             ...prev,
-            route: prev.route?.map((point, i) =>
-                i === index ? { ...point, [field]: value } : point
-            ) || []
+            route: prev.route?.map((point, i) => {
+                if (i !== index) return point;
+
+                if (typeof field === 'string' && field.startsWith('_')) {
+                    const existingValue = point[field];
+
+                    // Handle reference field updates
+                    if (typeof existingValue === 'object' && existingValue !== null && 'id' in existingValue && isBaseEntity(value)) {
+                        if (isBaseEntity(value))
+                            return {
+                                ...point,
+                                [field]: {
+                                    ...existingValue,
+                                    id: value.id,
+                                    title: value.title,
+                                    entry: value
+                                }
+                            };
+                        else return {
+                            ...point,
+                            [field]: {
+                                ...existingValue,
+                                id: value
+                            }
+                        };
+                    }
+                }
+
+                return {...point, [field]: value};
+            }) || []
         }));
     };
 
-    const updateCargoData = (routeIndex: number, cargoIndex: number, field: string, value: any) => {
+    const updateCargoData = (routeIndex: number, cargoIndex: number, field: keyof Cargo, value: unknown) => {
         setFormData(prev => ({
             ...prev,
-            route: prev.route?.map((point, i) =>
-                i === routeIndex ? {
+            route: prev.route?.map((point, i) => {
+                if (i !== routeIndex) return point;
+
+                return {
                     ...point,
-                    cargoList: point.cargoList?.map((cargo, j) =>
-                        j === cargoIndex ? { ...cargo, [field]: value } : cargo
-                    ) || []
-                } : point
-            ) || []
+                    cargoList: point.cargoList?.map((cargo, j) => {
+                        if (j !== cargoIndex) return cargo;
+
+                        if (field.startsWith('_')) {
+                            const existingValue = cargo[field];
+
+                            // Handle reference field updates for cargo
+                            if (typeof existingValue === 'object' && existingValue !== null && 'id' in existingValue) {
+                                if (isBaseEntity(value))
+                                    return {
+                                        ...cargo,
+                                        [field]: {
+                                            ...existingValue,
+                                            id: value.id,
+                                            title: value.title,
+                                            entry: value
+                                        }
+                                    };
+                                else return {
+                                    ...cargo,
+                                    [field]: {
+                                        ...existingValue,
+                                        id: value,
+                                    }
+                                };
+                            }
+                        }
+
+                        return {...cargo, [field]: value};
+                    }) || []
+                };
+            }) || []
         }));
     };
 
     const addRoutePoint = () => {
         setFormData(prev => ({
             ...prev,
-            route: [...(prev.route || []), {
-                address: '',
-                contactPhone: '',
-                arrival: '',
-                departure: '',
-                _counterParty: { id: '', title: '',domain: 'reference' , entity: 'item', catalog: 'counter-party' },
-                _cargoHandlingType: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-handling-type' } ,
-                cargoList: [{
-                    number: '',
-                    cargoWeight: 0,
-                    cargoVolume: 0,
-                    _cargoNature: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-nature' }
-                }]
-            } as RoutePoint]
+            route: [...(prev.route || []), createRoutePoint()]
         }));
     };
 
@@ -111,17 +180,22 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             route: prev.route?.map((point, i) =>
                 i === routeIndex ? {
                     ...point,
-                    cargoList: [...(point.cargoList || []), {
-                        number: '',
-                        cargoWeight: 0,
-                        cargoVolume: 0,
-                        _cargoNature: { id: '', title: '',domain: 'lists' , entity: 'item', catalog: 'cargo-nature' }
-                    }]
+                    cargoList: [...(point.cargoList || []), createCargo()]
                 } : point
             ) || []
         }));
     };
-
+    const removeCargoItem = (routeIndex: number, cargoIndex: number) => {
+        setFormData(prev => ({
+            ...prev,
+            route: prev.route?.map((point, i) =>
+                i === routeIndex ? {
+                    ...point,
+                    cargoList: point.cargoList?.filter((_, j) => j !== cargoIndex) || []
+                } : point
+            ) || []
+        }));
+    };
     const canProceed = () => {
         return canProceedToNext(steps[currentStep].id);
     };
@@ -144,6 +218,15 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         }
     };
 
+    const updateReferenceField = <T extends keyof WizardFormData>(
+        field: T,
+        selectedId: string,
+        options: BaseEntity[],
+        emptyValue: () => WizardFormData[T]
+    ) => {
+        const selected = options.find(item => item.id === selectedId);
+        updateFormData(field, selected || emptyValue());
+    };
     const renderBasicInfo = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -153,10 +236,9 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     </label>
                     <select
                         value={formData._shipmentType?.id || ''}
-                        onChange={(e) => {
-                            const selected = lists.shipmentTypes.find(t => t.id === e.target.value);
-                            updateFormData('_shipmentType', selected || { id: '', name: '' });
-                        }}
+                        onChange={(e) =>
+                            updateReferenceField('_shipmentType', e.target.value, lists.shipmentTypes, LinkFactories.shipmentType)}
+
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Выберите</option>
@@ -172,10 +254,9 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     </label>
                     <select
                         value={formData._transportationType?.id || ''}
-                        onChange={(e) => {
-                            const selected = lists.transportationTypes.find(t => t.id === e.target.value);
-                            updateFormData('_transportationType', selected || { id: '', title: '' });
-                        }}
+                        onChange={(e) =>
+                            updateReferenceField('_transportationType', e.target.value, lists.transportationTypes, LinkFactories.transportationType)}
+
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Выберите</option>
@@ -191,10 +272,9 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     </label>
                     <select
                         value={formData._currency?.id || ''}
-                        onChange={(e) => {
-                            const selected = lists.currencies.find(c => c.id === e.target.value);
-                            updateFormData('_currency', selected || { id: '', title: '' });
-                        }}
+                        onChange={(e) =>
+                            updateReferenceField('_currency', e.target.value, lists.currencies, LinkFactories.currency)}
+
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Выберите</option>
@@ -226,7 +306,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                 <div key={routeIndex} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                            <MapPin className="h-5 w-5 mr-2 text-blue-500" />
+                            <MapPin className="h-5 w-5 mr-2 text-blue-500"/>
                             Точка {routeIndex + 1}
                         </h3>
                         {formData.route.length > 1 && (
@@ -263,13 +343,16 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                 Контрагент *
                             </label>
                             <select
-                                value={point._counterParty}
-                                onChange={(e) => updateRouteData(routeIndex, '_counterParty', e.target.value)}
+                                value={point._counterParty.id}
+                                onChange={(e) => {
+                                    const selected = lists.counterParties.find(t => t.id === e.target.value);
+                                    updateRouteData(routeIndex, '_counterParty', selected || LinkFactories.counterParty);
+                                }}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
                                 <option value="">Выберите</option>
-                                {mockCounterParties.map(party => (
-                                    <option key={party.id} value={party.id}>{party.name}</option>
+                                {lists.counterParties.map(party => (
+                                    <option key={party.id} value={party.id}>{party.title}</option>
                                 ))}
                             </select>
                         </div>
@@ -279,13 +362,16 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                 Тип обработки груза *
                             </label>
                             <select
-                                value={point._cargoHandlingType}
-                                onChange={(e) => updateRouteData(routeIndex, '_cargoHandlingType', e.target.value)}
+                                value={point._cargoHandlingType.title}
+                                onChange={(e) => {
+                                    const selected = lists.cargoHandlingTypes.find(t => t.id === e.target.value);
+                                    updateRouteData(routeIndex, '_cargoHandlingType', selected || LinkFactories.cargoHandlingType());
+                                }}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
                                 <option value="">Выберите</option>
-                                {mockCargoHandlingTypes.map(type => (
-                                    <option key={type.id} value={type.id}>{type.name}</option>
+                                {lists.cargoHandlingTypes.map(type => (
+                                    <option key={type.id} value={type.id}>{type.title}</option>
                                 ))}
                             </select>
                         </div>
@@ -319,7 +405,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     <div className="border-t pt-4">
                         <div className="flex items-center justify-between mb-3">
                             <h4 className="text-md font-medium text-gray-900 flex items-center">
-                                <Package className="h-4 w-4 mr-2 text-green-500" />
+                                <Package className="h-4 w-4 mr-2 text-green-500"/>
                                 Грузы
                             </h4>
                             <button
@@ -331,7 +417,8 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                         </div>
 
                         {point.cargoList.map((cargo, cargoIndex) => (
-                            <div key={cargoIndex} className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 p-3 bg-white rounded border">
+                            <div key={cargoIndex}
+                                 className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 p-3 bg-white rounded border">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">
                                         Номер груза *
@@ -376,15 +463,30 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                         Характер груза *
                                     </label>
                                     <select
-                                        value={cargo._cargoNature}
-                                        onChange={(e) => updateCargoData(routeIndex, cargoIndex, '_cargoNature', e.target.value)}
+
+                                        value={cargo._cargoNature.id}
+                                        onChange={(e) => {
+                                            const selected = lists.cargoNatures.find(t => t.id === e.target.value);
+                                            updateCargoData(routeIndex, cargoIndex, '_cargoNature', selected || LinkFactories.cargoNature());
+                                        }}
                                         className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                                     >
                                         <option value="">Выберите</option>
-                                        {mockCargoNatures.map(nature => (
-                                            <option key={nature.id} value={nature.id}>{nature.name}</option>
+                                        {lists.cargoNatures.map(nature => (
+                                            <option key={nature.id} value={nature.id}>{nature.title}</option>
                                         ))}
                                     </select>
+                                </div>
+                                <div className="flex items-end justify-center">
+                                    {point.cargoList.length > 1 && (
+                                        <button
+                                            onClick={() => removeCargoItem(routeIndex, cargoIndex)}
+                                            className="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded hover:bg-red-50"
+                                            title="Remove this cargo item"
+                                        >
+                                            ×
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -408,13 +510,14 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     Требуемый тип ТС *
                 </label>
                 <select
-                    value={formData._requiredVehicleType}
-                    onChange={(e) => updateFormData('_requiredVehicleType', e.target.value)}
+                    value={formData._requiredVehicleType?.id}
+                    onChange={(e) =>
+                        updateReferenceField('_requiredVehicleType', e.target.value, lists.vehicleTypes, LinkFactories.vehicleType)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="">Выберите тип транспортного средства</option>
-                    {mockVehicleTypes.map(type => (
-                        <option key={type.id} value={type.id}>{type.name}</option>
+                    {lists.vehicleTypes.map(type => (
+                        <option key={type.id} value={type.id}>{type.title}</option>
                     ))}
                 </select>
             </div>
@@ -484,7 +587,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             {getStepErrors('additional').length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                     <div className="flex items-center mb-2">
-                        <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                        <AlertCircle className="h-5 w-5 text-red-400 mr-2"/>
                         <h3 className="text-sm font-medium text-red-800">Исправьте ошибки:</h3>
                     </div>
                     <ul className="text-sm text-red-700 space-y-1">
@@ -501,13 +604,13 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     <div>
                         <span className="font-medium text-blue-800">Тип перевозки:</span>
                         <div className="text-blue-700">
-                            {formData._shipmentType?.name || 'Не выбрано'}
+                            {formData._shipmentType?.title || 'Не выбрано'}
                         </div>
                     </div>
                     <div>
                         <span className="font-medium text-blue-800">Вид отгрузки:</span>
                         <div className="text-blue-700">
-                            {formData._transportationType?.name || 'Не выбрано'}
+                            {formData._transportationType?.title || 'Не выбрано'}
                         </div>
                     </div>
                     <div>
@@ -517,13 +620,13 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                     <div>
                         <span className="font-medium text-blue-800">Тип ТС:</span>
                         <div className="text-blue-700">
-                            {formData._requiredVehicleType?.name || 'Не выбрано'}
+                            {formData._requiredVehicleType?.title || 'Не выбрано'}
                         </div>
                     </div>
                     <div>
                         <span className="font-medium text-blue-800">Валюта:</span>
                         <div className="text-blue-700">
-                            {formData._currency?.name || 'Не выбрано'}
+                            {formData._currency?.title || 'Не выбрано'}
                         </div>
                     </div>
                     <div>
@@ -580,10 +683,11 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                     isCompleted ? 'border-green-500 bg-green-500 text-white' :
                                         'border-gray-300 bg-white text-gray-400'}
                 `}>
-                                    {isCompleted ? <Check className="h-5 w-5" /> : <StepIcon className="h-5 w-5" />}
+                                    {isCompleted ? <Check className="h-5 w-5"/> : <StepIcon className="h-5 w-5"/>}
                                 </div>
                                 <div className="ml-3 flex-1">
-                                    <div className={`text-sm font-medium ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
+                                    <div
+                                        className={`text-sm font-medium ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
                                         {step.title}
                                     </div>
                                     <div className="text-xs text-gray-500">
@@ -591,7 +695,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                     </div>
                                 </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`w-12 h-0.5 ml-4 ${isCompleted ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                    <div className={`w-12 h-0.5 ml-4 ${isCompleted ? 'bg-green-500' : 'bg-gray-300'}`}/>
                                 )}
                             </div>
                         );
@@ -629,7 +733,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                             : 'text-gray-700 bg-gray-100 hover:bg-gray-200'}
           `}
                 >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    <ArrowLeft className="h-4 w-4 mr-2"/>
                     {currentStep === 0 ? 'Отменить' : 'Назад'}
                 </button>
 
@@ -655,7 +759,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                             </>
                         ) : (
                             <>
-                                <Check className="h-4 w-4 mr-2" />
+                                <Check className="h-4 w-4 mr-2"/>
                                 Создать заявку
                             </>
                         )}
@@ -672,7 +776,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             `}
                     >
                         Далее
-                        <ArrowRight className="h-4 w-4 ml-2" />
+                        <ArrowRight className="h-4 w-4 ml-2"/>
                     </button>
                 )}
             </div>

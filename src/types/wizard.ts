@@ -1,6 +1,6 @@
 import React from "react";
 
-import {BaseEntity, CatalogItem, ShipmentRfpData, Titled} from '@/types'
+import {BaseEntity, CatalogItem, ShipmentRfpData} from '@/types'
 
 export interface WizardStep {
     id: string

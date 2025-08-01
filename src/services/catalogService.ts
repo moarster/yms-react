@@ -1,7 +1,7 @@
 import {Catalog, CatalogItem, ListItem, PaginatedResponse,SimpleList} from '@/types'
+import {WizardLists} from "@/types/wizard.ts";
 
 import {apiClient} from './apiClient'
-import {WizardLists} from "@/types/wizard.ts";
 
 export interface CatalogFilters {
     search?: string
@@ -71,7 +71,7 @@ class CatalogService {
         if (filters?.direction) params.append('direction', filters.direction)
 
         return await apiClient.getMany<ListItem>(
-            listType==='list'?`/lists/api/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
+            listType==='list'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
         )
 
     }

@@ -5,13 +5,16 @@ import { useNavigate } from 'react-router-dom'
 
 import ShipmentRfpWizard from '@/components/wizards/ShipmentRfpWizard'
 import {catalogService} from "@/services/catalogService.ts";
-import { ShipmentRfpData } from '@/types'
+import {ShipmentRfp, ShipmentRfpData} from '@/types'
+import { createShipmentRfpData } from '@/types/factories/linkFactory'
 
-import { useShipmentRfpDetail } from './hooks/useShipmentRfpDetail'
+import { useShipmentRfpMutations } from './hooks/useShipmentRfpMutations'
 
 const ShipmentRfpWizardPage: React.FC = () => {
     const navigate = useNavigate()
-    const { createMutation } = useShipmentRfpDetail()
+    const { createMutation } = useShipmentRfpMutations()
+
+    const [formData] = useState<Partial<ShipmentRfpData>>(createShipmentRfpData())
 
     // Fetch all required reference data
     const { data: lists, isLoading: listsLoading } = useQuery({
@@ -39,54 +42,12 @@ const ShipmentRfpWizardPage: React.FC = () => {
         }
     })
 
-    const [formData, setFormData] = useState<Partial<ShipmentRfpData>>({
-        _shipmentType: { id: '', title: '' },
-        _transportationType: { id: '', title: '' },
-        _currency: { id: '', title: '' },
-        express: false,
-        route: [{
-            address: '',
-            contactPhone: '',
-            arrival: '',
-            departure: '',
-            _counterParty: { id: '', title: '' },
-            _cargoHandlingType: { id: '', title: '' },
-            cargoList: [{
-                number: '',
-                cargoWeight: 0,
-                cargoVolume: 0,
-                _cargoNature: { id: '', title: '' }
-            }]
-        }],
-        _requiredVehicleType: { id: '', title: '' },
-        customRequirements: '',
-        comment: '',
-        innerComment: '',
-        attachments: []
-    })
 
-    const handleSubmit = async (finalData: Partial<ShipmentRfpData>) => {
+    const handleSubmit = async (finalData: ShipmentRfpData) => {
         try {
-            // Transform data to match API format
-            const submitData = {
-                ...finalData,
-                // Convert UI format to API format
-                _shipmentType: { id: finalData._shipmentType?.id },
-                _transportationType: { id: finalData._transportationType?.id },
-                _currency: { id: finalData._currency?.id },
-                _requiredVehicleType: { id: finalData._requiredVehicleType?.id },
-                route: finalData.route?.map(point => ({
-                    ...point,
-                    _counterParty: { id: point._counterParty?.id },
-                    _cargoHandlingType: { id: point._cargoHandlingType?.id },
-                    cargoList: point.cargoList?.map(cargo => ({
-                        ...cargo,
-                        _cargoNature: { id: cargo._cargoNature?.id }
-                    }))
-                }))
-            }
 
-            await createMutation.mutateAsync(submitData as ShipmentRfpData)
+
+            await createMutation.mutateAsync(finalData)
             toast.success('Заявка создана успешно!')
             navigate('/shipment-rfps')
         } catch (error) {
