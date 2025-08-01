@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
+   // <React.StrictMode>
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <DevSupport ComponentPreviews={ComponentPreviews}
@@ -59,5 +59,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 />
             </BrowserRouter>
         </QueryClientProvider>
-    </React.StrictMode>,
+  //  </React.StrictMode>,
 )

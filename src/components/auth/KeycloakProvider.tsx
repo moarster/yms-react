@@ -1,5 +1,5 @@
 import { ReactKeycloakProvider } from '@react-keycloak/web'
-import React, {  useState } from 'react'
+import React, {  useRef,useState } from 'react'
 
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { keycloak, keycloakInitOptions } from '@/config/keycloak'
@@ -12,27 +12,17 @@ interface KeycloakProviderProps {
 const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
     const [initError, _setInitError] = useState<string | null>(null)
     const { /*setKeycloak, setLoading,*/ isDemoMode } = useAuthStore()
-
+    const initializingRef = useRef(false)
     // If in demo mode, just render children
     if (isDemoMode) {
         return <>{children}</>
     }
 
-/*    const handleKeycloakInit = (authenticated: boolean) => {
-        console.log('Keycloak initialized:', authenticated)
-        setKeycloak(keycloak)
-        setLoading(false)
-
-        if (authenticated) {
-            useAuthStore.getState().initializeAuth()
-        }
+    const initOptions = {
+        ...keycloakInitOptions,
+        onLoad: initializingRef.current ? undefined : keycloakInitOptions.onLoad
     }
 
-    const handleKeycloakInitError = (error: any) => {
-        console.error('Keycloak initialization error:', error)
-        setInitError('Failed to initialize authentication system')
-        setLoading(false)
-    }*/
 
     const LoadingComponent = () => (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -69,20 +59,23 @@ const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
 
     return (
         <ReactKeycloakProvider
+
             authClient={keycloak}
-            initOptions={keycloakInitOptions}
-            onEvent={(_event, _error) => {
-               // console.log('Keycloak event:', event, error)
+            initOptions={initOptions}
+            onEvent={(event, _error) => {
+                if (event === 'onAuthSuccess' || event === 'onAuthError') {
+                    initializingRef.current = true
+                }
             }}
             onTokens={(_tokens) => {
                 //console.log('Keycloak tokens updated:', tokens)
             }}
-            LoadingComponent={LoadingComponent}
 
-           // onInitSuccess={handleKeycloakInit}
+            //onInitSuccess={handleKeycloakInit}
             //onInitError={handleKeycloakInitError}
         >
             {children}
+            <LoadingComponent/>
         </ReactKeycloakProvider>
     )
 }
