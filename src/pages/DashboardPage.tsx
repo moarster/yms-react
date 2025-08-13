@@ -10,8 +10,9 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { authService } from '@/core/auth/authService.ts'
+import {userIsCarrier, userIsLogist} from "@/core/auth/types.ts";
 import { useAuthStore } from '@/core/store/authStore.ts'
-import { documentService } from '@/services/documentService'
+import { documentService } from '@/features/documents/documentService.ts'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
 interface StatsCardProps {
@@ -95,8 +96,8 @@ const ActivityItem: React.FC<{ activity: RecentActivityItem }> = ({ activity }) 
 
 const DashboardPage: React.FC = () => {
     const { user } = useAuthStore()
-    const isLogist = authService.isLogist(user)
-    const isCarrier = authService.isCarrier(user)
+    const isLogist = userIsLogist(user)
+    const isCarrier = userIsCarrier(user)
 
     // Fetch dashboard stats
     const { data: rfpStats, isLoading: statsLoading } = useQuery({
@@ -106,7 +107,7 @@ const DashboardPage: React.FC = () => {
                 page: 0,
                 size: 1 // We just need the total count
             })
-            return response.data
+            return response.page
         },
     })
 
@@ -141,7 +142,7 @@ const DashboardPage: React.FC = () => {
     const stats = [
         {
             name: 'Total RFPs',
-            value: rfpStats?.pagination.total || 0,
+            value: rfpStats?.totalElements || 0,
             icon: ClipboardDocumentListIcon,
             color: 'bg-blue-500',
             change: { value: '+12%', trend: 'up' as const }

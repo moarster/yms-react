@@ -1,4 +1,4 @@
-import { getEnvVar } from './index'
+import { getEnvVar } from  './env.utils'
 
 export const authConfig = {
     mode: (import.meta.env.VITE_AUTH_MODE || 'keycloak') as 'keycloak' | 'demo',

@@ -1,8 +1,7 @@
 import { merge } from 'allof-merge'
 
+import {apiClient} from '@/core/api'
 import { JsonSchema } from '@/types'
-
-import {apiClient} from '../core/api/client.ts'
 
 
 export interface TableConfig {

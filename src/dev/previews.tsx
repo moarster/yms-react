@@ -1,7 +1,7 @@
 import {ComponentPreview, Previews} from "@react-buddy/ide-toolbox";
 
-import {ReferenceDropdownBase} from "@/components/form/reference/ReferenceDropdownBase.tsx";
-import ShipmentRfpWizard from "@/components/wizards/ShipmentRfpWizard.tsx";
+import ShipmentRfpWizard from "@/features/documents/wizards/ShipmentRfpWizard.tsx";
+import {ReferenceDropdownBase} from "@/shared/form/reference/ReferenceDropdownBase.tsx";
 
 import {PaletteTree} from "./palette";
 

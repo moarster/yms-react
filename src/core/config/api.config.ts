@@ -1,4 +1,4 @@
-import { getEnvVar } from './index'
+import { getEnvVar } from  './env.utils'
 
 export const apiConfig = {
     baseURL: getEnvVar('VITE_API_BASE_URL', 'http://localhost:8080/api'),

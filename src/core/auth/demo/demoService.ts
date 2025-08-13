@@ -1,3 +1,5 @@
+import {useAuthStore} from "@/core/store/authStore.ts";
+
 import { AuthResponse, AuthService, AuthTokens, User } from '../types'
 import { demoUsers } from './demoUsers'
 
@@ -16,7 +18,7 @@ export class DemoAuthService implements AuthService {
         await new Promise(resolve => setTimeout(resolve, 500))
 
         const token = this.generateDemoToken(demoUser.user)
-
+        localStorage.setItem('auth-token', token)
         return {
             user: demoUser.user,
             tokens: {
@@ -27,12 +29,11 @@ export class DemoAuthService implements AuthService {
     }
 
     async logout(): Promise<void> {
-        // Just clear localStorage for demo mode
+        localStorage.removeItem('auth-token')
         localStorage.removeItem('auth-storage')
     }
 
     async refreshToken(): Promise<AuthTokens> {
-        // In demo mode, just generate new token
         const currentUser = this.getCurrentUserFromToken()
         const newToken = this.generateDemoToken(currentUser)
 
