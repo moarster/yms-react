@@ -1,44 +1,6 @@
-import Keycloak from 'keycloak-js'
+import { authConfig } from '../../config'
+import { User } from '../types'
 
-// Get environment variables
-const getEnvVar = (name: string, defaultValue?: string): string => {
-    const value = import.meta.env[name] || defaultValue
-    if (!value) {
-        throw new Error(`Environment variable ${name} is required`)
-    }
-    return value
-}
-
-// Keycloak configuration
-export const keycloakConfig = {
-    url: getEnvVar('VITE_KEYCLOAK_URL'),
-    realm: getEnvVar('VITE_KEYCLOAK_REALM'),
-    clientId: getEnvVar('VITE_KEYCLOAK_CLIENT_ID'),
-}
-
-// Initialize Keycloak instance
-export const keycloak = new Keycloak(keycloakConfig)
-
-// Keycloak init options
-export const keycloakInitOptions = {
-    onLoad: 'check-sso' as const,
-    silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-    checkLoginIframe: false,
-    pkceMethod: 'S256' as const,
-}
-
-// Auth mode configuration
-export const authConfig = {
-    mode: (import.meta.env.VITE_AUTH_MODE || 'keycloak') as 'keycloak' | 'demo',
-    isDemoMode: import.meta.env.VITE_AUTH_MODE === 'demo',
-    demoUsersEnabled: import.meta.env.VITE_DEMO_USERS_ENABLED === 'true',
-    demoSuperuser: {
-        email: import.meta.env.VITE_DEMO_SUPERUSER_EMAIL || 'admin@demo.com',
-        password: import.meta.env.VITE_DEMO_SUPERUSER_PASSWORD || 'admin123',
-    },
-}
-
-// Demo users for testing
 export const demoUsers = [
     {
         email: 'logist@demo.com',
@@ -70,7 +32,7 @@ export const demoUsers = [
                 ogrn: '1234567890123',
                 address: '123 Demo Street, Demo City',
             },
-        },
+        } satisfies User,
     },
     {
         email: 'carrier@demo.com',
@@ -97,7 +59,7 @@ export const demoUsers = [
                 ogrn: '3210987654321',
                 address: '456 Transport Ave, Carrier City',
             },
-        },
+        } satisfies User,
     },
     {
         email: authConfig.demoSuperuser.email,
@@ -111,23 +73,10 @@ export const demoUsers = [
                     id: 'role-admin',
                     name: 'ADMIN' as const,
                     permissions: [
-                        'DOCUMENT_CREATE',
-                        'DOCUMENT_READ',
-                        'DOCUMENT_UPDATE',
-                        'DOCUMENT_DELETE',
-                        'RFP_CREATE',
-                        'RFP_ASSIGN',
-                        'RFP_CANCEL',
-                        'RFP_COMPLETE',
-                        'RFP_SUBMIT_RATE',
-                        'CATALOG_CREATE',
-                        'CATALOG_READ',
-                        'CATALOG_UPDATE',
-                        'CATALOG_DELETE',
-                        'USER_CREATE',
-                        'USER_READ',
-                        'USER_UPDATE',
-                        'USER_DELETE',
+                        'DOCUMENT_CREATE', 'DOCUMENT_READ', 'DOCUMENT_UPDATE', 'DOCUMENT_DELETE',
+                        'RFP_CREATE', 'RFP_ASSIGN', 'RFP_CANCEL', 'RFP_COMPLETE', 'RFP_SUBMIT_RATE',
+                        'CATALOG_CREATE', 'CATALOG_READ', 'CATALOG_UPDATE', 'CATALOG_DELETE',
+                        'USER_CREATE', 'USER_READ', 'USER_UPDATE', 'USER_DELETE',
                     ],
                 },
             ],
@@ -138,6 +87,6 @@ export const demoUsers = [
                 ogrn: '1111111111111',
                 address: 'Admin HQ, Demo City',
             },
-        },
+        } satisfies User,
     },
-]
+] as const

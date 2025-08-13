@@ -1,15 +1,15 @@
-// src/components/auth/LoginPage.tsx
 import { CogIcon,EyeIcon, EyeSlashIcon, TruckIcon } from '@heroicons/react/24/outline'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
+import React, { useState} from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { authConfig, demoUsers } from '@/config/keycloak'
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
+import {demoUsers} from "@/core/auth/demo/demoUsers.ts";
+import {authConfig} from "@/core/config";
+import { useAuthStore } from '@/core/store/authStore.ts'
+import { useUiStore } from '@/core/store/uiStore.ts'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
 
 const loginSchema = z.object({
@@ -22,9 +22,9 @@ type LoginForm = z.infer<typeof loginSchema>
 const LoginPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [showModeSwitch, setShowModeSwitch] = useState(false)
-    const { login, isLoading, isDemoMode, switchToDemoMode, switchToKeycloakMode } = useAuthStore()
+    const { login, isLoading, switchMode, authMode} = useAuthStore()
     const { addNotification } = useUiStore()
-
+    const isDemoMode = authMode === 'demo'
     const {
         register,
         handleSubmit,
@@ -39,7 +39,6 @@ const LoginPage: React.FC = () => {
             if (isDemoMode) {
                 await login(data.email, data.password)
             } else {
-                // For Keycloak mode, redirect to Keycloak login
                 await login()
             }
 
@@ -75,10 +74,10 @@ const LoginPage: React.FC = () => {
 
     const handleModeSwitch = () => {
         if (isDemoMode) {
-            switchToKeycloakMode()
+            switchMode('keycloak')
             toast.success('Switched to Keycloak authentication')
         } else {
-            switchToDemoMode()
+            switchMode('demo')
             toast.success('Switched to demo mode')
         }
         setShowModeSwitch(false)

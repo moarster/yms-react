@@ -30,6 +30,7 @@ export interface JsonSchemaProperty {
     'x-table-sortable'?: boolean
     'x-table-filterable'?: boolean
     'x-table-editable'?: boolean
+    'x-table-readonly'?: boolean
     'x-table-hidden'?: boolean
     'x-cell-renderer'?: string
     'x-cell-editor'?: string

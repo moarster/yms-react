@@ -8,7 +8,7 @@ import {
 import clsx from 'clsx'
 import React from 'react'
 
-import { useUiStore } from '@/stores/uiStore'
+import { useUiStore } from '@/core/store/uiStore.ts'
 import { Notification } from '@/types'
 
 const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {

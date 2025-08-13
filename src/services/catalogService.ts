@@ -1,7 +1,7 @@
 import {Catalog, CatalogItem, ListItem, PaginatedResponse,SimpleList} from '@/types'
 import {WizardLists} from "@/types/wizard.ts";
 
-import {apiClient} from './apiClient'
+import {apiClient} from '../core/api/client.ts'
 
 export interface CatalogFilters {
     search?: string

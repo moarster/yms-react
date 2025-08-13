@@ -3,7 +3,7 @@ import {
     NumberCellEditor,
     SelectCellEditor,
     TextCellEditor,
-} from './cellEditors'
+} from './cellEditors.tsx'
 
 export const CELL_EDITORS = {
     select: SelectCellEditor,

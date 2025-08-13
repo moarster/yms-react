@@ -2,10 +2,10 @@ import {  useQuery} from '@tanstack/react-query'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
+import { useAuthStore } from '@/core/store/authStore.ts'
 import {useShipmentRfpMutations} from "@/pages/documents/hooks/useShipmentRfpMutations.ts";
 import {documentService} from "@/services/documentService.ts";
 import {schemaService} from "@/services/schemaService.ts";
-import { useAuthStore } from '@/stores/authStore'
 
 
 export const useShipmentRfpDetail = () => {

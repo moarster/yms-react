@@ -13,10 +13,10 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { authService } from '@/services/authService'
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
+import { authService } from '@/core/auth/authService.ts'
+import { useAuthStore } from '@/core/store/authStore.ts'
+import { useUiStore } from '@/core/store/uiStore.ts'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 import { User } from '@/types'
 
 

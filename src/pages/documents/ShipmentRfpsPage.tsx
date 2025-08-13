@@ -9,13 +9,13 @@ import clsx from 'clsx'
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
-import AutoTable from '@/components/ui/AutoTable/AutoTable.tsx'
-import ErrorMessage from '@/components/ui/ErrorMessage'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { authService } from '@/services/authService'
+import { authService } from '@/core/auth/authService.ts'
+import { useAuthStore } from '@/core/store/authStore.ts'
 import { documentService } from '@/services/documentService'
 import { schemaService } from '@/services/schemaService'
-import { useAuthStore } from '@/stores/authStore'
+import AutoTable from '@/shared/ui/AutoTable/AutoTable.tsx'
+import ErrorMessage from '@/shared/ui/ErrorMessage'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 import { DocumentStatus,ShipmentRfp } from '@/types'
 
 

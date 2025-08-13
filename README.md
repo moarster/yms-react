@@ -255,7 +255,7 @@ server: {
 
 ### Service Layer Architecture
 ```typescript
-// services/apiClient.ts - Base HTTP client
+// services/client.ts - Base HTTP client
 // services/authService.ts - Authentication operations
 // services/catalogService.ts - Catalog/list operations  
 // services/documentService.ts - Document operations

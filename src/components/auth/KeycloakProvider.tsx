@@ -1,9 +1,10 @@
 import { ReactKeycloakProvider } from '@react-keycloak/web'
 import React, {  useRef,useState } from 'react'
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { keycloak, keycloakInitOptions } from '@/config/keycloak'
-import { useAuthStore } from '@/stores/authStore'
+import {authServiceFactory} from "@/core/auth/authService.ts";
+import {keycloakInitOptions} from "@/core/config";
+import { useAuthStore } from '@/core/store/authStore.ts'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
 interface KeycloakProviderProps {
     children: React.ReactNode
@@ -11,10 +12,10 @@ interface KeycloakProviderProps {
 
 const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
     const [initError, _setInitError] = useState<string | null>(null)
-    const { /*setKeycloak, setLoading,*/ isDemoMode } = useAuthStore()
+    const {authMode } = useAuthStore()
     const initializingRef = useRef(false)
     // If in demo mode, just render children
-    if (isDemoMode) {
+    if (authMode === 'demo') {
         return <>{children}</>
     }
 
@@ -52,8 +53,8 @@ const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
             </div>
         </div>
     )
-
-    if (initError) {
+    const keycloak = authServiceFactory.getKeycloakService().getKeycloakInstance()
+    if (initError || !keycloak) {
         return <ErrorComponent />
     }
 

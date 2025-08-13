@@ -1,7 +1,7 @@
 import React from 'react'
 
 import {WorkflowTasksFooter} from "@/components/form/layout/WorkflowTasksFooter.tsx";
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 import { CommonFormProps } from '@/types/form'
 
 import { CustomSections } from './layout/CustomSections'

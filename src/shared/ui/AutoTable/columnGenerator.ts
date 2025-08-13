@@ -10,8 +10,8 @@ import React from "react";
 
 import { JsonSchema, JsonSchemaProperty } from '@/types'
 
-import { CELL_RENDERERS } from './cellRendererRegistry'
-import { TableActions, TableRow } from './types'
+import { CELL_RENDERERS } from './rendering/cellRendererRegistry.ts'
+import { TableActions, TableRow } from './types.ts'
 
 const getDefaultWidth = (property: JsonSchemaProperty): number => {
     switch (property.type) {
@@ -37,13 +37,34 @@ const getColumnConfig = (property: JsonSchemaProperty): Partial<GridColDef> => {
             if (property.format === 'date' || property.format === 'date-time') {
                 config.renderCell = (params) => React.createElement(CELL_RENDERERS.date, params)
                 config.type = 'date'
+                if (!property['x-table-readonly']) {
+                    config.renderEditCell = (params) => React.createElement(CELL_EDITORS.date, {
+                        value: params.value,
+                        onValueChange: params.api.setEditCellValue,
+                    })
+                }
             } else if (property.enum) {
                 config.renderCell = (params) => React.createElement(CELL_RENDERERS.status, params)
                 config.type = 'singleSelect'
                 config.valueOptions = property.enum
+                if (!property['x-table-readonly']) {
+                    config.renderEditCell = (params) => React.createElement(CELL_EDITORS.select, {
+                        value: params.value,
+                        onValueChange: (value) => params.api.setEditCellValue({ id: params.id, field: params.field, value }),
+                        enumValues: property.enum.map(val => ({ value: val, label: String(val) }))
+                    })
+                }
             } else {
                 config.renderCell = (params) => React.createElement(CELL_RENDERERS.text, params)
                 config.type = 'string'
+                if (!property['x-table-readonly']) {
+                    config.renderEditCell = (params) => React.createElement(CELL_EDITORS.text, {
+                        value: params.value,
+                        onValueChange: (value) => params.api.setEditCellValue({ id: params.id, field: params.field, value }),
+                        placeholder: property.title,
+                        maxLength: property.maxLength
+                    })
+                }
             }
             break
         case 'object':
@@ -63,6 +84,15 @@ const getColumnConfig = (property: JsonSchemaProperty): Partial<GridColDef> => {
         case 'integer':
             config.renderCell = (params) => React.createElement(CELL_RENDERERS.text, params)
             config.type = 'number'
+            if (!property['x-table-readonly']) {
+                config.renderEditCell = (params) => React.createElement(CELL_EDITORS.number, {
+                    value: params.value,
+                    onValueChange: (value) => params.api.setEditCellValue({ id: params.id, field: params.field, value }),
+                    min: property.minimum,
+                    max: property.maximum,
+                    step: property.type === 'integer' ? 1 : 0.01
+                })
+            }
             break
         default:
             config.renderCell = (params) => React.createElement(CELL_RENDERERS.text, params)

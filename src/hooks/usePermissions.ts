@@ -1,26 +1,33 @@
-import { authService } from '@/services/authService'
-import { useAuthStore } from '@/stores/authStore'
+import {
+    userHasAnyRole,
+    userHasPermission,
+    userHasRole, userIsAdmin,
+    userIsCarrier,
+    userIsLogist,
+    UserRole
+} from "@/core/auth/types.ts";
+import { useAuthStore } from '@/core/store/authStore.ts'
 
 export const usePermissions = () => {
     const { user } = useAuthStore()
 
-    const hasRole = (role: string) => {
-        return authService.hasRole(user, role)
+    const hasRole = (role: UserRole) => {
+        return  userHasRole(user, role)
     }
 
     const hasPermission = (permission: string) => {
-        return authService.hasPermission(user, permission)
+        return userHasPermission(user, permission)
     }
 
-    const hasAnyRole = (roles: string[]) => {
-        return roles.some(role => hasRole(role))
+    const hasAnyRole = (roles: UserRole[]) => {
+        return userHasAnyRole(user, roles)
     }
 
     const hasAnyPermission = (permissions: string[]) => {
         return permissions.some(permission => hasPermission(permission))
     }
 
-    const hasAllRoles = (roles: string[]) => {
+    const hasAllRoles = (roles: UserRole[]) => {
         return roles.every(role => hasRole(role))
     }
 
@@ -29,11 +36,15 @@ export const usePermissions = () => {
     }
 
     const isLogist = () => {
-        return authService.isLogist(user)
+        return userIsLogist(user)
     }
 
     const isCarrier = () => {
-        return authService.isCarrier(user)
+        return userIsCarrier(user)
+    }
+
+    const isAdmin = () => {
+        return userIsAdmin(user)
     }
 
     const canAccessResource = (resource: string, action: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE') => {
@@ -51,6 +62,7 @@ export const usePermissions = () => {
         hasAllPermissions,
         isLogist,
         isCarrier,
+        isAdmin,
         canAccessResource,
     }
 }

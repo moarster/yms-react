@@ -4,7 +4,7 @@ import React from 'react'
 
 import { BaseEntity } from '@/types'
 
-import { CellRendererProps } from './types'
+import { CellRendererProps } from '../types.ts'
 
 export const StatusCellRenderer: React.FC<CellRendererProps<string>> = ({ value }) => {
     if (!value) return null

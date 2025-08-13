@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SelectEditorProps } from './types'
+import { SelectEditorProps } from '../types.ts'
 
 export const SelectCellEditor: React.FC<SelectEditorProps> = ({
                                                                   value,

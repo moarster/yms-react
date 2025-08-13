@@ -7,7 +7,7 @@ import {
     UserTasks,
 } from '@/types'
 
-import { apiClient } from './apiClient'
+import { apiClient } from '../core/api/client.ts'
 
 export interface ShipmentRfpSearchParams extends PaginationParams {
     status?: DocumentStatus[]

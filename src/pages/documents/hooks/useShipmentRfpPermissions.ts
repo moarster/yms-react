@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { authService } from '@/services/authService'
+import { authService } from '@/core/auth/authService.ts'
 import type { ShipmentRfp, User } from '@/types'
 
 export const useShipmentRfpPermissions = (rfp: ShipmentRfp | null, user: User | null, isCreating: boolean) => {

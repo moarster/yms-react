@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { useUiStore } from '@/stores/uiStore'
+import { useUiStore } from '@/core/store/uiStore.ts'
+import NotificationCenter from '@/shared/ui/NotificationCenter'
 
-import NotificationCenter from '../ui/NotificationCenter'
 import Header from './Header'
 import Sidebar from './Sidebar'
 

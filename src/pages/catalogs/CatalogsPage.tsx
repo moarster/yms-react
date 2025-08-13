@@ -3,9 +3,9 @@ import {useQuery} from '@tanstack/react-query'
 import React from 'react'
 import {Link} from 'react-router-dom'
 
-import ErrorMessage from '@/components/ui/ErrorMessage'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {catalogService} from '@/services/catalogService'
+import ErrorMessage from '@/shared/ui/ErrorMessage'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 import {CatalogBase} from "@/types";
 
 interface CatalogCardProps {

@@ -7,8 +7,8 @@ import {
 import clsx from 'clsx'
 import React, { useState } from 'react'
 
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
+import { useAuthStore } from '@/core/store/authStore.ts'
+import { useUiStore } from '@/core/store/uiStore.ts'
 
 const Header: React.FC = () => {
     const { user, logout } = useAuthStore()

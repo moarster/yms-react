@@ -5,7 +5,7 @@ import {
     ReferenceCellRenderer,
     StatusCellRenderer,
     TextCellRenderer,
-} from './cellRenderers'
+} from './cellRenderers.tsx'
 
 export const CELL_RENDERERS = {
     status: StatusCellRenderer,

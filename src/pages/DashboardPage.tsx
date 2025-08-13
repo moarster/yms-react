@@ -9,10 +9,10 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { authService } from '@/services/authService'
+import { authService } from '@/core/auth/authService.ts'
+import { useAuthStore } from '@/core/store/authStore.ts'
 import { documentService } from '@/services/documentService'
-import { useAuthStore } from '@/stores/authStore'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
 interface StatsCardProps {
     name: string

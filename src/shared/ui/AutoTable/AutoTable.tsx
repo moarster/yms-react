@@ -2,12 +2,12 @@ import { Box, ThemeProvider } from '@mui/material'
 import { DataGrid, GridRowParams } from '@mui/x-data-grid'
 import  { useCallback, useMemo } from 'react'
 
-import DataGridErrorBoundary from '../DataGridErrorBoundary'
-import { generateColumns } from './columnGenerator'
-import { createOverlaySlots } from './overlayUtils'
-import { autoTableTheme, tableStyles } from './theme'
-import { AutoTableProps, TableRow } from './types'
-import { useTableState } from './useTableState'
+import DataGridErrorBoundary from '../DataGridErrorBoundary.tsx'
+import { generateColumns } from './columnGenerator.ts'
+import { useTableState } from './hooks/useTableState.ts'
+import { createOverlaySlots } from './overlayUtils.ts'
+import { autoTableTheme, tableStyles } from './theme.ts'
+import { AutoTableProps, TableRow } from './types.ts'
 
 const AutoTable = <TRow extends TableRow = TableRow>({
                                                          data,

@@ -9,9 +9,9 @@ import clsx from 'clsx'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
-import { authService } from '@/services/authService'
-import { useAuthStore } from '@/stores/authStore'
-import { useUiStore } from '@/stores/uiStore'
+import { authService } from '@/core/auth/authService.ts'
+import { useAuthStore } from '@/core/store/authStore.ts'
+import { useUiStore } from '@/core/store/uiStore.ts'
 
 
 interface NavigationItem {

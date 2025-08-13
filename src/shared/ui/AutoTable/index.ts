@@ -1,12 +1,12 @@
-export { default as AutoTable } from './AutoTable'
-export { CELL_EDITORS, type CellEditorType } from './cellEditorRegistry'
+export { default as AutoTable } from './AutoTable.tsx'
+export { CELL_EDITORS, type CellEditorType } from './editing/cellEditorRegistry.ts'
 export {
     DateCellEditor,
     NumberCellEditor,
     SelectCellEditor,
     TextCellEditor,
-} from './cellEditors'
-export { CELL_RENDERERS, type CellRendererType } from './cellRendererRegistry'
+} from './editing/cellEditors.tsx'
+export { CELL_RENDERERS, type CellRendererType } from './rendering/cellRendererRegistry.ts'
 export {
     ArrayCellRenderer,
     BooleanCellRenderer,
@@ -14,7 +14,7 @@ export {
     ReferenceCellRenderer,
     StatusCellRenderer,
     TextCellRenderer,
-} from './cellRenderers'
+} from './rendering/cellRenderers.tsx'
 export type {
     AutoTableConfig,
     AutoTableProps,
@@ -24,20 +24,20 @@ export type {
     TableActions,
     TableRow,
     TableSelection,
-} from './types'
+} from './types.ts'
 
 // Column generation
 export {
     generateColumns,
     generateSchemaBasedColumns,
     generateSchemalessColumns,
-} from './columnGenerator'
+} from './columnGenerator.ts'
 
 // Theme
-export { autoTableTheme, tableStyles } from './theme'
+export { autoTableTheme, tableStyles } from './theme.ts'
 
 // Overlays
-export { EmptyOverlay, LoadingOverlay } from './overlays'
+export { EmptyOverlay, LoadingOverlay } from './overlays.tsx'
 
 // Hooks
-export { useTableState } from './useTableState'
+export { useTableState } from './hooks/useTableState.ts'
