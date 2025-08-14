@@ -126,9 +126,9 @@ export const useAuthStore = create<AuthStore>()(
                         if (initialized && keycloakService.isAuthenticated()) {
                             const user = await keycloakService.getCurrentUser()
                             const tokens = await keycloakService.refreshToken()
-
+                            const authResponse = await keycloakService.getAuthResponse()
                             set({
-                                user,
+                                user: authResponse.user,
                                 token: tokens.accessToken,
                                 isAuthenticated: true,
                             })

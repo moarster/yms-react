@@ -13,7 +13,7 @@ import ShipmentRfpWizardPage from '@/features/documents/pages/ShipmentRfpWizardP
 import {usePermissions} from "@/hooks/usePermissions.ts";
 import AppLayout from '@/layout/AppLayout'
 import DashboardPage from '@/pages/DashboardPage'
-import LoginPage from '@/pages/LoginPage.tsx'
+import LoginPage from '@/pages/login/LoginPage.tsx'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfilePage from '@/pages/ProfilePage'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
@@ -30,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                                                            requiredRole,
                                                            requiredPermission
                                                        }) => {
-    const { isAuthenticated, authMode } = useAuthStore()
+    const { isAuthenticated, authMode,user } = useAuthStore()
     const {hasRole, hasPermission, isAdmin } = usePermissions()
 
     if (!isAuthenticated) {

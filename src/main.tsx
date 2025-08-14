@@ -10,7 +10,6 @@ import {ComponentPreviews, useInitial} from "@/dev";
 
 import App from './App'
 
-
 const queryClient = new QueryClient({
 
     defaultOptions: {
@@ -26,6 +25,8 @@ const queryClient = new QueryClient({
         },
     },
 })
+
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
    // <React.StrictMode>

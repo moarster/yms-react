@@ -1,5 +1,3 @@
-import {useAuthStore} from "@/core/store/authStore.ts";
-
 import { AuthResponse, AuthService, AuthTokens, User } from '../types'
 import { demoUsers } from './demoUsers'
 

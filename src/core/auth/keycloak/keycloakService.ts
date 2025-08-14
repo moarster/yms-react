@@ -1,10 +1,10 @@
 import Keycloak from 'keycloak-js'
 
-import { keycloakConfig } from '../../config'
-import { AuthResponse, AuthService, AuthTokens, User } from '../types'
+import {keycloakConfig} from '../../config'
+import {AuthResponse, AuthService, AuthTokens, User} from '../types'
 
 export class KeycloakAuthService implements AuthService {
-    private keycloak: Keycloak | null = null
+    private readonly keycloak: Keycloak | null = null
 
     constructor() {
         this.keycloak = new Keycloak(keycloakConfig)
@@ -26,6 +26,22 @@ export class KeycloakAuthService implements AuthService {
         }
     }
 
+    async getAuthResponse(): Promise<AuthResponse> {
+        if (!this.keycloak?.authenticated || !this.keycloak.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const user = await this.mapKeycloakUser(this.keycloak)
+
+        return {
+            user,
+            tokens: {
+                accessToken: this.keycloak.token,
+                refreshToken: this.keycloak.refreshToken,
+            },
+        }
+    }
+
     async login(): Promise<AuthResponse> {
         if (!this.keycloak) throw new Error('Keycloak not initialized')
 
@@ -37,7 +53,7 @@ export class KeycloakAuthService implements AuthService {
             if (!this.keycloak.authenticated || !this.keycloak.token) {
                 throw new Error('Authentication failed')
             }
-
+            console.log(this.keycloak.token)
             const user = await this.mapKeycloakUser(this.keycloak)
 
             return {
