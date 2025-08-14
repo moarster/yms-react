@@ -9,7 +9,7 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T extends BaseEntity> {
     content: T[]
-    page: PageInfo
+    page?: PageInfo
 }
 
 export interface PageInfo {

@@ -16,8 +16,6 @@ import {schemaService} from '@/services/schemaService.ts'
 import {AutoTable, TableRow} from '@/shared/ui/AutoTable'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx'
 import Modal from '@/shared/ui/Modal.tsx'
-//import { useAuthStore } from '@/stores/authStore'
-//import { useUiStore } from '@/stores/uiStore'
 import {CatalogItem} from "@/types";
 
 interface CatalogItemRow extends TableRow, CatalogItem {
@@ -89,7 +87,7 @@ const CatalogItemsPage: React.FC = () => {
             toast.success('Items deleted successfully')
         },
         onError: (error: Error) => {
-            toast.error(error.response?.data?.message || 'Failed to delete items')
+            toast.error(error.message || 'Failed to delete items')
         },
     })
 

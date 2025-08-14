@@ -1,4 +1,4 @@
-import Keycloak from 'keycloak-js'
+import Keycloak, {KeycloakTokenParsed} from 'keycloak-js'
 
 import {keycloakConfig} from '../../config'
 import {AuthResponse, AuthService, AuthTokens, Organization, Role, User, UserRole} from '../types'
@@ -185,29 +185,29 @@ export class KeycloakAuthService implements AuthService {
 
     private getRolePermissions(role: UserRole): string[] {
         const permissions: Record<UserRole, string[]> = {
-            ADMIN: ['*'],
-            LOGIST: [
+            ADMIN: [
                 'catalogs.view',
                 'catalogs.manage',
                 'shipment_rfps.view',
                 'shipment_rfps.create',
-                'shipment_rfps.edit',
-                'shipment_rfps.delete',
-                'shipment_rfps.publish',
-                'shipment_rfps.assign',
-                'shipment_rfps.complete',
+                'shipment_rfps.accept',
+            ],
+            LOGIST: [
+                'catalogs.view',
+                'shipment_rfps.view',
+                'shipment_rfps.create',
             ],
             CARRIER: [
                 'catalogs.view',
                 'shipment_rfps.view',
-                'shipment_rfps.respond',
+                'shipment_rfps.accept',
             ],
         }
 
         return permissions[role] || []
     }
 
-    private extractOrganization(tokenParsed: any): Organization | undefined {
+    private extractOrganization(tokenParsed: KeycloakTokenParsed): Organization | undefined {
         if (!tokenParsed.organization) return undefined
 
         return {

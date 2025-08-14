@@ -9,7 +9,7 @@ import clsx from 'clsx'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
-import { authService } from '@/core/auth/authService.ts'
+import { userHasRole, UserRole} from "@/core/auth/types.ts";
 import { useAuthStore } from '@/core/store/authStore.ts'
 import { useUiStore } from '@/core/store/uiStore.ts'
 
@@ -18,7 +18,7 @@ interface NavigationItem {
     name: string
     href: string
     icon: React.ComponentType<{ className?: string }>
-    requiredRole?: string
+    requiredRole?: UserRole
     badge?: string
 }
 
@@ -39,7 +39,7 @@ const Sidebar: React.FC = () => {
     const location = useLocation()
 
     const filteredNavigation = navigation.filter(item =>
-        !item.requiredRole || authService.hasRole(user, item.requiredRole)
+        !item.requiredRole || userHasRole(user, item.requiredRole)
     )
 
     return (
@@ -127,7 +127,7 @@ const Sidebar: React.FC = () => {
                                 {user.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">
-                                {user.roles.join(', ')}
+                                {user.roles.map(role => role.name).join(', ')}
                             </p>
                         </div>
                     </div>

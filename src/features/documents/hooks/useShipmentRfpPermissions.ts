@@ -1,30 +1,30 @@
 import { useMemo } from 'react'
 
-import { authService } from '@/core/auth/authService.ts'
-import type { ShipmentRfp, User } from '@/types'
+import {User, userHasRole} from "@/core/auth/types.ts";
+import type { ShipmentRfp } from '@/types'
 
-export const useShipmentRfpPermissions = (rfp: ShipmentRfp | null, user: User | null, isCreating: boolean) => {
+export const useShipmentRfpPermissions = (rfp: ShipmentRfp | null, user:    User | null, isCreating: boolean) => {
     const canEdit = useMemo(() => {
         if (!rfp || !user) return isCreating
-        if (authService.isDemoSuperuser(user)) return true
+        if (userHasRole(user, 'ADMIN') ) return true
 
         switch (rfp.status) {
             case 'DRAFT':
                 return rfp.createdBy === user.id
             case 'ASSIGNED':
-                return authService.hasRole(user, 'LOGIST') ||
-                    (authService.hasRole(user, 'CARRIER') && rfp?.data?._carrier?.id === user?.organization?.id)
+                return userHasRole(user, 'LOGIST') ||
+                    (userHasRole(user, 'CARRIER')  && rfp?.data?._carrier?.id === user?.organization?.id)
             default:
                 return false
         }
     }, [rfp, user, isCreating])
 
     const canPublish = useMemo(() => {
-        return rfp?.status === 'DRAFT' && authService.hasRole(user, 'LOGIST')
+        return rfp?.status === 'DRAFT' && userHasRole(user, 'LOGIST')
     }, [rfp, user])
 
     const canCancel = useMemo(() => {
-        return ['NEW', 'ASSIGNED'].includes(rfp?.status) && authService.hasRole(user, 'LOGIST')
+        return ['NEW', 'ASSIGNED'].includes(<string>rfp?.status) && userHasRole(user, 'LOGIST')
     }, [rfp, user])
 
     return { canEdit, canPublish, canCancel }

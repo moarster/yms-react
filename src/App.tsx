@@ -30,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                                                            requiredRole,
                                                            requiredPermission
                                                        }) => {
-    const { isAuthenticated, authMode,user } = useAuthStore()
+    const { isAuthenticated, authMode } = useAuthStore()
     const {hasRole, hasPermission, isAdmin } = usePermissions()
 
     if (!isAuthenticated) {
@@ -114,7 +114,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/catalogs"
                                     element={
-                                        <ProtectedRoute requiredPermission="CATALOG_READ">
+                                        <ProtectedRoute requiredPermission="catalogs.view">
                                             <CatalogsPage />
                                         </ProtectedRoute>
                                     }
@@ -123,7 +123,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/catalog/:catalogKey"
                                     element={
-                                        <ProtectedRoute requiredPermission="CATALOG_READ">
+                                        <ProtectedRoute requiredPermission="catalogs.view">
                                             <CatalogItemsPage />
                                         </ProtectedRoute>
                                     }
@@ -133,7 +133,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/list/:catalogKey"
                                     element={
-                                        <ProtectedRoute requiredPermission="CATALOG_READ">
+                                        <ProtectedRoute requiredPermission="catalogs.view">
                                             <CatalogItemsPage />
                                         </ProtectedRoute>
                                     }
@@ -143,7 +143,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/shipment-rfps"
                                     element={
-                                        <ProtectedRoute requiredPermission="DOCUMENT_READ">
+                                        <ProtectedRoute requiredPermission="shipment_rfps.view">
                                             <ShipmentRfpsPage />
                                         </ProtectedRoute>
                                     }
@@ -151,7 +151,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/shipment-rfps/new"
                                     element={
-                                        <ProtectedRoute requiredPermission="RFP_CREATE">
+                                        <ProtectedRoute requiredPermission="shipment_rfps.create">
                                             <ShipmentRfpWizardPage />
                                             {/*<MockWizard />*/}
                                         </ProtectedRoute>
@@ -160,7 +160,7 @@ const AppContent: React.FC = () => {
                                 <Route
                                     path="/shipment-rfps/:id"
                                     element={
-                                        <ProtectedRoute requiredPermission="DOCUMENT_READ">
+                                        <ProtectedRoute requiredPermission="shipment_rfps.view">
                                             <ShipmentRfpDetailPage />
                                         </ProtectedRoute>
                                     }

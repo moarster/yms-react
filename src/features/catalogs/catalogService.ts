@@ -1,7 +1,6 @@
-import {Catalog, CatalogItem, ListItem, PaginatedResponse,SimpleList} from '@/types'
+import {apiClient} from '@/core/api'
+import {Catalog, CatalogItem, ListItem, PaginatedResponse, SimpleList} from '@/types'
 import {WizardLists} from "@/types/wizard.ts";
-
-import {apiClient} from '../../core/api/client.ts'
 
 export interface CatalogFilters {
     search?: string
@@ -31,7 +30,7 @@ class CatalogService {
     }
 
     async getListInfo(catalogKey: string): Promise<SimpleList> {
-        return await apiClient.get<SimpleList>(`/lists/api/${catalogKey}/info`)
+        return await apiClient.get<SimpleList>(`/lists/${catalogKey}/info`)
     }
 
 
@@ -50,10 +49,9 @@ class CatalogService {
             filters.status.forEach(status => params.append('status', status))
         }
 
-        const response = await apiClient.getMany<CatalogItem>(
+        return await apiClient.getMany<CatalogItem>(
             `/reference/${catalogKey}?${params.toString()}`
         )
-        return response
     }
 
     // Get list items with filters
@@ -70,9 +68,11 @@ class CatalogService {
         if (filters?.sort) params.append('sort', filters.sort)
         if (filters?.direction) params.append('direction', filters.direction)
 
-        return await apiClient.getMany<ListItem>(
-            listType==='list'?`/lists/api/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`
+        
+        const response = await apiClient.getMany<ListItem>(
+            listType==='list'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`,false
         )
+        return  response
 
     }
 
