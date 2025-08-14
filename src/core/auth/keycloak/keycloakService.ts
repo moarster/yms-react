@@ -154,7 +154,7 @@ export class KeycloakAuthService implements AuthService {
         }
 
         const realmRoles = tokenParsed.realm_access?.roles || []
-        const resourceRoles = tokenParsed.resource_access?.['carrier-portal']?.roles || []
+        const resourceRoles = tokenParsed.resource_access?.['carrier-portal-frontend']?.roles || []
 
         return {
             id: tokenParsed.sub || '',
