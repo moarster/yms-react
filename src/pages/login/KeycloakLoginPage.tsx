@@ -1,26 +1,23 @@
 import React from 'react'
 
-import { useAuthStore } from '@/core/store/authStore.ts'
+import {authServiceFactory} from "@/core/auth/authService.ts";
 import { useUiStore } from '@/core/store/uiStore.ts'
 import BaseLoginLayout from "@/layout/BaseLoginLayout.tsx";
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
 
 const KeycloakLoginPage: React.FC = () => {
-    const { login, isLoading } = useAuthStore()
     const { addNotification } = useUiStore()
-
+    const [isLoading, setIsLoading] = React.useState(false)
     const handleKeycloakLogin = async () => {
         try {
-            await login()
+            setIsLoading(true)
+            const keycloakService = authServiceFactory.getKeycloakService()
 
-            addNotification({
-                type: 'success',
-                title: 'Welcome back!',
-                message: 'You have successfully logged in.',
-            })
+            await keycloakService.login()
         } catch (error: unknown) {
-            const message = error?.message || 'Keycloak login failed. Please try again.'
+            setIsLoading(false)
+            const message = error instanceof Error ? error.message : 'Keycloak login failed. Please try again.'
             addNotification({
                 type: 'error',
                 title: 'Login Failed',

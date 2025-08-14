@@ -1,27 +1,33 @@
+
 import { ReactKeycloakProvider } from '@react-keycloak/web'
-import React, {  useRef,useState } from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 
 import {authServiceFactory} from "@/core/auth/authService.ts";
 import {keycloakInitOptions} from "@/core/config";
 import { useAuthStore } from '@/core/store/authStore.ts'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx'
 
-interface KeycloakProviderProps {
-    children: React.ReactNode
-}
+const KeycloakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [initError, setInitError] = useState<string | null>(null)
+    const [isInitializing, setIsInitializing] = useState(true)
+    const {authMode,initialize } = useAuthStore()
+    const hasInitializedStore = useRef(false)
+    const keycloakRef = useRef(authServiceFactory.getKeycloakService().getKeycloakInstance())
+    useEffect(() => {
+        if (!hasInitializedStore.current && authMode === 'keycloak') {
+            hasInitializedStore.current = true
+            // Small delay to ensure ReactKeycloakProvider initialization completes
+            setTimeout(() => {
+                initialize().finally(() => {
+                    setIsInitializing(false)
+                })
+            }, 100)
+        }
+    }, [authMode, initialize])
 
-const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
-    const [initError, _setInitError] = useState<string | null>(null)
-    const {authMode } = useAuthStore()
-    const initializingRef = useRef(false)
     // If in demo mode, just render children
     if (authMode === 'demo') {
         return <>{children}</>
-    }
-
-    const initOptions = {
-        ...keycloakInitOptions,
-        onLoad: initializingRef.current ? undefined : keycloakInitOptions.onLoad
     }
 
 
@@ -53,30 +59,60 @@ const KeycloakProvider: React.FC<KeycloakProviderProps> = ({ children }) => {
             </div>
         </div>
     )
-    const keycloak = authServiceFactory.getKeycloakService().getKeycloakInstance()
-    if (initError || !keycloak) {
+
+    if (initError || !keycloakRef.current) {
         return <ErrorComponent />
     }
 
     return (
         <ReactKeycloakProvider
+            authClient={keycloakRef.current}
+            initOptions={keycloakInitOptions}
+            onEvent={async (event, _error) => {
+                console.log('Keycloak event:', event, _error)
 
-            authClient={keycloak}
-            initOptions={initOptions}
-            onEvent={(event, _error) => {
-                if (event === 'onAuthSuccess' || event === 'onAuthError') {
-                    initializingRef.current = true
+                if (event === 'onAuthSuccess') {
+                    console.log('Authentication successful')
+                    if (!hasInitializedStore.current) {
+                        hasInitializedStore.current = true
+                        try {
+                            await initialize()
+                        } finally {
+                            setIsInitializing(false)
+                        }
+                    }
+                }
+                if (event === 'onAuthError') {
+                    console.error('Keycloak auth error:', _error)
+                    setInitError(_error?.error || 'Authentication failed')
+                    setIsInitializing(false)
+                }
+                if (event === 'onReady') {
+                    if (!hasInitializedStore.current) {
+                        hasInitializedStore.current = true
+                        try {
+                            await initialize()
+                        } finally {
+                            setIsInitializing(false)
+                        }
+                    } else {
+                        setIsInitializing(false)
+                    }
+                }
+                if (event === 'onInitError') {
+                    console.error('Keycloak init error:', _error)
+                    setInitError(_error?.error || 'Initialization failed')
+                    setIsInitializing(false)
                 }
             }}
-            onTokens={(_tokens) => {
-                //console.log('Keycloak tokens updated:', tokens)
+            onTokens={(tokens) => {
+                // Update token in store when Keycloak refreshes it
+                if (tokens?.token) {
+                    useAuthStore.getState().setToken(tokens.token)
+                }
             }}
-
-            //onInitSuccess={handleKeycloakInit}
-            //onInitError={handleKeycloakInitError}
         >
-            {children}
-            <LoadingComponent/>
+            {isInitializing ? <LoadingComponent /> : children}
         </ReactKeycloakProvider>
     )
 }

@@ -47,14 +47,18 @@ export const useAuthStore = create<AuthStore>()(
             login: async (email?: string, password?: string) => {
                 set({ isLoading: true })
                 try {
-                    const response = await authService.login(email, password)
-
-                    set({
-                        user: response.user,
-                        token: response.tokens.accessToken,
-                        isAuthenticated: true,
-                        isLoading: false,
-                    })
+                    if (get().authMode === 'keycloak') {
+                        await authService.login(email, password)
+                    } else {
+                        // For demo mode, handle the response normally
+                        const response = await authService.login(email, password)
+                        set({
+                            user: response.user,
+                            token: response.tokens.accessToken,
+                            isAuthenticated: true,
+                            isLoading: false,
+                        })
+                    }
                 } catch (error) {
                     set({ isLoading: false })
                     throw error
@@ -124,12 +128,10 @@ export const useAuthStore = create<AuthStore>()(
                         const initialized = await keycloakService.initialize()
 
                         if (initialized && keycloakService.isAuthenticated()) {
-                            const user = await keycloakService.getCurrentUser()
-                            const tokens = await keycloakService.refreshToken()
                             const authResponse = await keycloakService.getAuthResponse()
                             set({
                                 user: authResponse.user,
-                                token: tokens.accessToken,
+                                token: authResponse.tokens.accessToken,
                                 isAuthenticated: true,
                             })
                         }
@@ -139,7 +141,6 @@ export const useAuthStore = create<AuthStore>()(
                     }
                 } catch (error) {
                     console.error('Auth initialization failed:', error)
-                    get().logout()
                 } finally {
                     set({ isLoading: false })
                 }

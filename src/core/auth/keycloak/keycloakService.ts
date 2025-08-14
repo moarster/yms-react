@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js'
 
 import {keycloakConfig} from '../../config'
-import {AuthResponse, AuthService, AuthTokens, User} from '../types'
+import {AuthResponse, AuthService, AuthTokens, Organization, Role, User, UserRole} from '../types'
 
 export class KeycloakAuthService implements AuthService {
     private readonly keycloak: Keycloak | null = null
@@ -14,6 +14,11 @@ export class KeycloakAuthService implements AuthService {
         if (!this.keycloak) return false
 
         try {
+            if (this.keycloak.authenticated !== undefined) {
+                return this.keycloak.authenticated
+            }
+
+            // This path is for standalone usage without ReactKeycloakProvider
             return await this.keycloak.init({
                 onLoad: 'check-sso',
                 silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
@@ -21,6 +26,10 @@ export class KeycloakAuthService implements AuthService {
                 pkceMethod: 'S256',
             })
         } catch (error) {
+            if (error instanceof Error && error.message.includes('can only be initialized once')) {
+                return this.keycloak.authenticated ?? false
+            }
+
             console.error('Keycloak initialization failed:', error)
             return false
         }
@@ -29,6 +38,10 @@ export class KeycloakAuthService implements AuthService {
     async getAuthResponse(): Promise<AuthResponse> {
         if (!this.keycloak?.authenticated || !this.keycloak.token) {
             throw new Error('Not authenticated')
+        }
+
+        if (!this.keycloak.profile) {
+            await this.keycloak.loadUserProfile()
         }
 
         const user = await this.mapKeycloakUser(this.keycloak)
@@ -45,28 +58,11 @@ export class KeycloakAuthService implements AuthService {
     async login(): Promise<AuthResponse> {
         if (!this.keycloak) throw new Error('Keycloak not initialized')
 
-        try {
-            await this.keycloak.login({
-                redirectUri: window.location.origin,
-            })
+        await this.keycloak.login({
+            redirectUri: window.location.origin,
+        })
 
-            if (!this.keycloak.authenticated || !this.keycloak.token) {
-                throw new Error('Authentication failed')
-            }
-            console.log(this.keycloak.token)
-            const user = await this.mapKeycloakUser(this.keycloak)
-
-            return {
-                user,
-                tokens: {
-                    accessToken: this.keycloak.token,
-                    refreshToken: this.keycloak.refreshToken,
-                },
-            }
-        } catch (error) {
-            console.error('Keycloak login error:', error)
-            throw error
-        }
+        return {} as AuthResponse
     }
 
     async logout(): Promise<void> {
@@ -158,47 +154,70 @@ export class KeycloakAuthService implements AuthService {
         }
 
         const realmRoles = tokenParsed.realm_access?.roles || []
-        const resourceRoles = tokenParsed.resource_access?.[keycloakConfig.clientId]?.roles || []
-        const allRoles = [...realmRoles, ...resourceRoles]
-
-        const roles = allRoles
-            .filter((role): role is 'LOGIST' | 'CARRIER' | 'ADMIN' =>
-                ['LOGIST', 'CARRIER', 'ADMIN'].includes(role.toUpperCase())
-            )
-            .map(role => ({
-                id: `role-${role.toLowerCase()}`,
-                name: role.toUpperCase() as 'LOGIST' | 'CARRIER' | 'ADMIN',
-                permissions: this.getPermissionsForRole(role),
-            }))
+        const resourceRoles = tokenParsed.resource_access?.['carrier-portal']?.roles || []
 
         return {
-            id: profile.id!,
-            email: profile.email!,
+            id: tokenParsed.sub || '',
+            email: profile.email || '',
             name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim(),
-            roles,
-            keycloakId: profile.id,
-            preferredUsername: profile.username,
+            preferredUsername: tokenParsed.preferred_username,
+            keycloakId: tokenParsed.sub,
+            roles: this.mapRoles([...realmRoles, ...resourceRoles]),
+            organization: this.extractOrganization(tokenParsed),
         }
     }
 
-    private getPermissionsForRole(role: string): string[] {
-        const rolePermissions: Record<string, string[]> = {
+    private mapRoles(keycloakRoles: string[]): Role[] {
+        const roleMapping: Record<string, UserRole> = {
+            'logist': 'LOGIST',
+            'carrier': 'CARRIER',
+            'admin': 'ADMIN',
+        }
+
+        return keycloakRoles
+            .filter(role => roleMapping[role.toLowerCase()])
+            .map(role => ({
+                id: role,
+                name: roleMapping[role.toLowerCase()],
+                permissions: this.getRolePermissions(roleMapping[role.toLowerCase()]),
+            }))
+    }
+
+    private getRolePermissions(role: UserRole): string[] {
+        const permissions: Record<UserRole, string[]> = {
+            ADMIN: ['*'],
             LOGIST: [
-                'DOCUMENT_CREATE', 'DOCUMENT_READ', 'DOCUMENT_UPDATE',
-                'RFP_CREATE', 'RFP_ASSIGN', 'RFP_CANCEL', 'RFP_COMPLETE',
-                'CATALOG_READ',
+                'catalogs.view',
+                'catalogs.manage',
+                'shipment_rfps.view',
+                'shipment_rfps.create',
+                'shipment_rfps.edit',
+                'shipment_rfps.delete',
+                'shipment_rfps.publish',
+                'shipment_rfps.assign',
+                'shipment_rfps.complete',
             ],
             CARRIER: [
-                'DOCUMENT_READ', 'RFP_SUBMIT_RATE', 'CATALOG_READ',
-            ],
-            ADMIN: [
-                'DOCUMENT_CREATE', 'DOCUMENT_READ', 'DOCUMENT_UPDATE', 'DOCUMENT_DELETE',
-                'RFP_CREATE', 'RFP_ASSIGN', 'RFP_CANCEL', 'RFP_COMPLETE', 'RFP_SUBMIT_RATE',
-                'CATALOG_CREATE', 'CATALOG_READ', 'CATALOG_UPDATE', 'CATALOG_DELETE',
-                'USER_CREATE', 'USER_READ', 'USER_UPDATE', 'USER_DELETE',
+                'catalogs.view',
+                'shipment_rfps.view',
+                'shipment_rfps.respond',
             ],
         }
 
-        return rolePermissions[role.toUpperCase()] || []
+        return permissions[role] || []
+    }
+
+    private extractOrganization(tokenParsed: any): Organization | undefined {
+        if (!tokenParsed.organization) return undefined
+
+        return {
+            id: tokenParsed.organization.id || '',
+            name: tokenParsed.organization.name || '',
+            inn: tokenParsed.organization.inn || '',
+            ogrn: tokenParsed.organization.ogrn || '',
+            address: tokenParsed.organization.address || '',
+            phone: tokenParsed.organization.phone,
+            email: tokenParsed.organization.email,
+        }
     }
 }
