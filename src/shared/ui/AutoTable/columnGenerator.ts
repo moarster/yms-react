@@ -254,7 +254,7 @@ export const generateColumns = <TRow extends TableRow>(
         return generateSchemaBasedColumns(schema.properties, actions, enableActions)
     }
 
-    // Handle allOf schemas
+    // Handle allOf types
     if (schema?.allOf?.[0]?.properties) {
         return generateSchemaBasedColumns(schema.allOf[0].properties, actions, enableActions)
     }

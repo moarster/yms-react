@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
-import { BaseEntity, PaginatedResponse } from '@/types'
+import { BaseEntity } from '@/types'
 
 import { apiConfig } from '../config'
+import {PaginatedResponse} from "./api.types.ts";
 import { ApiInterceptors, TokenProvider } from './interceptors'
 
 export class Client {

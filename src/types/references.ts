@@ -28,7 +28,6 @@ export interface Attachment {
     minio_key?: string
 }
 
-// Type guards
 export const isListLink = (link: BaseLink): link is ListLink =>
     link.domain === 'lists' && link.entity === 'item'
 

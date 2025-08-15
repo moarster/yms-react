@@ -9,15 +9,15 @@ import clsx from 'clsx'
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
-import { authService } from '@/core/auth/authService.ts'
 import {userIsCarrier, userIsLogist} from "@/core/auth/types.ts";
 import { useAuthStore } from '@/core/store/authStore.ts'
 import { documentService } from '@/features/documents/documentService.ts'
+import {ShipmentRfp} from "@/features/documents/types/shipment-rfp.ts";
 import { schemaService } from '@/services/schemaService.ts'
 import AutoTable from '@/shared/ui/AutoTable/AutoTable.tsx'
 import ErrorMessage from '@/shared/ui/ErrorMessage.tsx'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx'
-import { DocumentStatus,ShipmentRfp } from '@/types'
+import { DocumentStatus } from '@/types'
 
 
 interface StatusFilterProps {

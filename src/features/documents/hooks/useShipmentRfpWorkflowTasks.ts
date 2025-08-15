@@ -5,7 +5,7 @@ import {
     XCircleIcon} from '@heroicons/react/24/outline'
 import { useMemo } from 'react'
 
-import {ShipmentRfp} from "@/types";
+import {ShipmentRfp} from "@/features/documents/types/shipment-rfp.ts";
 import { WorkflowTask } from '@/types/form.ts'
 import { DocumentStatus } from '@/types/workflow.ts'
 

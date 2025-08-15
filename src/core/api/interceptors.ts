@@ -1,7 +1,8 @@
 import { AxiosError,AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import toast from "react-hot-toast"
 
-import {ApiError} from "@/types";
+import {ApiError} from "./api.types.ts";
+
 
 
 export interface TokenProvider {

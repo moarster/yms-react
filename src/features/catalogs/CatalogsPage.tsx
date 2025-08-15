@@ -6,7 +6,8 @@ import {Link} from 'react-router-dom'
 import {catalogService} from '@/features/catalogs/catalogService.ts'
 import ErrorMessage from '@/shared/ui/ErrorMessage.tsx'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx'
-import {CatalogBase} from "@/types";
+
+import {CatalogBase} from "./catalog.types.ts";
 
 interface CatalogCardProps {
     catalog: CatalogBase
@@ -65,7 +66,6 @@ const CatalogsPage: React.FC = () => {
     })
     // Combined loading state
     const isLoading = catalogsLoading || listsLoading
-    // Combined error state (you can handle each error separately if needed)
     const error = catalogsError || listsError
 
     if (isLoading) {

@@ -1,6 +1,8 @@
 import React from "react";
 
-import {BaseEntity, CatalogItem, ShipmentRfpData} from '@/types'
+import {CatalogItem} from "@/features/catalogs/catalog.types.ts";
+import {ShipmentRfpData} from "@/features/documents/types/shipment-rfp.ts";
+import {BaseEntity} from '@/types'
 
 export interface WizardStep {
     id: string

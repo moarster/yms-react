@@ -1,4 +1,4 @@
-import { BaseEntity } from './base'
+import { BaseEntity } from '@/types'
 
 export interface ApiResponse<T> {
     body: T
@@ -61,7 +61,6 @@ export interface SearchParams extends PaginationParams {
 export type SuccessResponse<T> = ApiResponse<T> & { success: true }
 export type ErrorResponse = ApiResponse<never> & { success: false; message: string }
 
-// Type guard for API responses
 export const isApiError = (response: unknown): response is ApiError =>
     typeof response === 'object' &&
     response !== null &&

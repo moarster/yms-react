@@ -1,13 +1,10 @@
+import {apiClient, PaginatedResponse, PaginationParams} from '@/core/api'
+import {ShipmentRfp, ShipmentRfpData} from "@/features/documents/types/shipment-rfp.ts";
 import {
     DocumentStatus, DomainEntity,
-    PaginatedResponse, PaginationParams,
-    ShipmentRfp,
-    ShipmentRfpData,
     UserTask,
     UserTasks,
 } from '@/types'
-
-import { apiClient } from '../../core/api/client.ts'
 
 export interface ShipmentRfpSearchParams extends PaginationParams {
     status?: DocumentStatus[]

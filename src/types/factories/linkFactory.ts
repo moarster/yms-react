@@ -1,6 +1,4 @@
 import { ListLink, ReferenceLink } from '@/types'
-// Import types
-import { Cargo, RoutePoint, ShipmentRfpData } from '@/types/schemas/shipment-rfp'
 
 export const createListLink = <TCatalog extends string>(catalog: TCatalog): ListLink<TCatalog> => ({
     domain: 'lists',
@@ -39,32 +37,3 @@ export const LinkFactories = {
 } as const
 
 
-export const createRoutePoint = (): RoutePoint => ({
-    address: '',
-    contactPhone: '',
-    arrival: '',
-    departure: '',
-    _counterParty: LinkFactories.counterParty(),
-    _cargoHandlingType: LinkFactories.cargoHandlingType(),
-    cargoList: [createCargo()]
-})
-
-export const createCargo = (): Cargo => ({
-    number: '',
-    cargoWeight: 0,
-    cargoVolume: 0,
-    _cargoNature: LinkFactories.cargoNature()
-})
-
-export const createShipmentRfpData = (): Partial<ShipmentRfpData> => ({
-    _shipmentType: LinkFactories.shipmentType(),
-    _transportationType: LinkFactories.transportationType(),
-    _currency: LinkFactories.currency(),
-    express: false,
-    route: [createRoutePoint()],
-    _requiredVehicleType: LinkFactories.vehicleType(),
-    customRequirements: '',
-    comment: '',
-    innerComment: '',
-    attachments: []
-})

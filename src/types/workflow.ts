@@ -1,4 +1,4 @@
-export type DocumentStatus = 'NEW' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED' | 'PUBLISHED'
+export type DocumentStatus = 'NEW' | `DRAFT` | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED' | 'PUBLISHED' | 'CLOSED'
 
 export interface UserTask {
     name: string
@@ -17,9 +17,11 @@ export interface UserTasks {
 export const getStatusColor = (status: DocumentStatus): string => {
     switch (status) {
         case 'NEW': return 'gray'
+        case 'DRAFT': return 'gray'
         case 'ASSIGNED': return 'blue'
         case 'COMPLETED': return 'green'
         case 'CANCELLED': return 'red'
+        case 'CLOSED': return 'green'
         default: return 'gray'
     }
 }

@@ -3,8 +3,7 @@ import { BaseEntity, DataEntity, DomainEntity, MetadataEntity } from './base'
 export const isBaseEntity = (obj: unknown): obj is BaseEntity =>
     typeof obj === 'object' &&
     obj !== null &&
-    'title' in obj &&
-    typeof (obj as BaseEntity).title === 'string'
+    'title' in obj
 
 export const isDataEntity = (obj: unknown): obj is DataEntity =>
     isBaseEntity(obj) && 'data' in obj

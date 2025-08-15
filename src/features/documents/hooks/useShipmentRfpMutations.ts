@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
 import { documentService } from '@/features/documents/documentService.ts'
-import { ShipmentRfp, ShipmentRfpData } from '@/types'
+import {ShipmentRfp, ShipmentRfpData} from "@/features/documents/types/shipment-rfp.ts";
 
 export const useShipmentRfpMutations = () => {
     const queryClient = useQueryClient()

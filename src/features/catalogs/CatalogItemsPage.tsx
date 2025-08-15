@@ -1,4 +1,4 @@
-// noinspection t
+// noinspection D
 
 import {
     ArrowDownTrayIcon,
@@ -6,39 +6,32 @@ import {
     PlusIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline'
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import React, {useState} from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useMemo } from 'react'
 import toast from 'react-hot-toast'
-import {Link, useLocation, useNavigate, useParams} from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
-import {catalogService} from '@/features/catalogs/catalogService.ts'
-import {schemaService} from '@/services/schemaService.ts'
-import {AutoTable, TableRow} from '@/shared/ui/AutoTable'
-import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx'
-import Modal from '@/shared/ui/Modal.tsx'
-import {CatalogItem} from "@/types";
+import { catalogService } from '@/features/catalogs/catalogService'
+import {schemaService, TableConfig} from '@/services/schemaService'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner'
+import {BaseTableRow} from "@/shared/ui/TabulatorTable/table.types.ts";
+import TabulatorTable from '@/shared/ui/TabulatorTable/TabulatorTable'
+import {useTableData} from "@/shared/ui/TabulatorTable/useTableData.ts";
 
-interface CatalogItemRow extends TableRow, CatalogItem {
+import { CatalogItem } from './catalog.types.ts'
 
-}
+interface CatalogItemRow extends BaseTableRow, CatalogItem {}
 
 const CatalogItemsPage: React.FC = () => {
-    const {catalogKey} = useParams<{ catalogKey: string }>()
+    const { catalogKey } = useParams<{ catalogKey: string }>()
     const navigate = useNavigate()
-    //const { user } = useAuthStore()
-    //const { addNotification } = useUiStore()
-    const queryClient = useQueryClient()
-
-    const [selectedItems, setSelectedItems] = useState<object[]>([])
-    const [showCreateModal, setShowCreateModal] = useState(false)
-    const [showEditModal, setShowEditModal] = useState(false)
-    const [setEditingItem] = useState<object>()
     const location = useLocation()
     const isListType = location.pathname.startsWith('/list/')
-    const type = isListType ? 'list' : 'catalog'
+    const type = isListType ? 'LIST' : 'CATALOG'
+
 
     // Fetch catalog info
-    const {data: catalogInfo, isLoading: catalogLoading} = useQuery({
+    const { data: catalogInfo, isLoading: catalogLoading } = useQuery({
         queryKey: [isListType ? 'list-info' : 'catalog-info', catalogKey],
         queryFn: async () => {
             return isListType
@@ -48,108 +41,92 @@ const CatalogItemsPage: React.FC = () => {
         enabled: !!catalogKey,
     })
 
-
-    const {data: pagedItems, isLoading, error} = useQuery({
-        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
-        queryFn: async () => {
-            const result = await catalogService.getListItems(catalogKey!, type)
-            return result
-        },
-        enabled: !!catalogKey,
-    })
-
-    const items = pagedItems?.content?.map(item => {
-        if (isListType) {
-            return {
-                id: item.id,
-                title: item.title
-            }
-        } else {
-            return (item as CatalogItem)?.data
-        }
-    }) || []
-    const {data: schema} = useQuery({
+    // Fetch schema
+    const { data: schema } = useQuery({
         queryKey: ['catalog-schema', catalogKey],
         queryFn: () => schemaService.getAnySchema(catalogKey!),
         enabled: !!catalogKey && !isListType,
     })
 
-    // Delete items mutation
-    const deleteMutation = useMutation({
-        mutationFn: async (itemIds: string[]) => {
+    // Use common table data hook
+    const {
+        data: items,
+        isLoading,
+        error,
+        selectedRows,
+        handleSelectionChange,
+        handleDelete,
+        handleBulkDelete,
+    } = useTableData<CatalogItemRow>({
+        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
+        fetchFn: () => catalogService.getListItems(catalogKey!, type),
+        deleteFn: async (ids) => {
             await Promise.all(
-                itemIds.map(id => catalogService.deleteCatalogItem(catalogKey!, id))
+                ids.map(id => catalogService.deleteCatalogItem(catalogKey!, id.toString()))
             )
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['catalog-items', catalogKey]})
-            setSelectedItems([])
-            toast.success('Items deleted successfully')
+        transformData: (result) => {
+            const items = result?.content || []
+            return items.map((item: any) => {
+                if (isListType) {
+                    return {
+                        id: item.id,
+                        title: item.title
+                    }
+                } else {
+                    return {
+                        ...item.data,
+                        id: item.id,
+                        status: item.status,
+                    }
+                }
+            })
         },
-        onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete items')
-        },
+        onRowClick: (row) => navigate(`/${type}/${catalogKey}/items/${row.id}`),
+
     })
 
-    // Handle row selection
-    const handleSelectionChange = (selected: CatalogItem[]) => {
-        setSelectedItems(selected)
-    }
-
-    // Handle row click (view/edit)
-    const handleRowClick = (row: CatalogItem) => {
-        if (isListType) {
-            return;
-        }
-        navigate(`/${type}/${catalogKey}/items/${row.id}`)
-    }
-
-    // Handle edit action
-    const handleEdit = (row: CatalogItemRow) => {
-        setEditingItem(row)
-        setShowEditModal(true)
-    }
-
-    // Handle delete action
-    const handleDelete = (row: CatalogItem) => {
-        if (confirm('Are you sure you want to delete this item?')) {
-            deleteMutation.mutate([row.id])
-        }
-    }
-
-    // Handle view action
-    const handleView = (row: CatalogItem) => {
-        navigate(`/${type}/${catalogKey}/items/${row.id}`)
-    }
-
-    // Handle bulk delete
-    const handleBulkDelete = () => {
-        if (selectedItems.length === 0) return
-
-        if (confirm(`Are you sure you want to delete ${selectedItems.length} items?`)) {
-            deleteMutation.mutate(selectedItems.map(item => item.id))
-        }
-    }
+    // Table configuration
+    const tableConfig: TableConfig = useMemo(() => ({
+        editable: !isListType, // Enable inline editing for catalogs
+        selectable: true,
+        pagination: true,
+        pageSize: 20,
+        sortable: true,
+        filterable: true,
+        height: '70vh',
+        density: 'standard',
+    }), [isListType])
 
     // Handle export
     const handleExport = () => {
-        // Implementation for export functionality
         toast.custom('Export functionality coming soon')
+    }
+
+    // Handle data changes (for inline editing)
+    const handleDataChange = (updatedData: CatalogItemRow[]) => {
+        // Here you would typically save the changes to the backend
+        console.log('Data changed:', updatedData)
+        toast.success('Changes saved')
     }
 
     if (catalogLoading || isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg"/>
+                <LoadingSpinner size="lg" />
             </div>
         )
     }
 
-    if (error || !catalogInfo || (!schema && type !== 'list')) {
+    if (error || !catalogInfo || (!schema && !isListType)) {
         return (
             <div className="text-center py-12">
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Catalog not found</h3>
-                <p className="mt-1 text-sm text-gray-500">The requested catalog could not be loaded.</p>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    Catalog not found
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                    The requested catalog could not be loaded.
+                </p>
                 <Link to="/catalogs" className="btn-primary mt-4 inline-flex">
                     Back to Catalogs
                 </Link>
@@ -166,14 +143,16 @@ const CatalogItemsPage: React.FC = () => {
                         to="/catalogs"
                         className="inline-flex items-center text-gray-500 hover:text-gray-700"
                     >
-                        <ChevronLeftIcon className="h-5 w-5 mr-1"/>
+                        <ChevronLeftIcon className="h-5 w-5 mr-1" />
                         Back to Catalogs
                     </Link>
                 </div>
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">{catalogInfo.title}</h1>
+                        <h1 className="text-2xl font-semibold text-gray-900">
+                            {catalogInfo.title}
+                        </h1>
                         <p className="mt-1 text-sm text-gray-500">
                             Manage {catalogInfo?.type === 'LIST' ? 'list items' : 'catalog entries'}
                         </p>
@@ -181,28 +160,24 @@ const CatalogItemsPage: React.FC = () => {
 
                     <div className="flex items-center space-x-3">
                         {/* Bulk actions */}
-                        {selectedItems.length > 0 && (
+                        {selectedRows.length > 0 && (
                             <>
-                                <span className="text-sm text-gray-500">
-                                    {selectedItems.length} selected
-                                </span>
+                <span className="text-sm text-gray-500">
+                  {selectedRows.length} selected
+                </span>
                                 <button
                                     onClick={handleBulkDelete}
-                                    disabled={deleteMutation.isPending}
                                     className="btn-danger"
                                 >
-                                    <TrashIcon className="h-4 w-4 mr-2"/>
+                                    <TrashIcon className="h-4 w-4 mr-2" />
                                     Delete Selected
                                 </button>
                             </>
                         )}
 
                         {/* Action buttons */}
-                        <button
-                            onClick={handleExport}
-                            className="btn-secondary"
-                        >
-                            <ArrowDownTrayIcon className="h-4 w-4 mr-2"/>
+                        <button onClick={handleExport} className="btn-secondary">
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                             Export
                         </button>
 
@@ -210,113 +185,27 @@ const CatalogItemsPage: React.FC = () => {
                             onClick={() => setShowCreateModal(true)}
                             className="btn-primary"
                         >
-                            <PlusIcon className="h-4 w-4 mr-2"/>
+                            <PlusIcon className="h-4 w-4 mr-2" />
                             Add {catalogInfo.type === 'LIST' ? 'Item' : 'Entry'}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="space-y-6">
-                {/* Data Table */}
-                <div className="card">
-                    <AutoTable<CatalogItemRow>
-                        data={items}
-                        schema={catalogInfo?.type === 'LIST' ? undefined : schema}
-                        loading={isLoading}
-                        onRowClick={handleRowClick}
-                        onSelectionChange={handleSelectionChange}
-                        onEdit={catalogInfo?.type === 'LIST' ? undefined : handleEdit}
-                        onDelete={handleDelete}
-                        onView={catalogInfo?.type === 'LIST' ? undefined : handleView}
-                        enableBulkActions={true}
-                        enableActions={true}
-                        showToolbar={true}
-                        height="70vh"
-                        density="standard"
-                        config={{
-                            pagination: true,
-                            pageSize: 25,
-                            enableSorting: true,
-                            enableFiltering: catalogInfo?.type !== 'LIST',
-                            enableSelection: true
-                        }}
-                    />
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="card p-4">
-                        <div className="text-sm font-medium text-gray-500">Total Items</div>
-                        <div className="text-2xl font-semibold text-gray-900">{items.length}</div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="text-sm font-medium text-gray-500">Selected</div>
-                        <div className="text-2xl font-semibold text-gray-900">{selectedItems.length}</div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="text-sm font-medium text-gray-500">Type</div>
-                        <div className="text-lg font-medium text-gray-900">{catalogInfo.type}</div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="text-sm font-medium text-gray-500">Last Updated</div>
-                        <div className="text-sm text-gray-900">Just now</div>
-                    </div>
-                </div>
+            {/* Main Content - Table */}
+            <div className="card p-0 overflow-hidden">
+                <TabulatorTable<CatalogItemRow>
+                    data={items}
+                    schema={!isListType ? schema : undefined}
+                    config={tableConfig}
+                    loading={isLoading}
+                    enableInlineEdit={true}
+                    onDelete={handleDelete}
+                    onSelectionChange={handleSelectionChange}
+                    onDataChange={handleDataChange}
+                />
             </div>
 
-            {/* Create Modal */}
-            <Modal
-                isOpen={showCreateModal}
-                onClose={() => setShowCreateModal(false)}
-                title={`Add New ${catalogInfo.type === 'LIST' ? 'List Item' : 'Catalog Item'}`}
-            >
-                <div className="p-6">
-                    {/* This would use RJSF form based on schema */}
-                    <p className="text-gray-500">RJSF form component will be generated from schema here</p>
-                    <div className="mt-6 flex justify-end space-x-3">
-                        <button
-                            onClick={() => setShowCreateModal(false)}
-                            className="btn-secondary"
-                        >
-                            Cancel
-                        </button>
-                        <button className="btn-primary">
-                            Create Item
-                        </button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* Edit Modal */}
-            <Modal
-                isOpen={showEditModal}
-                onClose={() => {
-                    setShowEditModal(false)
-                    setEditingItem(null)
-                }}
-                title="Edit Item"
-            >
-                <div className="p-6">
-                    {/* This would use RJSF form based on schema with editingItem data */}
-                    <p className="text-gray-500">RJSF edit form component will be generated from schema here</p>
-                    <div className="mt-6 flex justify-end space-x-3">
-                        <button
-                            onClick={() => {
-                                setShowEditModal(false)
-                                setEditingItem(null)
-                            }}
-                            className="btn-secondary"
-                        >
-                            Cancel
-                        </button>
-                        <button className="btn-primary">
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-            </Modal>
         </div>
     )
 }

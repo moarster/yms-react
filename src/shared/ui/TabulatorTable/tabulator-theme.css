@@ -1,0 +1,149 @@
+.tabulator {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
+    font-family: inherit;
+}
+
+.tabulator .tabulator-header {
+    @apply bg-gray-50 border-b border-gray-200;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    @apply text-gray-700 font-medium text-sm;
+    background-color: transparent;
+    border-right: 1px solid #e5e7eb;
+}
+
+.tabulator .tabulator-header .tabulator-col:last-child {
+    border-right: none;
+}
+
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+    @apply bg-gray-100;
+}
+
+.tabulator .tabulator-header .tabulator-col-title {
+    @apply px-4 py-3;
+}
+
+/* Row styles */
+.tabulator .tabulator-row {
+    @apply border-b border-gray-100;
+}
+
+.tabulator .tabulator-row:hover {
+    @apply bg-gray-50;
+}
+
+.tabulator .tabulator-row.tabulator-selected {
+    @apply bg-blue-50;
+}
+
+.tabulator .tabulator-row.tabulator-selected:hover {
+    @apply bg-blue-100;
+}
+
+/* Cell styles */
+.tabulator .tabulator-cell {
+    @apply px-4 py-3 text-sm text-gray-900;
+    border-right: 1px solid #f3f4f6;
+}
+
+.tabulator .tabulator-cell:last-child {
+    border-right: none;
+}
+
+/* Editable cells */
+.tabulator .tabulator-cell.tabulator-editing {
+    @apply bg-blue-50 border-2 border-blue-400;
+}
+
+.tabulator .tabulator-cell input {
+    @apply w-full px-2 py-1 text-sm border-0 focus:ring-2 focus:ring-blue-500;
+    background: transparent;
+}
+
+/* Action buttons in cells */
+.action-btn {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.action-btn.view {
+    @apply hover:bg-blue-100;
+}
+
+.action-btn.edit {
+    @apply hover:bg-yellow-100;
+}
+
+.action-btn.delete {
+    @apply hover:bg-red-100;
+}
+
+/* Status badges */
+.tabulator .status-badge {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-full;
+}
+
+/* Pagination */
+.tabulator .tabulator-footer {
+    @apply bg-gray-50 border-t border-gray-200 px-4 py-3;
+}
+
+.tabulator .tabulator-paginator {
+    @apply flex items-center justify-between;
+}
+
+.tabulator .tabulator-page {
+    @apply px-3 py-1 mx-1 text-sm rounded-md hover:bg-gray-200;
+    cursor: pointer;
+}
+
+.tabulator .tabulator-page.active {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+/* Loading overlay */
+.tabulator .tabulator-loader {
+    @apply bg-white bg-opacity-90;
+}
+
+.tabulator .tabulator-loader-msg {
+    @apply text-gray-600;
+}
+
+/* Empty state */
+.tabulator .tabulator-placeholder {
+    @apply py-12 text-center text-gray-500;
+}
+
+/* Filters */
+.tabulator .tabulator-header-filter input {
+    @apply w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .tabulator .tabulator-cell,
+    .tabulator .tabulator-col-title {
+        @apply px-2 py-2 text-xs;
+    }
+}
+
+/* Density variations */
+.tabulator.density-compact .tabulator-row {
+    min-height: 30px;
+}
+
+.tabulator.density-compact .tabulator-cell {
+    @apply py-1;
+}
+
+.tabulator.density-comfortable .tabulator-row {
+    min-height: 50px;
+}
+
+.tabulator.density-comfortable .tabulator-cell {
+    @apply py-4;
+}

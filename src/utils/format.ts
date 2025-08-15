@@ -4,7 +4,7 @@ export const formatters = {
     // Date formatting
     date: (date: string | Date) => {
         const d = typeof date === 'string' ? parseISO(date) : date
-        return formatDate(d, 'MMM dd, yyyy')
+        return formatDate(d, 'dd.MM.yyyy')
     },
 
     dateTime: (date: string | Date) => {

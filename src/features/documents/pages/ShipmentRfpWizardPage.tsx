@@ -4,9 +4,8 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 import {catalogService} from "@/features/catalogs/catalogService.ts";
+import {createShipmentRfpData, ShipmentRfpData} from "@/features/documents/types/shipment-rfp.ts";
 import ShipmentRfpWizard from '@/features/documents/wizards/ShipmentRfpWizard.tsx'
-import { ShipmentRfpData} from '@/types'
-import { createShipmentRfpData } from '@/types/factories/linkFactory.ts'
 
 import { useShipmentRfpMutations } from '../hooks/useShipmentRfpMutations.ts'
 

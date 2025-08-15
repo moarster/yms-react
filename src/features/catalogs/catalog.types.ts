@@ -1,4 +1,4 @@
-import { BaseEntity, DataEntity } from './base'
+import { BaseEntity, DataEntity } from '@/types'
 
 export type CatalogType = 'CATALOG' | 'LIST'
 
@@ -16,10 +16,10 @@ export interface SimpleList extends CatalogBase {
     type: 'LIST'
 }
 
-// Catalog items
+
 export type CatalogItem = DataEntity
 export type ListItem = BaseEntity
 
-// Type guards for runtime checks
+
 export const isCatalog = (obj: CatalogBase): obj is Catalog => obj.type === 'CATALOG'
 export const isSimpleList = (obj: CatalogBase): obj is SimpleList => obj.type === 'LIST'

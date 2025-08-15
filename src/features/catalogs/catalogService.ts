@@ -1,6 +1,7 @@
-import {apiClient} from '@/core/api'
-import {Catalog, CatalogItem, ListItem, PaginatedResponse, SimpleList} from '@/types'
-import {WizardLists} from "@/types/wizard.ts";
+import {apiClient, PaginatedResponse} from '@/core/api'
+import {WizardLists} from "@/features/documents/wizards/wizard.types.ts";
+
+import {Catalog, CatalogItem, CatalogType, ListItem, SimpleList} from './catalog.types'
 
 export interface CatalogFilters {
     search?: string
@@ -57,7 +58,7 @@ class CatalogService {
     // Get list items with filters
     async getListItems(
         listKey: string,
-        listType: `list` | `catalog`,
+        listType: CatalogType,
         filters?: CatalogFilters
     ): Promise<PaginatedResponse<ListItem>> {
         const params = new URLSearchParams()
@@ -70,7 +71,7 @@ class CatalogService {
 
         
         const response = await apiClient.getMany<ListItem>(
-            listType==='list'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`,false
+            listType==='LIST'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`,listType==='CATALOG'
         )
         return  response
 
@@ -86,13 +87,13 @@ class CatalogService {
             counterParties,
             cargoHandlingTypes
         ] = await Promise.allSettled([
-            this.getListItems('shipment-type', 'list'),
-            this.getListItems('transportation-type', 'list'),
-            this.getListItems('currency', 'list'),
+            this.getListItems('shipment-type', 'LIST'),
+            this.getListItems('transportation-type', 'LIST'),
+            this.getListItems('currency', 'LIST'),
             this.getCatalogItems('vehicle-type'),
-            this.getListItems('cargo-nature', 'list'),
+            this.getListItems('cargo-nature', 'LIST'),
             this.getCatalogItems('counter-party'),
-            this.getListItems('cargo-handling-type', 'list')
+            this.getListItems('cargo-handling-type', 'LIST')
         ])
 
         return {

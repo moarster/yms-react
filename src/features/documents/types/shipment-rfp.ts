@@ -1,4 +1,5 @@
 import { Attachment,DomainEntity,ListLink, ReferenceLink } from '@/types'
+import { LinkFactories} from "@/types/factories/linkFactory.ts";
 
 export interface ShipmentRfpData extends Record<string, unknown>{
     _shipmentType: ListLink<'shipment-type'>
@@ -89,3 +90,34 @@ export interface ShipmentRfp extends DomainEntity<ShipmentRfpData>{
     bids?: object[]
 }
 
+
+export const createShipmentRfpData = (): Partial<ShipmentRfpData> => ({
+    _shipmentType: LinkFactories.shipmentType(),
+    _transportationType: LinkFactories.transportationType(),
+    _currency: LinkFactories.currency(),
+    express: false,
+    route: [createRoutePoint()],
+    _requiredVehicleType: LinkFactories.vehicleType(),
+    customRequirements: '',
+    comment: '',
+    innerComment: '',
+    attachments: []
+})
+
+
+export const createRoutePoint = (): RoutePoint => ({
+    address: '',
+    contactPhone: '',
+    arrival: '',
+    departure: '',
+    _counterParty: LinkFactories.counterParty(),
+    _cargoHandlingType: LinkFactories.cargoHandlingType(),
+    cargoList: [createCargo()]
+})
+
+export const createCargo = (): Cargo => ({
+    number: '',
+    cargoWeight: 0,
+    cargoVolume: 0,
+    _cargoNature: LinkFactories.cargoNature()
+})

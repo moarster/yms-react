@@ -13,6 +13,8 @@ import {
 import React, {useEffect, useState} from 'react';
 
 import {useWizardValidation} from '@/features/documents/hooks/useWizardValidation.ts';
+import {Cargo, createCargo, createRoutePoint, RoutePoint} from "@/features/documents/types/shipment-rfp.ts";
+import {ShipmentRfpWizardProps, WizardFormData} from "@/features/documents/wizards/wizard.types.ts";
 import FileUpload from '@/shared/form/FileUpload.tsx';
 import {
    CheckboxInput,
@@ -20,8 +22,8 @@ import {
    NumberInput,
    ReferenceInput,
    TextInput } from '@/shared/form/inputs';
-import { Cargo, isBaseEntity, RoutePoint, ShipmentRfpWizardProps, WizardFormData} from '@/types';
-import {createCargo, createRoutePoint, LinkFactories} from '@/types/factories/linkFactory.ts'
+import {  isBaseEntity} from '@/types';
+import {LinkFactories} from '@/types/factories/linkFactory.ts'
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                                                                  initialData,

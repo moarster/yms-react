@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import {User, userHasRole} from "@/core/auth/types.ts";
-import type { ShipmentRfp } from '@/types'
+import {ShipmentRfp} from "@/features/documents/types/shipment-rfp.ts";
 
 export const useShipmentRfpPermissions = (rfp: ShipmentRfp | null, user:    User | null, isCreating: boolean) => {
     const canEdit = useMemo(() => {
