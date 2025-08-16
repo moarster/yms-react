@@ -6,9 +6,33 @@ import { apiConfig } from '../config'
 import {PaginatedResponse} from "./api.types.ts";
 import { ApiInterceptors, TokenProvider } from './interceptors'
 
+class RequestBatcher {
+    private queue: Map<string, Promise<any>> = new Map()
+    private batchTimeout = 10 // ms
+
+    async batch<T>(key: string, request: () => Promise<T>): Promise<T> {
+        // Check if request is already in queue
+        if (this.queue.has(key)) {
+            return this.queue.get(key) as Promise<T>
+        }
+
+        // Add to queue
+        const promise = request().finally(() => {
+            // Remove from queue after completion
+            setTimeout(() => this.queue.delete(key), this.batchTimeout)
+        })
+
+        this.queue.set(key, promise)
+        return promise
+    }
+}
+
 export class Client {
-    private client: AxiosInstance
-    private interceptors: ApiInterceptors
+    private readonly client: AxiosInstance
+    private batcher = new RequestBatcher()
+    private abortControllers = new Map<string, AbortController>()
+    public interceptors: ApiInterceptors
+
 
     constructor() {
         this.client = axios.create({
@@ -19,8 +43,10 @@ export class Client {
             },
         })
 
-        this.interceptors = new ApiInterceptors(this.client)
+        this.interceptors = new ApiInterceptors(this.client, this.abortControllers)
     }
+
+
 
     setTokenProvider(provider: TokenProvider) {
         this.interceptors.setTokenProvider(provider)
@@ -32,6 +58,8 @@ export class Client {
     }
 
     async getMany<T extends BaseEntity>(url: string, paginated?: boolean, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> {
+        const key = `GET:${url}:${JSON.stringify(config?.params || {})}`
+        return this.batcher.batch(key, async () => {
         let response
         if (paginated===false) {
             response = {
@@ -41,6 +69,7 @@ export class Client {
             response = (await this.client.get<PaginatedResponse<T>>(url, config)).data
         }
         return response
+        })
     }
 
     async getAny<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
@@ -65,6 +94,41 @@ export class Client {
 
     async delete(url: string, config?: AxiosRequestConfig): Promise<void> {
         await this.client.delete(url, config)
+    }
+    // Batch multiple GET requests
+    async batchGet<T>(requests: Array<{ url: string; config?: AxiosRequestConfig }>): Promise<T[]> {
+        return Promise.all(
+            requests.map((req) => this.get<T>(req.url, req.config))
+        )
+    }
+
+    async getWithRetry<T>(
+        url: string,
+        config?: AxiosRequestConfig,
+        maxRetries = 3,
+        retryDelay = 1000
+    ): Promise<T> {
+        let lastError: any
+
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await this.get<T>(url, config)
+            } catch (error: any) {
+                lastError = error
+
+                // Don't retry on client errors (4xx)
+                if (error.response?.status >= 400 && error.response?.status < 500) {
+                    throw error
+                }
+
+                // Wait before retry
+                if (i < maxRetries - 1) {
+                    await new Promise((resolve) => setTimeout(resolve, retryDelay * (i + 1)))
+                }
+            }
+        }
+
+        throw lastError
     }
 
     async uploadFile<T>(
@@ -106,3 +170,5 @@ export class Client {
 }
 
 export const apiClient = new Client()
+
+export const cancelAllRequests = () => apiClient.interceptors.cancelAll()

@@ -1,22 +1,43 @@
-import React, { useEffect } from 'react'
-import { Navigate,Route, Routes } from 'react-router-dom'
+import React, { lazy, Suspense, useEffect } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import KeycloakProvider from '@/core/auth/KeycloakProvider.tsx'
-import {UserRole} from "@/core/auth/types.ts";
+import { UserRole } from "@/core/auth/types.ts"
+import { ResourceHints, useAdjacentRoutePrefetch } from '@/core/router/Router'
 import { useAuthStore } from '@/core/store/authStore.ts'
 import { useUiStore } from '@/core/store/uiStore.ts'
-import CatalogItemsPage from '@/features/catalogs/CatalogItemsPage.tsx'
-import CatalogsPage from '@/features/catalogs/CatalogsPage.tsx'
-import ShipmentRfpDetailPage from '@/features/documents/pages/ShipmentRfpDetailPage.tsx'
-import ShipmentRfpsPage from '@/features/documents/pages/ShipmentRfpsPage.tsx'
-import ShipmentRfpWizardPage from '@/features/documents/pages/ShipmentRfpWizardPage.tsx'
-import {usePermissions} from "@/hooks/usePermissions.ts";
-import AppLayout from '@/layout/AppLayout'
-import DashboardPage from '@/pages/DashboardPage'
-import LoginPage from '@/pages/login/LoginPage.tsx'
-import NotFoundPage from '@/pages/NotFoundPage'
-import ProfilePage from '@/pages/ProfilePage'
+import { usePermissions } from "@/hooks/usePermissions.ts"
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
+
+// Lazy load all pages
+const AppLayout = lazy(() => import('@/layout/AppLayout'))
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
+const LoginPage = lazy(() => import('@/pages/login/LoginPage.tsx'))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
+
+// Lazy load feature pages
+const CatalogsPage = lazy(() => import('@/features/catalogs/CatalogsPage.tsx'))
+const CatalogItemsPage = lazy(() => import('@/features/catalogs/CatalogItemsPage.tsx'))
+const ShipmentRfpDetailPage = lazy(() => import('@/features/documents/pages/ShipmentRfpDetailPage.tsx'))
+const ShipmentRfpsPage = lazy(() => import('@/features/documents/pages/ShipmentRfpsPage.tsx'))
+const ShipmentRfpWizardPage = lazy(() => import('@/features/documents/pages/ShipmentRfpWizardPage.tsx'))
+
+// Loading fallback component
+const PageLoading: React.FC = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" text="Loading..." />
+    </div>
+)
+
+// Prefetch component for route prefetching
+const usePrefetch = () => {
+    const prefetchRoute = (routeModule: () => Promise<any>) => {
+        routeModule()
+    }
+
+    return { prefetchRoute }
+}
 
 // Protected route component
 interface ProtectedRouteProps {
@@ -31,7 +52,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                                                            requiredPermission
                                                        }) => {
     const { isAuthenticated, authMode } = useAuthStore()
-    const {hasRole, hasPermission, isAdmin } = usePermissions()
+    const { hasRole, hasPermission, isAdmin } = usePermissions()
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />
@@ -48,7 +69,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
 
     // Check permission requirement
-    if (requiredPermission && !hasPermission( requiredPermission)) {
+    if (requiredPermission && !hasPermission(requiredPermission)) {
         return <Navigate to="/dashboard" replace />
     }
 
@@ -59,6 +80,10 @@ const AppContent: React.FC = () => {
     const { isAuthenticated, isLoading, refreshToken, authMode } = useAuthStore()
     const isDemoMode = authMode === 'demo'
     const { setTheme } = useUiStore()
+    const { prefetchRoute } = usePrefetch()
+
+    // Use adjacent route prefetching
+    useAdjacentRoutePrefetch()
 
     // Initialize app
     useEffect(() => {
@@ -76,6 +101,16 @@ const AppContent: React.FC = () => {
                     console.warn('Failed to refresh token:', error)
                 }
             }
+
+            // Prefetch common routes after authentication
+            if (isAuthenticated) {
+                // Prefetch dashboard and common pages
+                setTimeout(() => {
+                    prefetchRoute(() => import('@/pages/DashboardPage'))
+                    prefetchRoute(() => import('@/features/catalogs/CatalogsPage.tsx'))
+                    prefetchRoute(() => import('@/features/documents/pages/ShipmentRfpsPage.tsx'))
+                }, 1000)
+            }
         }
 
         initApp()
@@ -83,106 +118,106 @@ const AppContent: React.FC = () => {
 
     // Show loading spinner during initial auth check
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <LoadingSpinner size="lg" />
-            </div>
-        )
+        return <PageLoading />
     }
 
     return (
-        <Routes>
-            {/* Public routes */}
-            <Route
-                path="/login"
-                element={
-                    isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
-                }
-            />
+        <Suspense fallback={<PageLoading />}>
+            <Routes>
+                {/* Public routes */}
+                <Route
+                    path="/login"
+                    element={
+                        isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+                    }
+                />
 
-            {/* Protected routes */}
-            <Route
-                path="/*"
-                element={
-                    <ProtectedRoute>
-                        <AppLayout>
-                            <Routes>
-                                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                                <Route path="/dashboard" element={<DashboardPage />} />
+                {/* Protected routes */}
+                <Route
+                    path="/*"
+                    element={
+                        <ProtectedRoute>
+                            <AppLayout>
+                                <Suspense fallback={<PageLoading />}>
+                                    <Routes>
+                                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                                        <Route path="/dashboard" element={<DashboardPage />} />
 
-                                {/* Catalogs (NSI) routes */}
-                                <Route
-                                    path="/catalogs"
-                                    element={
-                                        <ProtectedRoute requiredPermission="catalogs.view">
-                                            <CatalogsPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                {/* Catalog routes */}
-                                <Route
-                                    path="/catalog/:catalogKey"
-                                    element={
-                                        <ProtectedRoute requiredPermission="catalogs.view">
-                                            <CatalogItemsPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                        {/* Catalogs (NSI) routes */}
+                                        <Route
+                                            path="/catalogs"
+                                            element={
+                                                <ProtectedRoute requiredPermission="catalogs.view">
+                                                    <CatalogsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        {/* Catalog routes */}
+                                        <Route
+                                            path="/catalog/:catalogKey"
+                                            element={
+                                                <ProtectedRoute requiredPermission="catalogs.view">
+                                                    <CatalogItemsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
 
-                                {/* List routes */}
-                                <Route
-                                    path="/list/:catalogKey"
-                                    element={
-                                        <ProtectedRoute requiredPermission="catalogs.view">
-                                            <CatalogItemsPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                        {/* List routes */}
+                                        <Route
+                                            path="/list/:catalogKey"
+                                            element={
+                                                <ProtectedRoute requiredPermission="catalogs.view">
+                                                    <CatalogItemsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
 
-                                {/* Document routes */}
-                                <Route
-                                    path="/shipment-rfps"
-                                    element={
-                                        <ProtectedRoute requiredPermission="shipment_rfps.view">
-                                            <ShipmentRfpsPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/shipment-rfps/new"
-                                    element={
-                                        <ProtectedRoute requiredPermission="shipment_rfps.create">
-                                            <ShipmentRfpWizardPage />
-                                            {/*<MockWizard />*/}
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/shipment-rfps/:id"
-                                    element={
-                                        <ProtectedRoute requiredPermission="shipment_rfps.view">
-                                            <ShipmentRfpDetailPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                        {/* Document routes */}
+                                        <Route
+                                            path="/shipment-rfps"
+                                            element={
+                                                <ProtectedRoute requiredPermission="shipment_rfps.view">
+                                                    <ShipmentRfpsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/shipment-rfps/new"
+                                            element={
+                                                <ProtectedRoute requiredPermission="shipment_rfps.create">
+                                                    <ShipmentRfpWizardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/shipment-rfps/:id"
+                                            element={
+                                                <ProtectedRoute requiredPermission="shipment_rfps.view">
+                                                    <ShipmentRfpDetailPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
 
-                                {/* User profile */}
-                                <Route path="/profile" element={<ProfilePage />} />
+                                        {/* User profile */}
+                                        <Route path="/profile" element={<ProfilePage />} />
 
-                                {/* Catch all - 404 */}
-                                <Route path="*" element={<NotFoundPage />} />
-                            </Routes>
-                        </AppLayout>
-                    </ProtectedRoute>
-                }
-            />
-        </Routes>
+                                        {/* Catch all - 404 */}
+                                        <Route path="*" element={<NotFoundPage />} />
+                                    </Routes>
+                                </Suspense>
+                            </AppLayout>
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Suspense>
     )
 }
 
 const App: React.FC = () => {
     return (
         <KeycloakProvider>
+            <ResourceHints />
             <AppContent />
         </KeycloakProvider>
     )

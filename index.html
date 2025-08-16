@@ -1,14 +1,71 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carrier Portal - Yard Management System</title>
-  <meta name="description" content="Platform for warehouse owners and logistics companies to find carriers and manage contracts" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrier Portal - Yard Management System</title>
+    <meta name="description" content="Platform for warehouse owners and logistics companies to find carriers and manage contracts" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+
+    <!-- Critical CSS inline (if needed) -->
+    <style>
+        /* Initial loading state */
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- Preload critical fonts if any -->
+    <!-- <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin> -->
+
+    <!-- Module preload for critical chunks will be auto-injected by Vite -->
 </head>
 <body class="bg-gray-50">
+<!-- Initial loading indicator -->
+<div id="initial-loader" class="initial-loader">
+    <div class="spinner"></div>
+</div>
+
 <div id="root"></div>
+
+<script>
+    // Remove loader when app starts
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('initial-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => loader.remove(), 300);
+            }
+        }, 100);
+    });
+</script>
+
 <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@ export interface TokenProvider {
 export class ApiInterceptors {
     private tokenProvider: TokenProvider | null = null
 
-    constructor(private client: AxiosInstance) {}
+    constructor(private client: AxiosInstance,private abortControllers: Map<string, AbortController>) {}
 
     setTokenProvider(provider: TokenProvider) {
         this.tokenProvider = provider
@@ -25,7 +25,12 @@ export class ApiInterceptors {
         this.setupRequestInterceptor()
         this.setupResponseInterceptor()
     }
-
+    private getRequestKey(config: AxiosRequestConfig): string | null {
+        if (config.method?.toUpperCase() === 'GET' && config.url) {
+            return `${config.method}:${config.url}:${JSON.stringify(config.params || {})}`
+        }
+        return null
+    }
     private setupRequestInterceptor() {
         this.client.interceptors.request.use(
             (config) => {
@@ -33,6 +38,19 @@ export class ApiInterceptors {
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`
                 }
+
+                const requestKey = this.getRequestKey(config)
+                if (requestKey) {
+                    // Cancel previous request if exists
+                    this.cancelRequest(requestKey)
+
+                    // Create new abort controller
+                    const controller = new AbortController()
+                    this.abortControllers.set(requestKey, controller)
+                    config.signal = controller.signal
+                }
+
+
                 return config
             },
             (error) => Promise.reject(error)
@@ -41,7 +59,14 @@ export class ApiInterceptors {
 
     private setupResponseInterceptor() {
         this.client.interceptors.response.use(
-            (response: AxiosResponse) => response,
+            (response: AxiosResponse) => {
+                // Clean up abort controller
+                const requestKey = this.getRequestKey(response.config)
+                if (requestKey) {
+                    this.abortControllers.delete(requestKey)
+                }
+                return response
+            },
             async (error: AxiosError) => {
                 const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
 
@@ -83,12 +108,28 @@ export class ApiInterceptors {
                 if (error.response?.status !== 401) {
                     toast.error(apiError.message)
                 }
+                if (error.config) {
+                    const requestKey = this.getRequestKey(error.config)
+                    if (requestKey) {
+                        this.abortControllers.delete(requestKey)
+                    }
+                }
 
                 return Promise.reject(apiError)
             }
         )
     }
-
+    private cancelRequest(key: string) {
+        const controller = this.abortControllers.get(key)
+        if (controller) {
+            controller.abort()
+            this.abortControllers.delete(key)
+        }
+    }
+    public cancelAll() {
+        this.abortControllers.forEach((controller) => controller.abort())
+        this.abortControllers.clear()
+    }
     private redirectToLogin() {
         // Avoid redirect during login/logout flows
         if (!window.location.pathname.includes('/login')) {
@@ -96,3 +137,4 @@ export class ApiInterceptors {
         }
     }
 }
+
