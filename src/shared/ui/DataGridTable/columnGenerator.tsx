@@ -2,43 +2,54 @@ import { Column, RenderCellProps, RenderEditCellProps } from 'react-data-grid'
 
 import { JsonSchema, JsonSchemaProperty } from '@/types'
 
-import { BaseTableRow, TableActions } from '../TabulatorTable/table.types'
 import { cellEditors } from './render/cellEditorRegistry.ts'
 import { cellRenderers } from './render/cellRenderers.tsx'
+import { BaseTableRow } from './table.types.ts'
 
 export function generateDataGridColumns<T extends BaseTableRow>(
     schema: JsonSchema | undefined,
     enableInlineEdit: boolean,
-    actions?: TableActions<T>
+    selectable?: boolean
 ): Column<T>[] {
     const columns: Column<T>[] = []
 
-    // Add selection column if needed
-    if (actions?.onDelete || actions?.onEdit) {
+    if (selectable) {
         columns.push({
             key: 'selection',
             name: '',
-            width: 45,
-            minWidth: 45,
-            maxWidth: 45,
+            width: 0,
+            minWidth: 0,
+            maxWidth: 0,
             resizable: false,
             sortable: false,
             frozen: true,
-            renderCell: (props: RenderCellProps<T>) => (
-                <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    onChange={() => {}}
-                />
-            ),
-            renderHeaderCell: () => (
-                <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-            )
+            renderCell: (props: RenderCellProps<T>) => {
+                const rowId = props.row.id || ''
+                const isSelected = props.isRowSelected || false
+
+                return (
+                    <div className="selection-cell-container">
+                        <button
+                            className={`selection-circle ${isSelected ? 'selected' : 'unselected'}`}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                if (props.onRowSelectionChange) {
+                                    props.onRowSelectionChange({
+                                        row: props.row,
+                                        checked: !isSelected,
+                                        isShiftClick: e.shiftKey
+                                    })
+                                }
+                            }}
+                            title={isSelected ? 'Deselect row' : 'Select row'}
+                        />
+                    </div>
+                )
+            },
+            renderHeaderCell: () => <div className="w-0 h-0 overflow-hidden" />
         })
     }
+
 
     if (schema?.properties) {
         // Schema-based columns

@@ -3,14 +3,14 @@ import './datagrid-theme.css'
 
 import React, { useCallback, useMemo, useState} from 'react'
 import {
-    Column, DataGrid, RenderRowProps, Row,
+     DataGrid, RenderRowProps, Row,
     SortColumn
 } from 'react-data-grid'
 
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
-import { BaseTableProps, BaseTableRow } from '../TabulatorTable/table.types'
 import { generateDataGridColumns } from './columnGenerator'
+import { BaseTableProps, BaseTableRow } from './table.types.ts'
 
 interface DataGridTableProps<T extends BaseTableRow> extends BaseTableProps<T> {
     enableInlineEdit?: boolean
@@ -23,10 +23,7 @@ const DataGridTable = <T extends BaseTableRow>({
                                                    loading = false,
                                                    className = '',
                                                    enableInlineEdit = true,
-                                                   onRowClick,
-                                                   onEdit,
                                                    onDelete,
-                                                   onView,
                                                    onSelectionChange,
                                                    onDataChange,
                                                }: DataGridTableProps<T>) => {
@@ -39,9 +36,9 @@ const DataGridTable = <T extends BaseTableRow>({
 
     const columns = useMemo(
         () => isSchemaless
-            ? generateDataGridColumns<T>(undefined, enableInlineEdit, { onEdit, onDelete, onView })
-            : generateDataGridColumns<T>(schema, enableInlineEdit, { onEdit, onDelete, onView }),
-        [isSchemaless, schema, enableInlineEdit, onEdit, onDelete, onView]
+            ? generateDataGridColumns<T>(undefined, enableInlineEdit)
+            : generateDataGridColumns<T>(schema, enableInlineEdit,true),
+        [isSchemaless, schema, enableInlineEdit]
     )
 
     // Apply sorting
@@ -73,6 +70,24 @@ const DataGridTable = <T extends BaseTableRow>({
         })
     }, [sortedRows, filters])
 
+    const handleSelectionToggle = useCallback((rowId: string) => {
+        setSelectedRows(prev => {
+            const newSelection = new Set(prev)
+            if (newSelection.has(rowId)) {
+                newSelection.delete(rowId)
+            } else {
+                newSelection.add(rowId)
+            }
+
+            if (onSelectionChange) {
+                const selected = data.filter(row => newSelection.has(row.id || ''))
+                onSelectionChange(selected)
+            }
+
+            return newSelection
+        })
+    }, [data, onSelectionChange])
+
     const handleSelectionChange = useCallback((newSelectedRows: Set<string>) => {
         setSelectedRows(newSelectedRows)
         if (onSelectionChange) {
@@ -81,12 +96,6 @@ const DataGridTable = <T extends BaseTableRow>({
         }
     }, [data, onSelectionChange])
 
-    const handleRowClick = useCallback((row: T, column: Column<T>) => {
-        if (column.key === 'selection' || column.key === 'actions') return
-        if (onRowClick) {
-            onRowClick(row)
-        }
-    }, [onRowClick])
 
     const handleRowsChange = useCallback((rows: T[]) => {
         if (onDataChange && enableInlineEdit) {
@@ -95,27 +104,29 @@ const DataGridTable = <T extends BaseTableRow>({
     }, [onDataChange, enableInlineEdit])
 
     const TableRow = React.memo(function TableRow<T, SR>(props: RenderRowProps<T, SR>) {
-        const { onMouseEnter, onMouseLeave, className, ...rest } = props;
+        const { onMouseEnter, onMouseLeave, className, ...rest } = props
+        const rowId = props.row?.id || ''
+
         return (
             <Row
                 {...rest}
                 className={className}
                 onMouseEnter={(e) => {
-                    onMouseEnter?.(e);
-                    setHoveredRow({id:props.key?.toString(), pos: props.rowIdx})
+                    onMouseEnter?.(e)
+                    setHoveredRow({id: rowId, pos: props.rowIdx})
                 }}
                 onMouseLeave={(e) => {
-                    onMouseLeave?.(e);
-                    setHoveredRow({})
+                    onMouseLeave?.(e)
+                    setHoveredRow(null)
                 }}
             />
-        );
-    });
+        )
+    })
 
     const renderRow = React.useCallback(
         (key: React.Key, props: RenderRowProps<T>) => <TableRow key={key} {...props} />,
-        []
-    );
+        [TableRow]
+    )
 
     if (loading) {
         return (
@@ -144,11 +155,8 @@ const DataGridTable = <T extends BaseTableRow>({
                 columns={columns}
                 rows={filteredRows}
                 rowKeyGetter={row => row.id || ''}
-                selectedRows={config.selectable ? selectedRows : undefined}
-                onSelectedRowsChange={config.selectable ? handleSelectionChange : undefined}
                 sortColumns={sortColumns}
                 onSortColumnsChange={setSortColumns}
-                onRowClick={handleRowClick}
                 onRowsChange={handleRowsChange}
                 rowHeight={rowHeight}
                 rowClass={() => 'my-row'}

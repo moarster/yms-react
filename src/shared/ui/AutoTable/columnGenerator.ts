@@ -1,10 +1,10 @@
 // noinspection t
 
 import {
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    Visibility as ViewIcon
-} from '@mui/icons-material'
+    EyeIcon as ViewIcon,
+    PencilIcon as EditIcon,
+    TrashIcon as DeleteIcon,
+} from '@heroicons/react/24/outline'
 import { GridActionsCellItem, GridColDef, GridRowParams} from '@mui/x-data-grid'
 import React from "react";
 

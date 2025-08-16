@@ -6,38 +6,156 @@ import {
     KeyIcon,
     UserIcon,
 } from '@heroicons/react/24/outline'
-import { zodResolver } from '@hookform/resolvers/zod'
+import Form from "@rjsf/mui";
+import validator from "@rjsf/validator-ajv8";
 import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { z } from 'zod'
 
 import { authService } from '@/core/auth/authService.ts'
+import {KeycloakAuthService} from "@/core/auth/keycloak/keycloakService.ts";
+import {User} from "@/core/auth/types.ts";
 import { useAuthStore } from '@/core/store/authStore.ts'
 import { useUiStore } from '@/core/store/uiStore.ts'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
-import { User } from '@/types'
 
 
-// Profile form schema
-const profileSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Invalid email address'),
-})
+const profileSchema = {
+    type: 'object',
+    required: ['name', 'email'],
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Full Name',
+            minLength: 1,
+        },
+        email: {
+            type: 'string',
+            title: 'Email Address',
+            format: 'email',
+        },
+    },
+}
 
-// Password change schema
-const passwordSchema = z.object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-})
+const passwordSchema = {
+    type: 'object',
+    required: ['currentPassword', 'newPassword', 'confirmPassword'],
+    properties: {
+        currentPassword: {
+            type: 'string',
+            title: 'Current Password',
+            minLength: 1,
+        },
+        newPassword: {
+            type: 'string',
+            title: 'New Password',
+            minLength: 6,
+        },
+        confirmPassword: {
+            type: 'string',
+            title: 'Confirm New Password',
+            minLength: 1,
+        },
+    },
+}
 
-type ProfileFormData = z.infer<typeof profileSchema>
-type PasswordFormData = z.infer<typeof passwordSchema>
+const profileUiSchema = {
+    name: {
+        'ui:placeholder': 'Enter your full name',
+        'ui:classNames': 'input',
+    },
+    email: {
+        'ui:placeholder': 'Enter your email address',
+        'ui:help': 'This email will be used for notifications and account recovery',
+        'ui:classNames': 'input',
+    },
+}
+
+const passwordUiSchema = {
+    currentPassword: {
+        'ui:widget': 'password',
+        'ui:placeholder': 'Enter your current password',
+        'ui:classNames': 'input',
+    },
+    newPassword: {
+        'ui:widget': 'password',
+        'ui:placeholder': 'Enter your new password',
+        'ui:classNames': 'input',
+    },
+    confirmPassword: {
+        'ui:widget': 'password',
+        'ui:placeholder': 'Confirm your new password',
+        'ui:classNames': 'input',
+    },
+}
+const passwordValidate = (formData: any, errors: any) => {
+    if (formData.newPassword !== formData.confirmPassword) {
+        errors.confirmPassword.addError("Passwords don't match")
+    }
+    return errors
+}
+
+const FieldTemplate = (props: any) => {
+    const { id, classNames, label, help, required, description, errors, children } = props
+    return (
+        <div className={classNames}>
+            {label && (
+                <label htmlFor={id} className="label">
+                    {label}
+                    {required ? ' *' : ''}
+                </label>
+            )}
+            {description && <p className="text-sm text-gray-600 mb-1">{description}</p>}
+            {children}
+            {errors && errors.length > 0 && (
+                <div className="mt-1">
+                    {Array.isArray(errors)
+                        ? errors.map((error: string, index: number) => (
+                            <p key={index} className="text-sm text-red-600">
+                                {error}
+                            </p>
+                        ))
+                        : <p className="text-sm text-red-600">{errors}</p>
+                    }
+                </div>
+            )}
+            {help && <div className="mt-1 text-xs text-gray-500">{help}</div>}
+        </div>
+    )
+}
+
+const ObjectFieldTemplate = (props: any) => {
+    return (
+        <div className="space-y-4">
+            {props.properties.map((element: any) => (
+                <div key={element.content.key}>{element.content}</div>
+            ))}
+        </div>
+    )
+}
+
+// Custom submit button template
+const SubmitButton = ({ loading, icon: Icon, children }: any) => (
+    <div className="pt-4">
+        <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary"
+        >
+            {loading ? (
+                <>
+                    <LoadingSpinner size="sm" />
+                    <span className="ml-2">Loading...</span>
+                </>
+            ) : (
+                <>
+                    <Icon className="h-4 w-4 mr-2" />
+                    {children}
+                </>
+            )}
+        </button>
+    </div>
+)
 
 interface ProfileSectionProps {
     title: string
@@ -57,40 +175,43 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ title, icon: Icon, chil
     </div>
 )
 
+// Custom password widget with show/hide toggle
+const PasswordWidget = (props: any) => {
+    const [showPassword, setShowPassword] = useState(false)
+    const { value, onChange, placeholder, className } = props
+
+    return (
+        <div className="relative">
+            <input
+                type={showPassword ? 'text' : 'password'}
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                className={`${className} pr-10`}
+            />
+            <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+            >
+                {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                )}
+            </button>
+        </div>
+    )
+}
+
 const ProfilePage: React.FC = () => {
     const { user, setUser } = useAuthStore()
     const { addNotification } = useUiStore()
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-    const [showNewPassword, setShowNewPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-    // Profile form
-    const {
-        register: registerProfile,
-        handleSubmit: handleProfileSubmit,
-        formState: { errors: profileErrors },
-    } = useForm<ProfileFormData>({
-        resolver: zodResolver(profileSchema),
-        defaultValues: {
-            name: user?.name || '',
-            email: user?.email || '',
-        },
-    })
-
-    // Password form
-    const {
-        register: registerPassword,
-        handleSubmit: handlePasswordSubmit,
-        formState: { errors: passwordErrors },
-        reset: resetPasswordForm,
-    } = useForm<PasswordFormData>({
-        resolver: zodResolver(passwordSchema),
-    })
 
     // Update profile mutation
     const updateProfileMutation = useMutation({
-        mutationFn: async (data: ProfileFormData) => {
-            const response = await authService.updateProfile(data)
+        mutationFn: async (data: { name: string; email: string }) => {
+            const response = await (authService as KeycloakAuthService).updateProfile(data)
             return response.data
         },
         onSuccess: (updatedUser: User) => {
@@ -109,11 +230,10 @@ const ProfilePage: React.FC = () => {
 
     // Change password mutation
     const changePasswordMutation = useMutation({
-        mutationFn: async (data: PasswordFormData) => {
-            await authService.changePassword( data.newPassword)
+        mutationFn: async (data: { newPassword: string }) => {
+            await (authService as KeycloakAuthService).changePassword(data.newPassword)
         },
         onSuccess: () => {
-            resetPasswordForm()
             toast.success('Password changed successfully')
             addNotification({
                 type: 'success',
@@ -126,16 +246,26 @@ const ProfilePage: React.FC = () => {
         },
     })
 
-    const onProfileSubmit = (data: ProfileFormData) => {
-        updateProfileMutation.mutate(data)
+    const handleProfileSubmit = ({ formData }: any) => {
+        updateProfileMutation.mutate(formData)
     }
 
-    const onPasswordSubmit = (data: PasswordFormData) => {
-        changePasswordMutation.mutate(data)
+    const handlePasswordSubmit = ({ formData }: any) => {
+        changePasswordMutation.mutate({ newPassword: formData.newPassword })
     }
 
     if (!user) {
         return <LoadingSpinner size="lg" text="Loading profile..." />
+    }
+
+    // Custom widgets
+    const widgets = {
+        password: PasswordWidget,
+    }
+
+    const templates = {
+        FieldTemplate,
+        ObjectFieldTemplate,
     }
 
     return (
@@ -151,56 +281,25 @@ const ProfilePage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Profile Information */}
                 <ProfileSection title="Profile Information" icon={UserIcon}>
-                    <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-4">
-                        <div>
-                            <label className="label">Full Name *</label>
-                            <input
-                                {...registerProfile('name')}
-                                type="text"
-                                className={profileErrors.name ? 'input-error' : 'input'}
-                                placeholder="Enter your full name"
-                            />
-                            {profileErrors.name && (
-                                <p className="mt-1 text-sm text-red-600">{profileErrors.name.message}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="label">Email Address *</label>
-                            <input
-                                {...registerProfile('email')}
-                                type="email"
-                                className={profileErrors.email ? 'input-error' : 'input'}
-                                placeholder="Enter your email address"
-                            />
-                            {profileErrors.email && (
-                                <p className="mt-1 text-sm text-red-600">{profileErrors.email.message}</p>
-                            )}
-                            <p className="mt-1 text-xs text-gray-500">
-                                This email will be used for notifications and account recovery
-                            </p>
-                        </div>
-
-                        <div className="pt-4">
-                            <button
-                                type="submit"
-                                disabled={updateProfileMutation.isPending}
-                                className="btn-primary"
-                            >
-                                {updateProfileMutation.isPending ? (
-                                    <>
-                                        <LoadingSpinner size="sm" />
-                                        <span className="ml-2">Updating...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <CheckCircleIcon className="h-4 w-4 mr-2" />
-                                        Update Profile
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </form>
+                    <Form
+                        schema={profileSchema}
+                        uiSchema={profileUiSchema}
+                        formData={{
+                            name: user.name || '',
+                            email: user.email || '',
+                        }}
+                        onSubmit={handleProfileSubmit}
+                        validator={validator}
+                        templates={templates}
+                        showErrorList={false}
+                    >
+                        <SubmitButton
+                            loading={updateProfileMutation.isPending}
+                            icon={CheckCircleIcon}
+                        >
+                            {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
+                        </SubmitButton>
+                    </Form>
                 </ProfileSection>
 
                 {/* Organization Information */}
@@ -259,105 +358,23 @@ const ProfilePage: React.FC = () => {
 
             {/* Password Change */}
             <ProfileSection title="Change Password" icon={KeyIcon}>
-                <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
-                    <div>
-                        <label className="label">Current Password *</label>
-                        <div className="relative">
-                            <input
-                                {...registerPassword('currentPassword')}
-                                type={showCurrentPassword ? 'text' : 'password'}
-                                className={passwordErrors.currentPassword ? 'input-error pr-10' : 'input pr-10'}
-                                placeholder="Enter your current password"
-                            />
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            >
-                                {showCurrentPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {passwordErrors.currentPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword.message}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="label">New Password *</label>
-                        <div className="relative">
-                            <input
-                                {...registerPassword('newPassword')}
-                                type={showNewPassword ? 'text' : 'password'}
-                                className={passwordErrors.newPassword ? 'input-error pr-10' : 'input pr-10'}
-                                placeholder="Enter your new password"
-                            />
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                onClick={() => setShowNewPassword(!showNewPassword)}
-                            >
-                                {showNewPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {passwordErrors.newPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword.message}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="label">Confirm New Password *</label>
-                        <div className="relative">
-                            <input
-                                {...registerPassword('confirmPassword')}
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                className={passwordErrors.confirmPassword ? 'input-error pr-10' : 'input pr-10'}
-                                placeholder="Confirm your new password"
-                            />
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                {showConfirmPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {passwordErrors.confirmPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword.message}</p>
-                        )}
-                    </div>
-
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={changePasswordMutation.isPending}
-                            className="btn-primary"
-                        >
-                            {changePasswordMutation.isPending ? (
-                                <>
-                                    <LoadingSpinner size="sm" />
-                                    <span className="ml-2">Changing...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <KeyIcon className="h-4 w-4 mr-2" />
-                                    Change Password
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </form>
+                <Form
+                    schema={passwordSchema}
+                    uiSchema={passwordUiSchema}
+                    onSubmit={handlePasswordSubmit}
+                    validator={validator}
+                    templates={templates}
+                    widgets={widgets}
+                    validate={passwordValidate}
+                    showErrorList={false}
+                >
+                    <SubmitButton
+                        loading={changePasswordMutation.isPending}
+                        icon={KeyIcon}
+                    >
+                        {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
+                    </SubmitButton>
+                </Form>
             </ProfileSection>
 
             {/* User Roles & Permissions */}
@@ -371,8 +388,8 @@ const ProfilePage: React.FC = () => {
                                     key={role.id}
                                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                                 >
-                  {role.name}
-                </span>
+                                    {role.name}
+                                </span>
                             ))}
                         </div>
                     </div>

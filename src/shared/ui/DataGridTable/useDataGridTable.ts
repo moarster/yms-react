@@ -1,7 +1,7 @@
 import { useCallback, useMemo,useState } from 'react'
 import { SortColumn } from 'react-data-grid'
 
-import { BaseTableRow } from '../TabulatorTable/table.types'
+import { BaseTableRow } from './table.types.ts'
 
 interface UseDataGridTableOptions<T extends BaseTableRow> {
     data: T[]

@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import tailwindcss from "@tailwindcss/vite"
-
+import { visualizer } from "rollup-plugin-visualizer"
 export default defineConfig({
-  plugins: [tailwindcss(),react()],
+  plugins: [tailwindcss(),react(),visualizer({ open: true })],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -22,7 +22,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           ui: ['@headlessui/react', '@heroicons/react'],
-          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+          forms: ['@rjsf/core'],
           utils: ['axios', 'date-fns', 'clsx', 'uuid']
         }
       }

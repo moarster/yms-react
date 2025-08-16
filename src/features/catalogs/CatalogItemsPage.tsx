@@ -14,11 +14,9 @@ import {Link, useLocation, useNavigate, useParams} from 'react-router-dom'
 import {catalogService} from '@/features/catalogs/catalogService'
 import {schemaService, TableConfig} from '@/services/schemaService'
 import {DataGridTable} from "@/shared/ui/DataGridTable";
-import HandsontableTable from "@/shared/ui/HandsontableTable/HandsontableTable.tsx";
+import {BaseTableRow} from "@/shared/ui/DataGridTable/table.types.ts";
+import {useTableData} from "@/shared/ui/DataGridTable/useTableData.ts";
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
-import {BaseTableRow} from "@/shared/ui/TabulatorTable/table.types.ts";
-import TabulatorTable from '@/shared/ui/TabulatorTable/TabulatorTable'
-import {useTableData} from "@/shared/ui/TabulatorTable/useTableData.ts";
 
 import {CatalogItem} from './catalog.types.ts'
 
@@ -195,45 +193,7 @@ const CatalogItemsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Main Content - Table */}
-            <div className="card p-0 overflow-hidden">
-                <TabulatorTable<CatalogItemRow>
-                    data={items}
-                    schema={!isListType ? schema : undefined}
-                    config={tableConfig}
-                    loading={isLoading}
-                    enableInlineEdit={true}
-                    onDelete={handleDelete}
-                    onSelectionChange={handleSelectionChange}
-                    onDataChange={handleDataChange}
-                />
-            </div>
-            {/* Handsontable Table */}
-            <div className={`transition-all duration-300 `}>
-                <div className="mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Handsontable Table</h3>
-                    <p className="text-sm text-gray-600">New implementation using Handsontable library</p>
-                </div>
-                <div className="card p-0 overflow-hidden">
-                    <HandsontableTable<CatalogItemRow>
-                        data={items}
-                        schema={!isListType ? schema : undefined}
-                        config={tableConfig}
-                        loading={isLoading}
-                        enableInlineEdit={true}
-                        onDelete={handleDelete}
-                        onSelectionChange={handleSelectionChange}
-                        onDataChange={handleDataChange}
-                    />
-                </div>
-            </div>
-            {/* New DataGrid Table */}
-
             <div className="relative">
-                <div
-                    className="absolute mb-2 mt-2 -top-12 right-0 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-full shadow-lg">
-                    Modern React DataGrid
-                </div>
                 <DataGridTable<CatalogItemRow>
                     data={items}
                     schema={!isListType ? schema : undefined}

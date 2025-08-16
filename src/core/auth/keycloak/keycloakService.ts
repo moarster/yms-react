@@ -162,7 +162,7 @@ export class KeycloakAuthService implements AuthService {
             name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim(),
             preferredUsername: tokenParsed.preferred_username,
             keycloakId: tokenParsed.sub,
-            roles: this.mapRoles([...realmRoles, ...resourceRoles]),
+            roles: this.mapRoles([...new Set([...realmRoles, ...resourceRoles])]),
             organization: this.extractOrganization(tokenParsed),
         }
     }

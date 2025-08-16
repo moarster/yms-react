@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @reference "tailwindcss/utilities";
 
-
 /* Container */
 .datagrid-wrapper {
     @apply rounded-xl overflow-hidden shadow-lg bg-white;
@@ -26,6 +25,16 @@
     padding: 14px 16px;
     border-right: 1px solid rgba(0, 0, 0, 0.04);
     position: relative;
+}
+
+/* Selection column header - first cell, zero padding and borders */
+.rdg-modern .rdg-header-row .rdg-cell:first-child {
+    padding: 0;
+    border-right: none;
+    overflow: hidden;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
 }
 
 .rdg-modern .rdg-header-row .rdg-cell:last-child {
@@ -70,6 +79,7 @@
     @apply bg-white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .rdg-modern .rdg-row:hover {
@@ -98,6 +108,16 @@
     align-items: center;
 }
 
+/* Selection column cell - first cell, zero padding and borders */
+.rdg-modern .rdg-cell:first-child {
+    padding: 0;
+    border-right: none;
+    overflow: visible;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+}
+
 .rdg-modern .rdg-cell:last-child {
     border-right: none;
 }
@@ -107,6 +127,64 @@
     @apply bg-blue-50 ring-2 ring-blue-400 ring-inset;
     padding: 0;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Selection column and circle */
+.selection-cell-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* Allow clicks to pass through container */
+}
+
+.selection-circle {
+    position: absolute;
+    left: 0; /* Position outside the zero-width cell */
+    width: 8px;
+    height: calc(100% - 6px);
+    border-radius: 0 6px 6px 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: auto;
+}
+
+/* Show circle on row hover */
+.rdg-modern .rdg-row:hover .selection-circle {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Circle states */
+.selection-circle.unselected {
+    background-color: #e5e7eb; /* gray-200 */
+    border: 1px solid #9ca3af; /* gray-400 */
+}
+
+.selection-circle.unselected:hover {
+    background-color: #dbeafe; /* blue-100 */
+    border-color: #3b82f6; /* blue-500 */
+}
+
+.selection-circle.selected {
+    background-color: #3b82f6; /* blue-500 */
+    border: 1px solid #1d4ed8; /* blue-700 */
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+.selection-circle.selected:hover {
+    background-color: #1d4ed8; /* blue-700 */
+    border-color: #1e3a8a; /* blue-800 */
 }
 
 /* Action buttons */
@@ -221,25 +299,15 @@
     .action-btn {
         @apply w-6 h-6;
     }
-}
 
+    .selection-circle {
+        width: 4px;
+        height: calc(100% - 3px); /* Smaller on mobile */
+        left: -16px;
+        top: 1.5px;
+    }
+}
 
 .my-row {
     position: relative;
-}
-
-.trash-btn {
-    position: absolute;
-    left: -28px; /* place it to the left of the row */
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    opacity: 0;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.my-row:hover .trash-btn {
-    opacity: 1;
 }

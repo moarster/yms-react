@@ -1,9 +1,9 @@
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
-import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import Form from '@rjsf/mui'
+import { RJSFSchema } from '@rjsf/utils'
+import validator from '@rjsf/validator-ajv8'
+import React, { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { z } from 'zod'
 
 import { demoUsers } from "@/core/auth/demo/demoUsers.ts"
 import { authConfig } from "@/core/config"
@@ -12,38 +12,41 @@ import { useUiStore } from '@/core/store/uiStore.ts'
 import BaseLoginLayout from "@/layout/BaseLoginLayout.tsx";
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 
+const schema: RJSFSchema = {
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+        email: { type: "string", format: "email", title: "Email address" },
+        password: { type: "string", title: "Password" }
+    }
+}
 
-const loginSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(1, 'Password is required'),
-})
-
-type LoginForm = z.infer<typeof loginSchema>
+const uiSchema = {
+    email: {
+        "ui:placeholder": "Email address",
+        "ui:options": { inputType: "email" }
+    },
+    password: {
+        "ui:placeholder": "Enter your password",
+        "ui:widget": "password"
+    }
+}
 
 const DemoLoginPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false)
     const { login, isLoading } = useAuthStore()
     const { addNotification } = useUiStore()
+    const formRef = useRef<any>()
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { errors },
-    } = useForm<LoginForm>({
-        resolver: zodResolver(loginSchema),
-    })
-
-    const onSubmit = async (data: LoginForm) => {
+    const onSubmit = async ({ formData }: any) => {
         try {
-            await login(data.email, data.password)
-
+            await login(formData.email, formData.password)
             addNotification({
                 type: 'success',
                 title: 'Welcome back!',
                 message: 'You have successfully logged in.',
             })
-        } catch (error: unknown) {
+        } catch (error: any) {
             const message = error?.message || 'Login failed. Please try again.'
             toast.error(message)
             addNotification({
@@ -61,10 +64,8 @@ const DemoLoginPage: React.FC = () => {
         } else {
             demoUser = demoUsers.find(u => u.user.roles[0].name === userType.toUpperCase())
         }
-
-        if (demoUser) {
-            setValue('email', demoUser.email)
-            setValue('password', demoUser.password)
+        if (demoUser && formRef.current) {
+            formRef.current.change({ email: demoUser.email, password: demoUser.password })
         }
     }
 
@@ -73,52 +74,36 @@ const DemoLoginPage: React.FC = () => {
             title="Carrier Portal"
             subtitle="Demo Mode - Sign in with demo credentials"
         >
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                <div className="rounded-md shadow-sm space-y-4">
-                    <div>
-                        <label htmlFor="email" className="sr-only">
-                            Email address
-                        </label>
-                        <input
-                            {...register('email')}
-                            type="email"
-                            autoComplete="email"
-                            placeholder="Email address"
-                            className={errors.email ? 'input-error' : 'input'}
-                        />
-                        {errors.email && (
-                            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            <Form
+                ref={formRef}
+                schema={schema}
+                uiSchema={uiSchema}
+                validator={validator}
+                onSubmit={onSubmit}
+                transformErrors={(errors) =>
+                    errors.map((e) => {
+                        if (e.name === "format" && e.property === ".email") {
+                            e.message = "Invalid email address"
+                        }
+                        if (e.name === "required" && e.property === ".password") {
+                            e.message = "Password is required"
+                        }
+                        return e
+                    })
+                }
+            >
+                <div className="relative mb-4">
+                    <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? (
+                            <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                        ) : (
+                            <EyeIcon className="h-5 w-5 text-gray-400" />
                         )}
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className="sr-only">
-                            Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                {...register('password')}
-                                type={showPassword ? 'text' : 'password'}
-                                autoComplete="current-password"
-                                className={errors.password ? 'input-error pr-10' : 'input pr-10'}
-                                placeholder="Enter your password"
-                            />
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {errors.password && (
-                            <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                        )}
-                    </div>
+                    </button>
                 </div>
 
                 <div>
@@ -130,45 +115,45 @@ const DemoLoginPage: React.FC = () => {
                         {isLoading ? <LoadingSpinner size="sm" /> : 'Sign in'}
                     </button>
                 </div>
+            </Form>
 
-                {/* Demo credentials section */}
-                <div className="mt-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-gray-50 text-gray-500">
-                                Demo Credentials
-                            </span>
-                        </div>
+            {/* Demo credentials section */}
+            <div className="mt-6">
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300" />
                     </div>
-
-                    <div className="mt-4 grid grid-cols-1 gap-3">
-                        <button
-                            type="button"
-                            className="btn-outline text-xs"
-                            onClick={() => fillDemoCredentials('logist')}
-                        >
-                            Logist Demo (logist@demo.com)
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-outline text-xs"
-                            onClick={() => fillDemoCredentials('carrier')}
-                        >
-                            Carrier Demo (carrier@demo.com)
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-outline text-xs"
-                            onClick={() => fillDemoCredentials('admin')}
-                        >
-                            Admin Demo (Full Access)
-                        </button>
+                    <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-gray-50 text-gray-500">
+              Demo Credentials
+            </span>
                     </div>
                 </div>
-            </form>
+
+                <div className="mt-4 grid grid-cols-1 gap-3">
+                    <button
+                        type="button"
+                        className="btn-outline text-xs"
+                        onClick={() => fillDemoCredentials('logist')}
+                    >
+                        Logist Demo (logist@demo.com)
+                    </button>
+                    <button
+                        type="button"
+                        className="btn-outline text-xs"
+                        onClick={() => fillDemoCredentials('carrier')}
+                    >
+                        Carrier Demo (carrier@demo.com)
+                    </button>
+                    <button
+                        type="button"
+                        className="btn-outline text-xs"
+                        onClick={() => fillDemoCredentials('admin')}
+                    >
+                        Admin Demo (Full Access)
+                    </button>
+                </div>
+            </div>
         </BaseLoginLayout>
     )
 }

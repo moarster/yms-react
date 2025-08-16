@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo,useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { BaseTableRow } from './table.types'
+import { BaseTableRow } from './table.types.ts'
 
 interface UseTableDataOptions<T extends BaseTableRow> {
     queryKey: string | string[]
