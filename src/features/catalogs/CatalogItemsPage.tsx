@@ -6,24 +6,27 @@ import {
     PlusIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline'
-import { useQuery } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
+import {useQuery} from '@tanstack/react-query'
+import React, {useMemo} from 'react'
 import toast from 'react-hot-toast'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {Link, useLocation, useNavigate, useParams} from 'react-router-dom'
 
-import { catalogService } from '@/features/catalogs/catalogService'
+import {catalogService} from '@/features/catalogs/catalogService'
 import {schemaService, TableConfig} from '@/services/schemaService'
+import {DataGridTable} from "@/shared/ui/DataGridTable";
+import HandsontableTable from "@/shared/ui/HandsontableTable/HandsontableTable.tsx";
 import LoadingSpinner from '@/shared/ui/LoadingSpinner'
 import {BaseTableRow} from "@/shared/ui/TabulatorTable/table.types.ts";
 import TabulatorTable from '@/shared/ui/TabulatorTable/TabulatorTable'
 import {useTableData} from "@/shared/ui/TabulatorTable/useTableData.ts";
 
-import { CatalogItem } from './catalog.types.ts'
+import {CatalogItem} from './catalog.types.ts'
 
-interface CatalogItemRow extends BaseTableRow, CatalogItem {}
+interface CatalogItemRow extends BaseTableRow, CatalogItem {
+}
 
 const CatalogItemsPage: React.FC = () => {
-    const { catalogKey } = useParams<{ catalogKey: string }>()
+    const {catalogKey} = useParams<{ catalogKey: string }>()
     const navigate = useNavigate()
     const location = useLocation()
     const isListType = location.pathname.startsWith('/list/')
@@ -31,7 +34,7 @@ const CatalogItemsPage: React.FC = () => {
 
 
     // Fetch catalog info
-    const { data: catalogInfo, isLoading: catalogLoading } = useQuery({
+    const {data: catalogInfo, isLoading: catalogLoading} = useQuery({
         queryKey: [isListType ? 'list-info' : 'catalog-info', catalogKey],
         queryFn: async () => {
             return isListType
@@ -42,7 +45,7 @@ const CatalogItemsPage: React.FC = () => {
     })
 
     // Fetch schema
-    const { data: schema } = useQuery({
+    const {data: schema} = useQuery({
         queryKey: ['catalog-schema', catalogKey],
         queryFn: () => schemaService.getAnySchema(catalogKey!),
         enabled: !!catalogKey && !isListType,
@@ -113,7 +116,7 @@ const CatalogItemsPage: React.FC = () => {
     if (catalogLoading || isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
+                <LoadingSpinner size="lg"/>
             </div>
         )
     }
@@ -143,7 +146,7 @@ const CatalogItemsPage: React.FC = () => {
                         to="/catalogs"
                         className="inline-flex items-center text-gray-500 hover:text-gray-700"
                     >
-                        <ChevronLeftIcon className="h-5 w-5 mr-1" />
+                        <ChevronLeftIcon className="h-5 w-5 mr-1"/>
                         Back to Catalogs
                     </Link>
                 </div>
@@ -169,7 +172,7 @@ const CatalogItemsPage: React.FC = () => {
                                     onClick={handleBulkDelete}
                                     className="btn-danger"
                                 >
-                                    <TrashIcon className="h-4 w-4 mr-2" />
+                                    <TrashIcon className="h-4 w-4 mr-2"/>
                                     Delete Selected
                                 </button>
                             </>
@@ -177,7 +180,7 @@ const CatalogItemsPage: React.FC = () => {
 
                         {/* Action buttons */}
                         <button onClick={handleExport} className="btn-secondary">
-                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2"/>
                             Export
                         </button>
 
@@ -185,7 +188,7 @@ const CatalogItemsPage: React.FC = () => {
                             onClick={() => setShowCreateModal(true)}
                             className="btn-primary"
                         >
-                            <PlusIcon className="h-4 w-4 mr-2" />
+                            <PlusIcon className="h-4 w-4 mr-2"/>
                             Add {catalogInfo.type === 'LIST' ? 'Item' : 'Entry'}
                         </button>
                     </div>
@@ -195,6 +198,43 @@ const CatalogItemsPage: React.FC = () => {
             {/* Main Content - Table */}
             <div className="card p-0 overflow-hidden">
                 <TabulatorTable<CatalogItemRow>
+                    data={items}
+                    schema={!isListType ? schema : undefined}
+                    config={tableConfig}
+                    loading={isLoading}
+                    enableInlineEdit={true}
+                    onDelete={handleDelete}
+                    onSelectionChange={handleSelectionChange}
+                    onDataChange={handleDataChange}
+                />
+            </div>
+            {/* Handsontable Table */}
+            <div className={`transition-all duration-300 `}>
+                <div className="mb-2">
+                    <h3 className="text-lg font-semibold text-gray-800">Handsontable Table</h3>
+                    <p className="text-sm text-gray-600">New implementation using Handsontable library</p>
+                </div>
+                <div className="card p-0 overflow-hidden">
+                    <HandsontableTable<CatalogItemRow>
+                        data={items}
+                        schema={!isListType ? schema : undefined}
+                        config={tableConfig}
+                        loading={isLoading}
+                        enableInlineEdit={true}
+                        onDelete={handleDelete}
+                        onSelectionChange={handleSelectionChange}
+                        onDataChange={handleDataChange}
+                    />
+                </div>
+            </div>
+            {/* New DataGrid Table */}
+
+            <div className="relative">
+                <div
+                    className="absolute mb-2 mt-2 -top-12 right-0 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-full shadow-lg">
+                    Modern React DataGrid
+                </div>
+                <DataGridTable<CatalogItemRow>
                     data={items}
                     schema={!isListType ? schema : undefined}
                     config={tableConfig}
