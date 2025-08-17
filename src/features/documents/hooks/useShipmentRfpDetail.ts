@@ -1,46 +1,44 @@
-import {  useQuery} from '@tanstack/react-query'
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import { useAuthStore } from '@/core/store/authStore.ts'
-import {documentService} from "@/features/documents/documentService.ts";
-import {useShipmentRfpMutations} from "@/features/documents/hooks/useShipmentRfpMutations.ts";
-import {schemaService} from "@/services/schemaService.ts";
-
+import { useAuthStore } from '@/core/store/authStore.ts';
+import { documentService } from '@/features/documents/documentService.ts';
+import { useShipmentRfpMutations } from '@/features/documents/hooks/useShipmentRfpMutations.ts';
+import { schemaService } from '@/services/schemaService.ts';
 
 export const useShipmentRfpDetail = () => {
-    const { id } = useParams<{ id: string }>()
-    const { user } = useAuthStore()
-    const [formData, setFormData] = useState<object>({})
-    const [isEditMode, setIsEditMode] = useState(false)
-    const isCreating = id === 'new'
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuthStore();
+  const [formData, setFormData] = useState<object>({});
+  const [isEditMode, setIsEditMode] = useState(false);
+  const isCreating = id === 'new';
 
-    const { createMutation, updateMutation } = useShipmentRfpMutations()
-    
-    const rfpQuery = useQuery({
-        queryKey: ['rfp', id],
-        queryFn: () => documentService.getShipmentRfp(id!),
-        enabled: !isCreating
-    })
+  const { createMutation, updateMutation } = useShipmentRfpMutations();
 
-    const schemaQuery = useQuery({
-        queryKey: ['shipment-rfp-schema'],
-        queryFn: () => schemaService.getAnySchema('shipment-rfp')
-    })
+  const rfpQuery = useQuery({
+    enabled: !isCreating,
+    queryFn: () => documentService.getShipmentRfp(id!),
+    queryKey: ['rfp', id],
+  });
 
+  const schemaQuery = useQuery({
+    queryFn: () => schemaService.getAnySchema('shipment-rfp'),
+    queryKey: ['shipment-rfp-schema'],
+  });
 
-    return {
-        id,
-        isCreating,
-        formData,
-        setFormData,
-        isEditMode,
-        setIsEditMode,
-        rfp: rfpQuery.data,
-        schema: schemaQuery.data,
-        isLoading: rfpQuery.isLoading || schemaQuery.isLoading,
-        createMutation,
-        updateMutation,
-        user
-    }
-}
+  return {
+    createMutation,
+    formData,
+    id,
+    isCreating,
+    isEditMode,
+    isLoading: rfpQuery.isLoading || schemaQuery.isLoading,
+    rfp: rfpQuery.data,
+    schema: schemaQuery.data,
+    setFormData,
+    setIsEditMode,
+    updateMutation,
+    user,
+  };
+};

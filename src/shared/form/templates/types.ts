@@ -1,20 +1,20 @@
-import {JsonSchema} from "@/services/schemaService.ts";
+import { JsonSchema } from '@/services/schemaService.ts';
 
 export interface FieldTemplateProps {
-    id: string
-    label: string
-    help?: string
-    required?: boolean
-    errors?: string
-    children: React.ReactNode
-    schema: JsonSchema
-    formData?: object
-    onChange: (value: object) => void
-    name?: string
-    disabled?: boolean
+  children: React.ReactNode;
+  disabled?: boolean;
+  errors?: string;
+  formData?: object;
+  help?: string;
+  id: string;
+  label: string;
+  name?: string;
+  onChange: (value: object) => void;
+  required?: boolean;
+  schema: JsonSchema;
 }
 
 export interface FieldLayoutConfig {
-    wrapperClass: string
-    labelClass: string
+  labelClass: string;
+  wrapperClass: string;
 }

@@ -1,119 +1,115 @@
-import {apiClient, PaginatedResponse} from '@/core/api'
-import {WizardLists} from "@/features/documents/wizards/wizard.types.ts";
+import { apiClient, PaginatedResponse } from '@/core/api';
+import { WizardLists } from '@/features/documents/wizards/wizard.types.ts';
 
-import {Catalog, CatalogItem, CatalogType, ListItem, SimpleList} from './catalog.types'
+import { Catalog, CatalogItem, CatalogType, ListItem, SimpleList } from './catalog.types';
 
 export interface CatalogFilters {
-    search?: string
-    status?: string[]
-    page?: number
-    size?: number
-    sort?: string
-    direction?: 'asc' | 'desc'
+  direction?: 'asc' | 'desc';
+  page?: number;
+  search?: string;
+  size?: number;
+  sort?: string;
+  status?: string[];
 }
 
 class CatalogService {
-    // Get all available catalogs
-    async getCatalogs(): Promise<Catalog[]> {
-        const response = await apiClient.getMany<Catalog>('/catalogs')
-        return response.content
+  // Get all available catalogs
+  async getCatalogs(): Promise<Catalog[]> {
+    const response = await apiClient.getMany<Catalog>('/catalogs');
+    return response.content;
+  }
+
+  async getLists(): Promise<SimpleList[]> {
+    const response = await apiClient.getMany<SimpleList>('/lists');
+    return response.content;
+  }
+
+  // Get catalog info
+  async getCatalogInfo(catalogKey: string): Promise<Catalog> {
+    return await apiClient.get<Catalog>(`/catalogs/${catalogKey}/info`);
+  }
+
+  async getListInfo(catalogKey: string): Promise<SimpleList> {
+    return await apiClient.get<SimpleList>(`/lists/${catalogKey}/info`);
+  }
+
+  async getCatalogItems(
+    catalogKey: string,
+    filters?: CatalogFilters,
+  ): Promise<PaginatedResponse<CatalogItem>> {
+    const params = new URLSearchParams();
+
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
+    if (filters?.size !== undefined) params.append('size', filters.size.toString());
+    if (filters?.sort) params.append('sort', filters.sort);
+    if (filters?.direction) params.append('direction', filters.direction);
+    if (filters?.status?.length) {
+      filters.status.forEach((status) => params.append('status', status));
     }
 
-    async getLists(): Promise<SimpleList[]> {
-        const response = await apiClient.getMany<SimpleList>('/lists')
-        return response.content
-    }
+    return await apiClient.getMany<CatalogItem>(`/reference/${catalogKey}?${params.toString()}`);
+  }
 
+  // Get list items with filters
+  async getListItems(
+    listKey: string,
+    listType: CatalogType,
+    filters?: CatalogFilters,
+  ): Promise<PaginatedResponse<ListItem>> {
+    const params = new URLSearchParams();
 
-    // Get catalog info
-    async getCatalogInfo(catalogKey: string): Promise<Catalog> {
-        return await apiClient.get<Catalog>(`/catalogs/${catalogKey}/info`)
-    }
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
+    if (filters?.size !== undefined) params.append('size', filters.size.toString());
+    if (filters?.sort) params.append('sort', filters.sort);
+    if (filters?.direction) params.append('direction', filters.direction);
 
-    async getListInfo(catalogKey: string): Promise<SimpleList> {
-        return await apiClient.get<SimpleList>(`/lists/${catalogKey}/info`)
-    }
+    const response = await apiClient.getMany<ListItem>(
+      listType === 'LIST'
+        ? `/lists/${listKey}?${params.toString()}`
+        : `/catalogs/${listKey}?${params.toString()}`,
+      listType === 'CATALOG',
+    );
+    return response;
+  }
 
+  async getWizardLists(): Promise<WizardLists> {
+    const [
+      shipmentTypes,
+      transportationTypes,
+      currencies,
+      vehicleTypes,
+      cargoNatures,
+      counterParties,
+      cargoHandlingTypes,
+    ] = await Promise.allSettled([
+      this.getListItems('shipment-type', 'LIST'),
+      this.getListItems('transportation-type', 'LIST'),
+      this.getListItems('currency', 'LIST'),
+      this.getCatalogItems('vehicle-type'),
+      this.getListItems('cargo-nature', 'LIST'),
+      this.getCatalogItems('counter-party'),
+      this.getListItems('cargo-handling-type', 'LIST'),
+    ]);
 
-    async getCatalogItems(
-        catalogKey: string,
-        filters?: CatalogFilters
-    ): Promise<PaginatedResponse<CatalogItem>> {
-        const params = new URLSearchParams()
+    return {
+      cargoHandlingTypes:
+        cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value.content : [],
+      cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value.content : [],
+      counterParties: counterParties.status === 'fulfilled' ? counterParties.value.content : [],
+      currencies: currencies.status === 'fulfilled' ? currencies.value.content : [],
+      shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value.content : [],
+      transportationTypes:
+        transportationTypes.status === 'fulfilled' ? transportationTypes.value.content : [],
+      vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value.content : [],
+    };
+  }
 
-        if (filters?.search) params.append('search', filters.search)
-        if (filters?.page !== undefined) params.append('page', filters.page.toString())
-        if (filters?.size !== undefined) params.append('size', filters.size.toString())
-        if (filters?.sort) params.append('sort', filters.sort)
-        if (filters?.direction) params.append('direction', filters.direction)
-        if (filters?.status?.length) {
-            filters.status.forEach(status => params.append('status', status))
-        }
-
-        return await apiClient.getMany<CatalogItem>(
-            `/reference/${catalogKey}?${params.toString()}`
-        )
-    }
-
-    // Get list items with filters
-    async getListItems(
-        listKey: string,
-        listType: CatalogType,
-        filters?: CatalogFilters
-    ): Promise<PaginatedResponse<ListItem>> {
-        const params = new URLSearchParams()
-
-        if (filters?.search) params.append('search', filters.search)
-        if (filters?.page !== undefined) params.append('page', filters.page.toString())
-        if (filters?.size !== undefined) params.append('size', filters.size.toString())
-        if (filters?.sort) params.append('sort', filters.sort)
-        if (filters?.direction) params.append('direction', filters.direction)
-
-        
-        const response = await apiClient.getMany<ListItem>(
-            listType==='LIST'?`/lists/${listKey}?${params.toString()}`:`/catalogs/${listKey}?${params.toString()}`,listType==='CATALOG'
-        )
-        return  response
-
-    }
-
-    async getWizardLists(): Promise<WizardLists> {
-        const [
-            shipmentTypes,
-            transportationTypes,
-            currencies,
-            vehicleTypes,
-            cargoNatures,
-            counterParties,
-            cargoHandlingTypes
-        ] = await Promise.allSettled([
-            this.getListItems('shipment-type', 'LIST'),
-            this.getListItems('transportation-type', 'LIST'),
-            this.getListItems('currency', 'LIST'),
-            this.getCatalogItems('vehicle-type'),
-            this.getListItems('cargo-nature', 'LIST'),
-            this.getCatalogItems('counter-party'),
-            this.getListItems('cargo-handling-type', 'LIST')
-        ])
-
-        return {
-            shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value.content : [],
-            transportationTypes: transportationTypes.status === 'fulfilled' ? transportationTypes.value.content : [],
-            currencies: currencies.status === 'fulfilled' ? currencies.value.content : [],
-            vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value.content : [],
-            cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value.content : [],
-            counterParties: counterParties.status === 'fulfilled' ? counterParties.value.content : [],
-            cargoHandlingTypes: cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value.content : []
-        }
-    }
-
-    // Delete catalog item
-    async deleteCatalogItem(catalogKey: string, itemId: string): Promise<void> {
-        return await apiClient.delete(
-            `/reference/${catalogKey}/items/${itemId}`
-        )
-    }
-
+  // Delete catalog item
+  async deleteCatalogItem(catalogKey: string, itemId: string): Promise<void> {
+    return await apiClient.delete(`/reference/${catalogKey}/items/${itemId}`);
+  }
 }
 
-export const catalogService = new CatalogService()
+export const catalogService = new CatalogService();

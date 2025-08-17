@@ -1,67 +1,67 @@
-export type UserRole = 'LOGIST' | 'CARRIER' | 'ADMIN'
-export type AuthMode = 'keycloak' | 'demo'
+export type UserRole = 'ADMIN' | 'CARRIER' | 'LOGIST';
+export type AuthMode = 'demo' | 'keycloak';
 
 export interface Organization {
-    id: string
-    name: string
-    inn: string
-    ogrn: string
-    address: string
-    phone?: string
-    email?: string
+  address: string;
+  email?: string;
+  id: string;
+  inn: string;
+  name: string;
+  ogrn: string;
+  phone?: string;
 }
 
 export interface Role {
-    id: string
-    name: UserRole
-    permissions: string[]
+  id: string;
+  name: UserRole;
+  permissions: string[];
 }
 
 export interface User {
-    id: string
-    email: string
-    name: string
-    roles: Role[]
-    organization?: Organization
-    keycloakId?: string
-    preferredUsername?: string
+  email: string;
+  id: string;
+  keycloakId?: string;
+  name: string;
+  organization?: Organization;
+  preferredUsername?: string;
+  roles: Role[];
 }
 
 export interface AuthState {
-    user: User | null
-    token: string | null
-    isAuthenticated: boolean
-    isLoading: boolean
-    authMode: AuthMode
+  authMode: AuthMode;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  token: null | string;
+  user: null | User;
 }
 
 export interface AuthTokens {
-    accessToken: string
-    refreshToken?: string
+  accessToken: string;
+  refreshToken?: string;
 }
 
 export interface AuthResponse {
-    user: User
-    tokens: AuthTokens
+  tokens: AuthTokens;
+  user: User;
 }
 
 export interface AuthService {
-    login(email?: string, password?: string): Promise<AuthResponse>
-    logout(): Promise<void>
-    refreshToken(): Promise<AuthTokens>
-    getCurrentUser(): Promise<User>
-    isAuthenticated(): boolean
+  getCurrentUser(): Promise<User>;
+  isAuthenticated(): boolean;
+  login(email?: string, password?: string): Promise<AuthResponse>;
+  logout(): Promise<void>;
+  refreshToken(): Promise<AuthTokens>;
 }
 
-export const userHasRole = (user: User | null, role: UserRole): boolean =>
-    user?.roles.some(r => r.name === role) ?? false
+export const userHasRole = (user: null | User, role: UserRole): boolean =>
+  user?.roles.some((r) => r.name === role) ?? false;
 
-export const userHasAnyRole = (user: User | null, roles: UserRole[]): boolean =>
-    roles.some(role => userHasRole(user, role))
+export const userHasAnyRole = (user: null | User, roles: UserRole[]): boolean =>
+  roles.some((role) => userHasRole(user, role));
 
-export const userHasPermission = (user: User | null, permission: string): boolean =>
-    user?.roles?.some(role => role.permissions.includes(permission)) ?? false
+export const userHasPermission = (user: null | User, permission: string): boolean =>
+  user?.roles?.some((role) => role.permissions.includes(permission)) ?? false;
 
-export const userIsLogist = (user: User | null): boolean => userHasRole(user, 'LOGIST')
-export const userIsCarrier = (user: User | null): boolean => userHasRole(user, 'CARRIER')
-export const userIsAdmin = (user: User | null): boolean => userHasRole(user, 'ADMIN')
+export const userIsLogist = (user: null | User): boolean => userHasRole(user, 'LOGIST');
+export const userIsCarrier = (user: null | User): boolean => userHasRole(user, 'CARRIER');
+export const userIsAdmin = (user: null | User): boolean => userHasRole(user, 'ADMIN');

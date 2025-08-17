@@ -1,89 +1,89 @@
-import { RJSFSchema, UiSchema } from '@rjsf/utils'
-import React from 'react'
+import { RJSFSchema, UiSchema } from '@rjsf/utils';
+import React from 'react';
 
-type IconComponent = React.ComponentType<{ className?: string }>
+type IconComponent = React.ComponentType<{ className?: string }>;
 
 export interface FormConfig {
-    schema: RJSFSchema
-    uiSchema?: UiSchema
-    formData?: object
-    disabled?: boolean
-    showErrorList?: boolean
+  disabled?: boolean;
+  formData?: object;
+  schema: RJSFSchema;
+  showErrorList?: boolean;
+  uiSchema?: UiSchema;
 }
 
 export interface SidebarSection {
-    title: string
-    icon?: IconComponent
-    content?: React.ReactNode
-    items?: Array<{ label: string; value: string; type?: string }>
+  content?: React.ReactNode;
+  icon?: IconComponent;
+  items?: Array<{ label: string; value: string; type?: string }>;
+  title: string;
 }
 
 export interface CustomSection {
-    id: string
-    title: string
-    icon?: IconComponent
-    content: React.ReactNode
-    position: 'before-form' | 'after-form'
+  content: React.ReactNode;
+  icon?: IconComponent;
+  id: string;
+  position: 'after-form' | 'before-form';
+  title: string;
 }
 
 export interface FormAction {
-    label: string
-    onClick: () => void
-    loading?: boolean
-    disabled?: boolean
-    icon?: IconComponent
+  disabled?: boolean;
+  icon?: IconComponent;
+  label: string;
+  loading?: boolean;
+  onClick: () => void;
 }
 
 export interface FormActions {
-    edit?: FormAction
-    save?: FormAction
-    cancel?: FormAction
-    delete?: FormAction
-    additional?: Array<FormAction & {
-        variant?: 'outline' | 'danger' | 'success'
-    }>
+  additional?: Array<
+    FormAction & {
+      variant?: 'danger' | 'outline' | 'success';
+    }
+  >;
+  cancel?: FormAction;
+  delete?: FormAction;
+  edit?: FormAction;
+  save?: FormAction;
 }
 
 export interface WorkflowTask {
-    label: string
-    onClick: () => void
-    loading?: boolean
-    disabled?: boolean
-    icon?: IconComponent
-    variant?: 'primary' | 'secondary' | 'danger' | 'success'
-    requiresConfirmation?: boolean
+  disabled?: boolean;
+  icon?: IconComponent;
+  label: string;
+  loading?: boolean;
+  onClick: () => void;
+  requiresConfirmation?: boolean;
+  variant?: 'danger' | 'primary' | 'secondary' | 'success';
 }
 
-
-
 export interface CommonFormProps {
-    title: string
-    subtitle?: string
-    breadcrumbs?: Array<{ label: string; href?: string }>
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+  // Additional customization
+  className?: string;
+  customSections?: CustomSection[];
 
-    // Form configuration
-    formConfig: FormConfig
-    onFormChange: (data: object) => void
-    onFormSubmit: (data: object) => void
+  // Header - Form Actions (edit, save, cancel)
+  formActions?: FormActions;
+  // Form configuration
+  formConfig: FormConfig;
+  // Edit mode toggle
+  isEditMode?: boolean;
 
-    // Layout customization
-    sidebarSections?: SidebarSection[]
-    customSections?: CustomSection[]
+  // Loading states
+  isLoading?: boolean;
+  isSubmitting?: boolean;
 
-    // Header - Form Actions (edit, save, cancel)
-    formActions?: FormActions
+  onEditModeChange?: (editMode: boolean) => void;
 
-    // Footer - Workflow Tasks (publish, assign, etc.)
-    workflowTasks?: WorkflowTask[]
+  onFormChange: (data: object) => void;
 
-    // Loading states
-    isLoading?: boolean
-    isSubmitting?: boolean
+  onFormSubmit: (data: object) => void;
+  // Layout customization
+  sidebarSections?: SidebarSection[];
 
-    // Edit mode toggle
-    isEditMode?: boolean
-    onEditModeChange?: (editMode: boolean) => void
+  subtitle?: string;
+  title: string;
 
-    // Additional customization
-    className?: string
+  // Footer - Workflow Tasks (publish, assign, etc.)
+  workflowTasks?: WorkflowTask[];
 }

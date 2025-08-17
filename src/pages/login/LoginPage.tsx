@@ -1,14 +1,14 @@
-import React from 'react'
+import React from 'react';
 
-import { useAuthStore } from '@/core/store/authStore.ts'
+import { useAuthStore } from '@/core/store/authStore.ts';
 
-import DemoLoginPage from './DemoLoginPage'
-import KeycloakLoginPage from './KeycloakLoginPage'
+import DemoLoginPage from './DemoLoginPage';
+import KeycloakLoginPage from './KeycloakLoginPage';
 
 const LoginPage: React.FC = () => {
-    const { authMode } = useAuthStore()
+  const { authMode } = useAuthStore();
 
-    return authMode === 'demo' ? <DemoLoginPage /> : <KeycloakLoginPage />
-}
+  return authMode === 'demo' ? <DemoLoginPage /> : <KeycloakLoginPage />;
+};
 
-export default LoginPage
+export default LoginPage;

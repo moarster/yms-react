@@ -1,22 +1,24 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import react from 'eslint-plugin-react'
-import importPlugin from 'eslint-plugin-import'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import tseslint from 'typescript-eslint'
-import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import react from 'eslint-plugin-react';
+import importPlugin from 'eslint-plugin-import';
+import tseslint from 'typescript-eslint';
+import perfectionist from 'eslint-plugin-perfectionist';
+import prettierPlugin from 'eslint-plugin-prettier';
+import mantine from 'eslint-config-mantine';
 
 export default [
+  ...mantine,
   {
-    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts',
-    '**/ReferenceArrayFieldTemplate.tsx']
+    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
+
     languageOptions: {
       ecmaVersion: 2023,
       globals: globals.browser,
@@ -32,8 +34,9 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       import: importPlugin,
-      'jsx-a11y': jsxA11y,
-      'simple-import-sort': simpleImportSort,
+      // 'jsx-a11y': jsxA11y,
+      perfectionist,
+      prettier: prettierPlugin,
     },
     settings: {
       react: {
@@ -48,22 +51,60 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      'prettier/prettier': ['error'],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-     // '@typescript-eslint/no-unused-vars': 'off', //TODO: remove
-     // '@typescript-eslint/no-explicit-any': 'off',//TODO: remove
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
+
       'import/first': 'error',
       'import/newline-after-import': 'error',
 
+      'perfectionist/sort-imports': [
+        'error',
+        {
+          type: 'natural',
+          groups: [
+            'builtin',
+            'external',
+            'internal-type',
+            'internal',
+            ['parent', 'sibling', 'index'],
+            'object',
+            'style',
+            'unknown',
+          ],
+        },
+      ],
+      'perfectionist/sort-exports': ['error', { type: 'natural' }],
+      'perfectionist/sort-objects': ['error', { type: 'natural' }],
+      'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
+      'perfectionist/sort-union-types': ['error', { type: 'natural' }],
+      'perfectionist/sort-enums': ['error', { type: 'natural' }],
+      'perfectionist/sort-jsx-props': [
+        'error',
+        {
+          type: 'line-length',
+          ignoreCase: true,
+          fallbackSort: { type: 'natural' },
+          groups: ['multiline-prop', 'unknown', 'shorthand-prop', 'callback'],
+          customGroups: [
+            {
+              groupName: 'callback',
+              elementNamePattern: '^on.+',
+            },
+          ],
+        },
+      ],
+
       // TypeScript - re-enable the good stuff
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-inferrable-types': 'error',
 
@@ -76,8 +117,8 @@ export default [
       'no-duplicate-imports': 'error',
 
       // Basic accessibility
-      'jsx-a11y/alt-text': 'error',
-      'jsx-a11y/anchor-has-content': 'error',
+      // 'jsx-a11y/alt-text': 'error',
+      // 'jsx-a11y/anchor-has-content': 'error',
     },
   },
   {
@@ -89,7 +130,6 @@ export default [
         project: './tsconfig.node.json',
       },
     },
-
   },
   {
     files: ['**/*.{js,mjs,cjs}'],
@@ -98,7 +138,7 @@ export default [
       globals: globals.node,
     },
     rules: {
-      'no-unused-vars': ['off'], // Disable for JS files too
+      'no-unused-vars': 'off',
     },
   },
-]
+];

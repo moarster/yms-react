@@ -1,47 +1,63 @@
 export interface Identifiable {
-    id?: string
+  id?: string;
 }
 
 export interface Auditable {
-    createdBy?: string
-    createdDate?: Date
-    lastModifiedBy?: string
-    lastModifiedDate?: Date
+  createdBy?: string;
+  createdDate?: Date;
+  lastModifiedBy?: string;
+  lastModifiedDate?: Date;
 }
 
 export interface Titled {
-    title?: string
-    description?: string
+  description?: string;
+  title?: string;
 }
 
-// Core entity types with clear hierarchy
 export interface BaseEntity extends Identifiable, Auditable, Titled {}
 
-export interface DataEntity<TData = Record<string, unknown>> extends BaseEntity {
-    data?: TData
+export interface DataEntity<TData = EntityData> extends BaseEntity {
+  data: TData | undefined;
 }
 
-export interface DomainEntity<TData = Record<string, unknown>> extends DataEntity<TData> {
-    status?: string
-    process?: string
-    meta?: string
+export interface DomainEntity<TData = EntityData> extends DataEntity<TData> {
+  meta?: string;
+  process?: string;
+  status?: string;
 }
 
 export interface MetadataEntity extends Identifiable, Auditable {
-    schema?: string
-    since?: Date
-    until?: Date
+  schema?: string;
+  since?: Date;
+  until?: Date;
 }
 
-// Utility types for entity operations
-export type EntityId = string
-export type EntityStatus = string
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EntityData
+  extends Record<
+    string,
+    | BaseEntity
+    | boolean
+    | boolean[]
+    | Date
+    | Date[]
+    | EntityData
+    | EntityData[]
+    | null
+    | number
+    | number[]
+    | string
+    | string[]
+    | undefined
+  > {}
 
 // Strip audit fields for creation
-export type CreatePayload<T extends BaseEntity> = Omit<T, keyof Auditable | 'id'>
+export type CreatePayload<T extends BaseEntity> = Omit<T, 'id' | keyof Auditable>;
 
 // Partial update payload
-export type UpdatePayload<T extends BaseEntity> = Partial<CreatePayload<T>>
+export type UpdatePayload<T extends BaseEntity> = Partial<CreatePayload<T>>;
 
 // Fully persisted entity (all audit fields required)
-export type PersistedEntity<T extends BaseEntity> = T & Required<Auditable> & Required<Identifiable>
+export type PersistedEntity<T extends BaseEntity> = T &
+  Required<Auditable> &
+  Required<Identifiable>;

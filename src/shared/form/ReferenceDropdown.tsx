@@ -1,92 +1,89 @@
-import React from 'react'
+import React from 'react';
 
-import { BaseLink } from '@/types'
+import { BaseLink } from '@/types';
 
-import { DropdownOptions } from './reference/DropdownOptions.tsx'
-import { DropdownSearch } from './reference/DropdownSearch.tsx'
-import { useReferenceDropdown } from './reference/hooks/useReferenceDropdown.ts'
-import { ReferenceDropdownBase } from './reference/ReferenceDropdownBase.tsx'
+import { DropdownOptions } from './reference/DropdownOptions.tsx';
+import { DropdownSearch } from './reference/DropdownSearch.tsx';
+import { useReferenceDropdown } from './reference/hooks/useReferenceDropdown.ts';
+import { ReferenceDropdownBase } from './reference/ReferenceDropdownBase.tsx';
 
 interface ReferenceDropdownProps {
-    value?: BaseLink | null
-    onChange: (value: BaseLink | null) => void
-    catalog: string
-    domain: 'lists' | 'catalogs'
-    placeholder?: string
-    disabled?: boolean
-    required?: boolean
-    error?: string
+  catalog: string;
+  disabled?: boolean;
+  domain: 'catalogs' | 'lists';
+  error?: string;
+  onChange: (value: BaseLink | null) => void;
+  placeholder?: string;
+  required?: boolean;
+  value?: BaseLink | null;
 }
 
 const ReferenceDropdown: React.FC<ReferenceDropdownProps> = ({
-                                                                 value,
-                                                                 onChange,
-                                                                 catalog,
-                                                                 domain,
-                                                                 placeholder = "Select option...",
-                                                                 disabled = false,
-                                                                 error
-                                                             }) => {
-    const {
-        isOpen,
-        searchTerm,
-        setSearchTerm,
-        options,
-        isLoading,
-        dropdownRef,
-        handleSelect,
-        handleClear,
-        handleToggle
-    } = useReferenceDropdown({ catalog, domain, onChange })
+  catalog,
+  disabled = false,
+  domain,
+  error,
+  onChange,
+  placeholder = 'Select option...',
+  value,
+}) => {
+  const {
+    dropdownRef,
+    handleClear,
+    handleSelect,
+    handleToggle,
+    isLoading,
+    isOpen,
+    options,
+    searchTerm,
+    setSearchTerm,
+  } = useReferenceDropdown({ catalog, domain, onChange });
 
-    if (disabled) {
-        return (
-            <div className="relative">
-                <ReferenceDropdownBase
-                    value={value}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    error={error}
-                    isOpen={false}
-                    onToggle={() => {}}
-                    onClear={() => {}}
-                />
-                {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-            </div>
-        )
-    }
-
+  if (disabled) {
     return (
-        <div className="relative" ref={dropdownRef}>
-            <ReferenceDropdownBase
-                value={value}
-                placeholder={placeholder}
-                disabled={disabled}
-                error={error}
-                isOpen={isOpen}
-                onToggle={handleToggle}
-                onClear={handleClear}
-            />
+      <div className="relative">
+        <ReferenceDropdownBase
+          error={error}
+          value={value}
+          isOpen={false}
+          disabled={disabled}
+          placeholder={placeholder}
+          onClear={() => {}}
+          onToggle={() => {}}
+        />
+        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      </div>
+    );
+  }
 
-            {isOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                    <DropdownSearch
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                    />
-                    <DropdownOptions
-                        options={options}
-                        isLoading={isLoading}
-                        selectedValue={value}
-                        searchTerm={searchTerm}
-                        onSelect={handleSelect}
-                    />
-                </div>
-            )}
+  return (
+    <div ref={dropdownRef} className="relative">
+      <ReferenceDropdownBase
+        error={error}
+        value={value}
+        isOpen={isOpen}
+        disabled={disabled}
+        placeholder={placeholder}
+        onClear={handleClear}
+        onToggle={handleToggle}
+      />
 
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+          <DropdownSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <DropdownOptions
+            options={options}
+            isLoading={isLoading}
+            selectedValue={value}
+            searchTerm={searchTerm}
+            onSelect={handleSelect}
+          />
         </div>
-    )
-}
+      )}
 
-export default ReferenceDropdown
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+};
+
+export default ReferenceDropdown;

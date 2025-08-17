@@ -1,42 +1,42 @@
-import React from 'react'
+import React from 'react';
 
-import { InputError,InputLabel } from '../common'
-import {BaseInputProps} from './types.ts'
+import { InputError, InputLabel } from '../common';
+import { BaseInputProps } from './types.ts';
 
 interface TextInputProps extends BaseInputProps {
-    value: string
-    onChange: (value: string) => void
-    placeholder?: string
-    type?: 'text' | 'tel' | 'email' | 'password'
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: 'email' | 'password' | 'tel' | 'text';
+  value: string;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
-                                                        label,
-                                                        required,
-                                                        disabled,
-                                                        error,
-                                                        className = '',
-                                                        id,
-                                                        value,
-                                                        onChange,
-                                                        placeholder,
-                                                        type = 'text'
-                                                    }) => {
-    const inputId = id || `text-input-${Math.random().toString(36).substr(2, 9)}`
+  className = '',
+  disabled,
+  error,
+  id,
+  label,
+  onChange,
+  placeholder,
+  required,
+  type = 'text',
+  value,
+}) => {
+  const inputId = id || `text-input-${Math.random().toString(36).substr(2, 9)}`;
 
-    return (
-        <div className={className}>
-            {label && <InputLabel htmlFor={inputId} label={label} required={required} />}
-            <input
-                id={inputId}
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-                placeholder={placeholder}
-                className={`input ${error ? 'input-error' : ''}`}
-            />
-            <InputError error={error} />
-        </div>
-    )
-}
+  return (
+    <div className={className}>
+      {label && <InputLabel label={label} htmlFor={inputId} required={required} />}
+      <input
+        type={type}
+        id={inputId}
+        value={value}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={`input ${error ? 'input-error' : ''}`}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <InputError error={error} />
+    </div>
+  );
+};

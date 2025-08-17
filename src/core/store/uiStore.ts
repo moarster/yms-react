@@ -1,74 +1,72 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
-import { Notification } from '@/types'
+import { Notification } from '@/types';
 
 interface UiStore {
-    sidebarOpen: boolean
-    theme: 'light' | 'dark'
-    notifications: Notification[]
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => void;
+  clearNotifications: () => void;
+  markNotificationRead: (id: string) => void;
 
-    toggleSidebar: () => void
-    setSidebarOpen: (open: boolean) => void
-    setTheme: (theme: 'light' | 'dark') => void
-    addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void
-    markNotificationRead: (id: string) => void
-    removeNotification: (id: string) => void
-    clearNotifications: () => void
+  notifications: Notification[];
+  removeNotification: (id: string) => void;
+  setSidebarOpen: (open: boolean) => void;
+  setTheme: (theme: 'dark' | 'light') => void;
+  sidebarOpen: boolean;
+  theme: 'dark' | 'light';
+  toggleSidebar: () => void;
 }
 
 export const useUiStore = create<UiStore>((set, get) => ({
-    sidebarOpen: true,
-    theme: 'light',
-    notifications: [],
+  addNotification: (notification) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now().toString(),
+      read: false,
+      timestamp: new Date().toISOString(),
+    };
 
-    toggleSidebar: () => {
-        set((state) => ({ sidebarOpen: !state.sidebarOpen }))
-    },
+    set((state) => ({
+      notifications: [newNotification, ...state.notifications].slice(0, 10), // Keep only last 10
+    }));
 
-    setSidebarOpen: (open: boolean) => {
-        set({ sidebarOpen: open })
-    },
+    // Auto-remove after 10 seconds for non-error notifications
+    if (notification.type !== 'error') {
+      setTimeout(() => {
+        get().removeNotification(newNotification.id);
+      }, 10000);
+    }
+  },
+  clearNotifications: () => {
+    set({ notifications: [] });
+  },
+  markNotificationRead: (id: string) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    }));
+  },
 
-    setTheme: (theme: 'light' | 'dark') => {
-        set({ theme })
-        document.documentElement.classList.toggle('dark', theme === 'dark')
-    },
+  notifications: [],
 
-    addNotification: (notification) => {
-        const newNotification: Notification = {
-            ...notification,
-            id: Date.now().toString(),
-            timestamp: new Date().toISOString(),
-            read: false,
-        }
+  removeNotification: (id: string) => {
+    set((state) => ({
+      notifications: state.notifications.filter((n) => n.id !== id),
+    }));
+  },
 
-        set((state) => ({
-            notifications: [newNotification, ...state.notifications].slice(0, 10), // Keep only last 10
-        }))
+  setSidebarOpen: (open: boolean) => {
+    set({ sidebarOpen: open });
+  },
 
-        // Auto-remove after 10 seconds for non-error notifications
-        if (notification.type !== 'error') {
-            setTimeout(() => {
-                get().removeNotification(newNotification.id)
-            }, 10000)
-        }
-    },
+  setTheme: (theme: 'dark' | 'light') => {
+    set({ theme });
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  },
 
-    markNotificationRead: (id: string) => {
-        set((state) => ({
-            notifications: state.notifications.map((n) =>
-                n.id === id ? { ...n, read: true } : n
-            ),
-        }))
-    },
+  sidebarOpen: true,
 
-    removeNotification: (id: string) => {
-        set((state) => ({
-            notifications: state.notifications.filter((n) => n.id !== id),
-        }))
-    },
+  theme: 'light',
 
-    clearNotifications: () => {
-        set({ notifications: [] })
-    },
-}))
+  toggleSidebar: () => {
+    set((state) => ({ sidebarOpen: !state.sidebarOpen }));
+  },
+}));

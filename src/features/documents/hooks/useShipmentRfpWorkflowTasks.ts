@@ -1,89 +1,100 @@
 import {
-    DocumentCheckIcon,
-    PaperAirplaneIcon,
-    UserGroupIcon,
-    XCircleIcon} from '@heroicons/react/24/outline'
-import { useMemo } from 'react'
+  XCircleIcon,
+  UsersIcon,
+  AirplaneTakeoffIcon,
+  UserCircleCheckIcon,
+} from '@phosphor-icons/react';
+import { useMemo } from 'react';
 
-import {ShipmentRfp} from "@/features/documents/types/shipment-rfp.ts";
-import { WorkflowTask } from '@/types/form.ts'
-import { DocumentStatus } from '@/types/workflow.ts'
+import { ShipmentRfp } from '@/features/documents/types/shipment-rfp.ts';
+import { WorkflowTask } from '@/types/form.ts';
+import { DocumentStatus } from '@/types/workflow.ts';
 
 interface UseShipmentRfpWorkflowTasksProps {
-    rfp: ShipmentRfp
-    canPublish: boolean
-    canAssign: boolean
-    canComplete: boolean
-    canCancel: boolean
-    userRole: 'LOGIST' | 'CARRIER' | 'ADMIN'
-    onPublish: () => void
-    onAssign: () => void
-    onComplete: () => void
-    onCancel: () => void
+  canAssign: boolean;
+  canCancel: boolean;
+  canComplete: boolean;
+  canPublish: boolean;
+  onAssign: () => void;
+  onCancel: () => void;
+  onComplete: () => void;
+  onPublish: () => void;
+  rfp: ShipmentRfp;
+  userRole: 'ADMIN' | 'CARRIER' | 'LOGIST';
 }
 
 export const useShipmentRfpWorkflowTasks = ({
-                                                rfp,
-                                                canPublish,
-                                                canAssign,
-                                                canComplete,
-                                                canCancel,
-                                                userRole,
-                                                onPublish,
-                                                onAssign,
-                                                onComplete,
-                                                onCancel
-                                            }: UseShipmentRfpWorkflowTasksProps) => {
+  canAssign,
+  canCancel,
+  canComplete,
+  canPublish,
+  onAssign,
+  onCancel,
+  onComplete,
+  onPublish,
+  rfp,
+  userRole,
+}: UseShipmentRfpWorkflowTasksProps) => {
+  const workflowTasks: WorkflowTask[] = useMemo(() => {
+    if (!rfp) return [];
 
-    const workflowTasks: WorkflowTask[] = useMemo(() => {
-        if (!rfp) return []
+    const tasks: WorkflowTask[] = [];
+    const status = rfp.status as DocumentStatus;
 
-        const tasks: WorkflowTask[] = []
-        const status = rfp.status as DocumentStatus
+    // Tasks based on document status and user permissions
+    if (status === 'NEW' && canPublish) {
+      tasks.push({
+        icon: AirplaneTakeoffIcon,
+        label: 'Publish RFP',
+        onClick: onPublish,
+        requiresConfirmation: true,
+        variant: 'primary',
+      });
+    }
 
-        // Tasks based on document status and user permissions
-        if (status === 'NEW' && canPublish) {
-            tasks.push({
-                label: 'Publish RFP',
-                icon: PaperAirplaneIcon,
-                variant: 'primary',
-                onClick: onPublish,
-                requiresConfirmation: true
-            })
-        }
+    if ((status === 'NEW' || status === 'PUBLISHED') && canAssign) {
+      tasks.push({
+        icon: UsersIcon,
+        label: 'Assign Carrier',
+        onClick: onAssign,
+        variant: 'secondary',
+      });
+    }
 
-        if ((status === 'NEW' || status === 'PUBLISHED') && canAssign) {
-            tasks.push({
-                label: 'Assign Carrier',
-                icon: UserGroupIcon,
-                variant: 'secondary',
-                onClick: onAssign
-            })
-        }
+    if (status === 'ASSIGNED' && canComplete && userRole === 'LOGIST') {
+      tasks.push({
+        icon: UserCircleCheckIcon,
+        label: 'Mark Complete',
+        onClick: onComplete,
+        requiresConfirmation: true,
+        variant: 'success',
+      });
+    }
 
-        if (status === 'ASSIGNED' && canComplete && userRole === 'LOGIST') {
-            tasks.push({
-                label: 'Mark Complete',
-                icon: DocumentCheckIcon,
-                variant: 'success',
-                onClick: onComplete,
-                requiresConfirmation: true
-            })
-        }
+    // Cancel is available for most statuses (but not terminal ones)
+    if ((status === 'NEW' || status === 'PUBLISHED' || status === 'ASSIGNED') && canCancel) {
+      tasks.push({
+        icon: XCircleIcon,
+        label: 'Cancel RFP',
+        onClick: onCancel,
+        requiresConfirmation: true,
+        variant: 'danger',
+      });
+    }
 
-        // Cancel is available for most statuses (but not terminal ones)
-        if ((status === 'NEW' || status === 'PUBLISHED' || status === 'ASSIGNED') && canCancel) {
-            tasks.push({
-                label: 'Cancel RFP',
-                icon: XCircleIcon,
-                variant: 'danger',
-                onClick: onCancel,
-                requiresConfirmation: true
-            })
-        }
+    return tasks;
+  }, [
+    rfp,
+    canPublish,
+    canAssign,
+    canComplete,
+    canCancel,
+    userRole,
+    onPublish,
+    onAssign,
+    onComplete,
+    onCancel,
+  ]);
 
-        return tasks
-    }, [rfp, canPublish, canAssign, canComplete, canCancel, userRole, onPublish, onAssign, onComplete, onCancel])
-
-    return { workflowTasks }
-}
+  return { workflowTasks };
+};

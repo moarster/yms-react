@@ -1,198 +1,172 @@
-import 'react-data-grid/lib/styles.css'
-import './datagrid-theme.css'
+import 'react-data-grid/lib/styles.css';
+import './datagrid-theme.css';
 
-import React, { useCallback, useMemo, useState} from 'react'
-import {
-     DataGrid, RenderRowProps, Row,
-    SortColumn
-} from 'react-data-grid'
+import React, { useCallback, useMemo, useState } from 'react';
+import { DataGrid, RenderRowProps, Row } from 'react-data-grid';
 
-import LoadingSpinner from '@/shared/ui/LoadingSpinner'
+import { useTableState } from '@/shared/ui/DataGridTable/hooks/useTableState.ts';
+import { DataGridTableProps, TableRow } from '@/shared/ui/DataGridTable/types.ts';
+import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
-import { generateDataGridColumns } from './columnGenerator'
-import { BaseTableProps, BaseTableRow } from './table.types.ts'
+import { generateDataGridColumns } from './columnGenerator';
 
-interface DataGridTableProps<T extends BaseTableRow> extends BaseTableProps<T> {
-    enableInlineEdit?: boolean
-}
+const DataGridTable = <TRow extends TableRow>({
+  className = '',
+  config = {},
+  data,
+  editable = false,
+  enableBulkActions = false,
+  loading = false,
+  onDataChange,
+  onDelete,
+  onEdit,
+  onRowClick,
+  onSelectionChange,
+  onView,
+  schema,
+}: DataGridTableProps<TRow>) => {
+  const actions = useMemo(
+    () => ({
+      onDelete,
+      onEdit,
+      onRowClick,
+      onView,
+    }),
+    [onEdit, onDelete, onView, onRowClick],
+  );
 
-const DataGridTable = <T extends BaseTableRow>({
-                                                   data,
-                                                   schema,
-                                                   config = {},
-                                                   loading = false,
-                                                   className = '',
-                                                   enableInlineEdit = true,
-                                                   onDelete,
-                                                   onSelectionChange,
-                                                   onDataChange,
-                                               }: DataGridTableProps<T>) => {
-    const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([])
-    const [selectedRows, setSelectedRows] = useState(new Set<string>())
-    const [filters, setFilters] = useState<Record<string, string>>({})
-    const [hoveredRow, setHoveredRow] = useState<{id?: string, pos?: number} | null>(null);
+  const selection = useMemo(
+    () => ({
+      enableBulkActions,
+      onSelectionChange,
+    }),
+    [onSelectionChange, enableBulkActions],
+  );
 
-    const isSchemaless = !schema
+  const {
+    displayData,
+    filters,
+    handleSelectionChange,
+    selectedRows,
+    setFilters,
+    setSortColumns,
+    sortColumns,
+  } = useTableState({ data, selection });
+  const [hoveredRow, setHoveredRow] = useState<null | { id?: string; pos?: number }>(null);
 
-    const columns = useMemo(
-        () => isSchemaless
-            ? generateDataGridColumns<T>(undefined, enableInlineEdit)
-            : generateDataGridColumns<T>(schema, enableInlineEdit,true),
-        [isSchemaless, schema, enableInlineEdit]
-    )
+  const isSchemaless = !schema;
 
-    // Apply sorting
-    const sortedRows = useMemo(() => {
-        if (sortColumns.length === 0) return data
+  const columns = useMemo(
+    () =>
+      isSchemaless
+        ? generateDataGridColumns<TRow>(undefined, editable)
+        : generateDataGridColumns<TRow>(schema, editable, true),
+    [isSchemaless, schema, editable],
+  );
 
-        return [...data].sort((a, b) => {
-            for (const sort of sortColumns) {
-                const aValue = a[sort.columnKey as keyof T]
-                const bValue = b[sort.columnKey as keyof T]
+  const handleRowClick = useCallback(
+    (params: RenderRowProps<TRow>) => {
+      if (onRowClick) {
+        onRowClick(params.row);
+      }
+    },
+    [onRowClick],
+  );
+  const handleRowsChange = useCallback(
+    (rows: TRow[]) => {
+      if (onDataChange && editable) {
+        onDataChange(rows);
+      }
+    },
+    [onDataChange, editable],
+  );
 
-                if (aValue < bValue) return sort.direction === 'ASC' ? -1 : 1
-                if (aValue > bValue) return sort.direction === 'ASC' ? 1 : -1
-            }
-            return 0
-        })
-    }, [data, sortColumns])
-
-    // Apply filtering
-    const filteredRows = useMemo(() => {
-        if (Object.keys(filters).length === 0) return sortedRows
-
-        return sortedRows.filter(row => {
-            return Object.entries(filters).every(([key, filterValue]) => {
-                if (!filterValue) return true
-                const cellValue = String(row[key as keyof T] || '')
-                return cellValue.toLowerCase().includes(filterValue.toLowerCase())
-            })
-        })
-    }, [sortedRows, filters])
-
-    const handleSelectionToggle = useCallback((rowId: string) => {
-        setSelectedRows(prev => {
-            const newSelection = new Set(prev)
-            if (newSelection.has(rowId)) {
-                newSelection.delete(rowId)
-            } else {
-                newSelection.add(rowId)
-            }
-
-            if (onSelectionChange) {
-                const selected = data.filter(row => newSelection.has(row.id || ''))
-                onSelectionChange(selected)
-            }
-
-            return newSelection
-        })
-    }, [data, onSelectionChange])
-
-    const handleSelectionChange = useCallback((newSelectedRows: Set<string>) => {
-        setSelectedRows(newSelectedRows)
-        if (onSelectionChange) {
-            const selected = data.filter(row => newSelectedRows.has(row.id || ''))
-            onSelectionChange(selected)
-        }
-    }, [data, onSelectionChange])
-
-
-    const handleRowsChange = useCallback((rows: T[]) => {
-        if (onDataChange && enableInlineEdit) {
-            onDataChange(rows)
-        }
-    }, [onDataChange, enableInlineEdit])
-
-    const TableRow = React.memo(function TableRow<T, SR>(props: RenderRowProps<T, SR>) {
-        const { onMouseEnter, onMouseLeave, className, ...rest } = props
-        const rowId = props.row?.id || ''
-
-        return (
-            <Row
-                {...rest}
-                className={className}
-                onMouseEnter={(e) => {
-                    onMouseEnter?.(e)
-                    setHoveredRow({id: rowId, pos: props.rowIdx})
-                }}
-                onMouseLeave={(e) => {
-                    onMouseLeave?.(e)
-                    setHoveredRow(null)
-                }}
-            />
-        )
-    })
-
-    const renderRow = React.useCallback(
-        (key: React.Key, props: RenderRowProps<T>) => <TableRow key={key} {...props} />,
-        [TableRow]
-    )
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" text="Loading data..." />
-            </div>
-        )
-    }
-
-    const gridHeight = config.height || '600px'
-    const rowHeight = config.density === 'compact' ? 35 : config.density === 'comfortable' ? 60 : 45
-
-    const handleDelete = async (id: string|undefined) => {
-        try {
-            await fetch(`/api/items/${id}`, { method: 'DELETE' });
-            setRows(prev => prev.filter(r => r.id !== id));
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
+  const TableRow = React.memo(function TableRow<TRow, SR>(props: RenderRowProps<TRow, SR>) {
+    const { className, onMouseEnter, onMouseLeave, ...rest } = props;
+    const rowId = props.row?.id || '';
 
     return (
-        <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>
-            <DataGrid
-                columns={columns}
-                rows={filteredRows}
-                rowKeyGetter={row => row.id || ''}
-                sortColumns={sortColumns}
-                onSortColumnsChange={setSortColumns}
-                onRowsChange={handleRowsChange}
-                rowHeight={rowHeight}
-                rowClass={() => 'my-row'}
-                headerRowHeight={40}
-                className="rdg-modern"
-                style={{ height: gridHeight }}
-                renderers={{
-                    renderRow,
-                    noRowsFallback:
-                        <div className="no-rows-fallback">
-                            <div className="text-gray-400 text-lg">No Data Available</div>
-                        </div>
+      <Row
+        {...rest}
+        className={className}
+        onMouseLeave={(e) => {
+          onMouseLeave?.(e);
+          setHoveredRow(null);
+        }}
+        onMouseEnter={(e) => {
+          onMouseEnter?.(e);
+          setHoveredRow({ id: rowId, pos: props.rowIdx });
+        }}
+      />
+    );
+  });
 
-                }}
+  const renderRow = React.useCallback(
+    (key: React.Key, props: RenderRowProps<TRow>) => <TableRow key={key} {...props} />,
+    [TableRow],
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" text="Loading data..." />
+      </div>
+    );
+  }
+
+  const gridHeight = config.height || '600px';
+  const rowHeight = config.density === 'compact' ? 35 : config.density === 'comfortable' ? 60 : 45;
+
+  return (
+    <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>
+      <DataGrid<TRow>
+        renderers={{
+          noRowsFallback: (
+            <div className="no-rows-fallback">
+              <div className="text-gray-400 text-lg">No Data Available</div>
+            </div>
+          ),
+          renderRow,
+        }}
+        columns={columns}
+        rows={displayData}
+        headerRowHeight={40}
+        rowHeight={rowHeight}
+        className="rdg-modern"
+        rowClass={() => 'my-row'}
+        sortColumns={sortColumns}
+        selectedRows={selectedRows}
+        style={{ height: gridHeight }}
+        rowKeyGetter={(row) => row.id || ''}
+        onRowsChange={handleRowsChange}
+        onSortColumnsChange={setSortColumns}
+      />
+      {hoveredRow?.pos !== undefined && (
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            left: -30,
+            position: 'absolute',
+            top: 40 + hoveredRow.pos * rowHeight + rowHeight / 2, // center icon vertically
+          }}
+          title="Delete"
+          className="action-btn delete"
+          onClick={() => onDelete}
+        >
+          <svg fill="none" className="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
-            {hoveredRow?.pos !== undefined && (
-                <button
-                    style={{
-                        position: 'absolute',
-                        left: -30,
-                        top: 40 + (hoveredRow.pos) * rowHeight + rowHeight / 2   , // center icon vertically
-                        cursor: 'pointer',
-                        background: 'none',
-                        border: 'none'
-                    }}
-                    onClick={() => onDelete}
-                    className="action-btn delete"
-                    title="Delete"
-                >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                </button>
-            )}
-        </div>
-    )
-}
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+};
 
-export default DataGridTable
+export default DataGridTable;

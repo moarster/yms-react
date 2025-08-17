@@ -1,123 +1,119 @@
-import { Attachment,DomainEntity,ListLink, ReferenceLink } from '@/types'
-import { LinkFactories} from "@/types/factories/linkFactory.ts";
+import { Attachment, DomainEntity, EntityData, ListLink, ReferenceLink } from '@/types';
+import { LinkFactories } from '@/types/factories/linkFactory.ts';
 
-export interface ShipmentRfpData extends Record<string, unknown>{
-    _shipmentType: ListLink<'shipment-type'>
-    _transportationType: ListLink<'transportation-type'>
-    _routeDirection: ReferenceLink<'route-direction'>
-    _currency: ListLink<'currency'>
-    _candidates?: ReferenceLink<'counter-party'>[]
-    _carrier?: ReferenceLink<'counter-party'>
-    price?: number
-    _requiredVehicleType?: ReferenceLink<'vehicle-type'>
-    customRequirements?: string
-    innerComment?: string
-    comment?: string // max 1000 chars
-    admittanceComment?: string // max 1000 chars
-    refusalComment?: string // max 1000 chars
+export interface ShipmentRfpData extends EntityData {
+  _candidates?: ReferenceLink<'counter-party'>[];
+  _carrier?: ReferenceLink<'counter-party'>;
+  _client?: ReferenceLink<'counter-party'>;
+  _contract?: ReferenceLink<'contract'>;
+  _currency?: ListLink<'currency'>;
+  _driver?: ReferenceLink<'driver'>;
+  _refusalReason?: ReferenceLink<'shipment-rfp-refusal-reason'>;
+  _requiredVehicleType?: ReferenceLink<'vehicle-type'>;
+  _routeDirection?: ReferenceLink<'route-direction'>;
+  _shipmentPlanningDepartment?: ReferenceLink<'shipment-planning-department'>;
+  _shipmentType?: ListLink<'shipment-type'>;
+  _transportationType?: ListLink<'transportation-type'>;
+  _vehicle?: ReferenceLink<'vehicle'>;
 
-    route: RoutePoint[]
+  _vehicleAffiliation?: ListLink<'vehicle-affiliation'>;
 
-    express?: boolean
+  actualCarrier?: ActualCarrier;
 
-    _shipmentPlanningDepartment?: ReferenceLink<'shipment-planning-department'>
-    _vehicle?: ReferenceLink<'vehicle'>
-    trailerNumber?: string
-    vehicleWeight?: number
-    trailerWeight?: number
-    permissibleAxleLoad?: string // format: axis1/axis2/.../axisN
-    _vehicleAffiliation?: ListLink<'vehicle-affiliation'>
-    _driver?: ReferenceLink<'driver'>
-    driverContactPhone?: string
-    _client?: ReferenceLink<'counter-party'>
+  admittanceComment?: string;
+  attachments?: Attachment[];
+  comment?: string;
+  customRequirements?: string;
+  driverContactPhone?: string;
+  express?: boolean;
+  innerComment?: string;
+  letterOfAttorney?: LetterOfAttorney;
+  permissibleAxleLoad?: string;
+  price?: number;
 
-    actualCarrier?: ActualCarrier
-    _contract?: ReferenceLink<'contract'>
-    letterOfAttorney?: LetterOfAttorney
-    requestForVehicleDispatch?: Attachment
-    _refusalReason?: ReferenceLink<'shipment-rfp-refusal-reason'>
+  refusalComment?: string;
+  requestForVehicleDispatch?: Attachment;
+  route?: RoutePoint[];
+  trailerNumber?: string;
+  trailerWeight?: number;
 
-    attachments: Attachment[]
+  vehicleWeight?: number;
 }
 
-export interface RoutePoint {
-    address: string // max 255 chars
-    contactPhone?: string
-    arrival: string // date-time
-    departure?: string // date-time
-    _counterParty: ReferenceLink<'counter-party'>
-    _cargoHandlingType: ListLink<'cargo-handling-type'>
-    cargoList: Cargo[]
+export interface RoutePoint extends EntityData {
+  _cargoHandlingType: ListLink<'cargo-handling-type'>;
+  _counterParty: ReferenceLink<'counter-party'>;
+  address: string; // max 255 chars
+  arrival: string; // date-time
+  cargoList: Cargo[];
+  contactPhone?: string;
+  departure?: string; // date-time
 }
 
-export interface Cargo {
-    number: string
-    cargoWeight: number // minimum 0, multipleOf 0.01
-    cargoVolume: number // minimum 0, multipleOf 0.01
-    _cargoNature: ListLink<'cargo-nature'>
+export interface Cargo extends EntityData {
+  _cargoNature: ListLink<'cargo-nature'>;
+  cargoVolume: number; // minimum 0, multipleOf 0.01
+  cargoWeight: number; // minimum 0, multipleOf 0.01
+  number: string;
 }
 
-export interface ActualCarrier {
-    name?: string // max 255 chars
-    legalAddress?: string // max 255 chars
-    taxIdentificationNumber?: string // INN: 10 or 12 digits
-    phone?: string
-    requestNumber?: string
-    requestDate?: string // date format
+export interface ActualCarrier extends EntityData {
+  legalAddress?: string; // max 255 chars
+  name?: string; // max 255 chars
+  phone?: string;
+  requestDate?: string; // date format
+  requestNumber?: string;
+  taxIdentificationNumber?: string; // INN: 10 or 12 digits
 }
 
-export interface LetterOfAttorney {
-    number?: string // max 255 chars
-    date?: string // date format
-    issuedBy?: string // max 255 chars
-    attachment?: Attachment
+export interface LetterOfAttorney extends EntityData {
+  attachment?: Attachment;
+  date?: string; // date format
+  issuedBy?: string; // max 255 chars
+  number?: string; // max 255 chars
 }
 
-
-export const validateINN = (inn: string): boolean =>
-    /^\d{10}$|^\d{12}$/.test(inn)
+export const validateINN = (inn: string): boolean => /^\d{10}$|^\d{12}$/.test(inn);
 
 export const validateRoutePoint = (point: RoutePoint): string[] => {
-    const errors: string[] = []
-    if (!point.address?.trim()) errors.push('Address is required')
-    if (point.address?.length > 255) errors.push('Address too long (max 255 chars)')
-    if (!point.arrival) errors.push('Arrival time is required')
-    if (point.cargoList.length === 0) errors.push('At least one cargo item is required')
-    return errors
-}
+  const errors: string[] = [];
+  if (!point.address?.trim()) errors.push('Address is required');
+  if (point.address?.length > 255) errors.push('Address too long (max 255 chars)');
+  if (!point.arrival) errors.push('Arrival time is required');
+  if (point.cargoList.length === 0) errors.push('At least one cargo item is required');
+  return errors;
+};
 
-export interface ShipmentRfp extends DomainEntity<ShipmentRfpData>{
-    bids?: object[]
+export interface ShipmentRfp extends DomainEntity<ShipmentRfpData> {
+  bids?: object[];
 }
-
 
 export const createShipmentRfpData = (): Partial<ShipmentRfpData> => ({
-    _shipmentType: LinkFactories.shipmentType(),
-    _transportationType: LinkFactories.transportationType(),
-    _currency: LinkFactories.currency(),
-    express: false,
-    route: [createRoutePoint()],
-    _requiredVehicleType: LinkFactories.vehicleType(),
-    customRequirements: '',
-    comment: '',
-    innerComment: '',
-    attachments: []
-})
-
+  _currency: LinkFactories.currency(),
+  _requiredVehicleType: LinkFactories.vehicleType(),
+  _shipmentType: LinkFactories.shipmentType(),
+  _transportationType: LinkFactories.transportationType(),
+  attachments: [],
+  comment: '',
+  customRequirements: '',
+  express: false,
+  innerComment: '',
+  route: [createRoutePoint()],
+});
 
 export const createRoutePoint = (): RoutePoint => ({
-    address: '',
-    contactPhone: '',
-    arrival: '',
-    departure: '',
-    _counterParty: LinkFactories.counterParty(),
-    _cargoHandlingType: LinkFactories.cargoHandlingType(),
-    cargoList: [createCargo()]
-})
+  _cargoHandlingType: LinkFactories.cargoHandlingType(),
+  _counterParty: LinkFactories.counterParty(),
+  address: '',
+  arrival: '',
+  cargoList: [createCargo()],
+  contactPhone: '',
+  departure: '',
+});
 
 export const createCargo = (): Cargo => ({
-    number: '',
-    cargoWeight: 0,
-    cargoVolume: 0,
-    _cargoNature: LinkFactories.cargoNature()
-})
+  _cargoNature: LinkFactories.cargoNature(),
+  cargoVolume: 0,
+  cargoWeight: 0,
+  number: '',
+});

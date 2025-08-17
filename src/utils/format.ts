@@ -1,161 +1,163 @@
-import { format as formatDate, formatDistanceToNow, parseISO } from 'date-fns'
+import { format as formatDate, formatDistanceToNow, parseISO } from 'date-fns';
 
 export const formatters = {
-    // Date formatting
-    date: (date: string | Date) => {
-        const d = typeof date === 'string' ? parseISO(date) : date
-        return formatDate(d, 'dd.MM.yyyy')
-    },
+  // Address formatting
+  address: (address: string) => {
+    return address.replace(/,\s*/g, ', ').trim();
+  },
 
-    dateTime: (date: string | Date) => {
-        const d = typeof date === 'string' ? parseISO(date) : date
-        return formatDate(d, 'MMM dd, yyyy HH:mm')
-    },
+  capitalize: (text: string) => {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  },
 
-    time: (date: string | Date) => {
-        const d = typeof date === 'string' ? parseISO(date) : date
-        return formatDate(d, 'HH:mm')
-    },
+  // Number formatting
+  currency: (amount: number, currency = 'RUB') => {
+    return new Intl.NumberFormat('ru-RU', {
+      currency,
+      style: 'currency',
+    }).format(amount);
+  },
 
-    timeAgo: (date: string | Date) => {
-        const d = typeof date === 'string' ? parseISO(date) : date
-        return formatDistanceToNow(d, { addSuffix: true })
-    },
+  // Date formatting
+  date: (date: Date | string) => {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    return formatDate(d, 'dd.MM.yyyy');
+  },
 
-    // Number formatting
-    currency: (amount: number, currency = 'RUB') => {
-        return new Intl.NumberFormat('ru-RU', {
-            style: 'currency',
-            currency,
-        }).format(amount)
-    },
+  dateTime: (date: Date | string) => {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    return formatDate(d, 'MMM dd, yyyy HH:mm');
+  },
 
-    number: (value: number) => {
-        return new Intl.NumberFormat('ru-RU').format(value)
-    },
+  fileSize: (bytes: number) => {
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+  },
 
-    weight: (kg: number) => {
-        if (kg >= 1000) {
-            return `${(kg / 1000).toFixed(1)} t`
-        }
-        return `${kg} kg`
-    },
+  number: (value: number) => {
+    return new Intl.NumberFormat('ru-RU').format(value);
+  },
 
-    volume: (m3: number) => {
-        return `${m3} m³`
-    },
+  pascalCase: (text: string) => {
+    return text
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/[_-]/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  },
 
-    fileSize: (bytes: number) => {
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-        if (bytes === 0) return '0 B'
-        const i = Math.floor(Math.log(bytes) / Math.log(1024))
-        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
-    },
+  // Phone formatting
+  phone: (phone: string) => {
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 11 && cleaned.startsWith('7')) {
+      return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
+    }
+    return phone;
+  },
 
-    // Text formatting
-    truncate: (text: string, length = 50) => {
-        if (text.length <= length) return text
-        return text.substring(0, length).trim() + '...'
-    },
+  // Status formatting
+  status: (status: string) => {
+    const statusMap: Record<string, string> = {
+      APPROVED: 'Approved',
+      ASSIGNED: 'Assigned',
+      CANCELLED: 'Cancelled',
+      COMPLETED: 'Completed',
+      DRAFT: 'Draft',
+      PENDING: 'Pending',
+      REJECTED: 'Rejected',
+    };
+    return statusMap[status] || formatters.pascalCase(status);
+  },
 
-    capitalize: (text: string) => {
-        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
-    },
+  time: (date: Date | string) => {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    return formatDate(d, 'HH:mm');
+  },
 
-    pascalCase: (text: string) => {
-        return text
-            .replace(/([a-z])([A-Z])/g, '$1 $2')
-            .replace(/[_-]/g, ' ')
-            .replace(/\b\w/g, char => char.toUpperCase())
-    },
+  timeAgo: (date: Date | string) => {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    return formatDistanceToNow(d, { addSuffix: true });
+  },
 
-    // Phone formatting
-    phone: (phone: string) => {
-        const cleaned = phone.replace(/\D/g, '')
-        if (cleaned.length === 11 && cleaned.startsWith('7')) {
-            return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`
-        }
-        return phone
-    },
+  // Text formatting
+  truncate: (text: string, length = 50) => {
+    if (text.length <= length) return text;
+    return text.substring(0, length).trim() + '...';
+  },
 
-    // Address formatting
-    address: (address: string) => {
-        return address.replace(/,\s*/g, ', ').trim()
-    },
+  volume: (m3: number) => {
+    return `${m3} m³`;
+  },
 
-    // Status formatting
-    status: (status: string) => {
-        const statusMap: Record<string, string> = {
-            DRAFT: 'Draft',
-            ASSIGNED: 'Assigned',
-            COMPLETED: 'Completed',
-            CANCELLED: 'Cancelled',
-            PENDING: 'Pending',
-            APPROVED: 'Approved',
-            REJECTED: 'Rejected',
-        }
-        return statusMap[status] || formatters.pascalCase(status)
-    },
-}
+  weight: (kg: number) => {
+    if (kg >= 1000) {
+      return `${(kg / 1000).toFixed(1)} t`;
+    }
+    return `${kg} kg`;
+  },
+};
 
 // Validation helpers
 export const validators = {
-    email: (email: string) => {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        return regex.test(email)
-    },
+  email: (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  },
 
-    phone: (phone: string) => {
-        const cleaned = phone.replace(/\D/g, '')
-        return cleaned.length >= 10
-    },
+  inn: (inn: string) => {
+    const cleaned = inn.replace(/\D/g, '');
+    return cleaned.length === 10 || cleaned.length === 12;
+  },
 
-    inn: (inn: string) => {
-        const cleaned = inn.replace(/\D/g, '')
-        return cleaned.length === 10 || cleaned.length === 12
-    },
+  ogrn: (ogrn: string) => {
+    const cleaned = ogrn.replace(/\D/g, '');
+    return cleaned.length === 13 || cleaned.length === 15;
+  },
 
-    ogrn: (ogrn: string) => {
-        const cleaned = ogrn.replace(/\D/g, '')
-        return cleaned.length === 13 || cleaned.length === 15
-    },
+  phone: (phone: string) => {
+    const cleaned = phone.replace(/\D/g, '');
+    return cleaned.length >= 10;
+  },
 
-    positiveNumber: (value: number) => {
-        return value > 0
-    },
+  positiveNumber: (value: number) => {
+    return value > 0;
+  },
 
-    url: (url: string) => {
-        try {
-            new URL(url)
-            return true
-        } catch {
-            return false
-        }
-    },
-}
+  url: (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
 
 // Color helpers
 export const colors = {
-    status: (status: string) => {
-        const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-            DRAFT: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' },
-            ASSIGNED: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-            COMPLETED: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-            CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
-            PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-            APPROVED: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-            REJECTED: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
-        }
-        return colorMap[status] || { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' }
-    },
+  priority: (priority: 'high' | 'low' | 'medium' | 'urgent') => {
+    const colorMap = {
+      high: { bg: 'bg-orange-100', text: 'text-orange-800' },
+      low: { bg: 'bg-gray-100', text: 'text-gray-800' },
+      medium: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+      urgent: { bg: 'bg-red-100', text: 'text-red-800' },
+    };
+    return colorMap[priority];
+  },
 
-    priority: (priority: 'low' | 'medium' | 'high' | 'urgent') => {
-        const colorMap = {
-            low: { bg: 'bg-gray-100', text: 'text-gray-800' },
-            medium: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-            high: { bg: 'bg-orange-100', text: 'text-orange-800' },
-            urgent: { bg: 'bg-red-100', text: 'text-red-800' },
-        }
-        return colorMap[priority]
-    },
-}
+  status: (status: string) => {
+    const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+      APPROVED: { bg: 'bg-green-100', border: 'border-green-200', text: 'text-green-800' },
+      ASSIGNED: { bg: 'bg-blue-100', border: 'border-blue-200', text: 'text-blue-800' },
+      CANCELLED: { bg: 'bg-red-100', border: 'border-red-200', text: 'text-red-800' },
+      COMPLETED: { bg: 'bg-green-100', border: 'border-green-200', text: 'text-green-800' },
+      DRAFT: { bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-800' },
+      PENDING: { bg: 'bg-yellow-100', border: 'border-yellow-200', text: 'text-yellow-800' },
+      REJECTED: { bg: 'bg-red-100', border: 'border-red-200', text: 'text-red-800' },
+    };
+    return (
+      colorMap[status] || { bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-800' }
+    );
+  },
+};

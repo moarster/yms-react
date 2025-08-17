@@ -1,68 +1,58 @@
-import { BaseEntity } from '@/types'
+import { BaseEntity } from '@/types';
 
 export interface ApiResponse<T> {
-    body: T
-    success: boolean
-    message?: string
-    errors?: string[]
+  body: T;
+  errors?: string[];
+  message?: string;
+  success: boolean;
 }
 
 export interface PaginatedResponse<T extends BaseEntity> {
-    content: T[]
-    page?: PageInfo
+  content: T[];
+  page?: PageInfo;
 }
 
 export interface PageInfo {
-    number: number
-    size: number
-    totalElements: number
-    totalPages: number
-    first: boolean
-    last: boolean
-    numberOfElements: number
-    empty: boolean
+  empty: boolean;
+  first: boolean;
+  last: boolean;
+  number: number;
+  numberOfElements: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface ApiError {
-    message: string
-    code: string
-    details?: Record<string, unknown>
-    timestamp?: string
-    path?: string
+  code: string;
+  details?: Record<string, unknown>;
+  message: string;
+  path?: string;
+  timestamp?: string;
 }
-
 
 export interface PaginationParams {
-    page?: number
-    size?: number
-    sort?: string
-    direction?: 'asc' | 'desc'
+  direction?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+  sort?: string;
 }
 
-export type UIFilterOperand =
-    | 'EQ'
-    | 'LIKE'
-    | 'IN'
-    | 'GT'
-    | 'LT'
-    | 'BETWEEN';
+export type UIFilterOperand = 'BETWEEN' | 'EQ' | 'GT' | 'IN' | 'LIKE' | 'LT';
 
 export interface FilterDescription {
-    fieldName: string;
-    value: string[];
-    operand: UIFilterOperand;
+  fieldName: string;
+  operand: UIFilterOperand;
+  value: string[];
 }
 
 export interface SearchParams extends PaginationParams {
-    filters?: FilterDescription[];
+  filters?: FilterDescription[];
 }
 
 // Response type helpers
-export type SuccessResponse<T> = ApiResponse<T> & { success: true }
-export type ErrorResponse = ApiResponse<never> & { success: false; message: string }
+export type SuccessResponse<T> = ApiResponse<T> & { success: true };
+export type ErrorResponse = ApiResponse<never> & { success: false; message: string };
 
 export const isApiError = (response: unknown): response is ApiError =>
-    typeof response === 'object' &&
-    response !== null &&
-    'message' in response &&
-    'code' in response
+  typeof response === 'object' && response !== null && 'message' in response && 'code' in response;

@@ -1,83 +1,82 @@
-import { DocumentIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { useMemo } from 'react'
+import { TrashIcon, PencilIcon, FloppyDiskBackIcon } from '@phosphor-icons/react';
+import { useMemo } from 'react';
 
-import { FormActions } from '@/types/form.ts'
+import { FormActions } from '@/types/form.ts';
 
 interface UseDocumentFormActionsProps {
-    isEditMode: boolean
-    isLoading?: boolean
-    isSaving?: boolean
-    isDeleting?: boolean
-    canEdit: boolean
-    canDelete: boolean
-    onEdit: () => void
-    onSave: () => void
-    onCancel: () => void
-    onDelete?: () => void
+  canDelete: boolean;
+  canEdit: boolean;
+  isDeleting?: boolean;
+  isEditMode: boolean;
+  isLoading?: boolean;
+  isSaving?: boolean;
+  onCancel: () => void;
+  onDelete?: () => void;
+  onEdit: () => void;
+  onSave: () => void;
 }
 
 export const useDocumentFormActions = ({
-                                           isEditMode,
-                                           isLoading = false,
-                                           isSaving = false,
-                                           isDeleting = false,
-                                           canEdit,
-                                           canDelete = false,
-                                           onEdit,
-                                           onSave,
-                                           onCancel,
-                                           onDelete
-                                       }: UseDocumentFormActionsProps): FormActions => {
+  canDelete = false,
+  canEdit,
+  isDeleting = false,
+  isEditMode,
+  isLoading = false,
+  isSaving = false,
+  onCancel,
+  onDelete,
+  onEdit,
+  onSave,
+}: UseDocumentFormActionsProps): FormActions => {
+  return useMemo(() => {
+    const actions: FormActions = {
+      cancel: {
+        disabled: isLoading || isSaving,
+        label: isEditMode ? 'Cancel' : 'Back',
+        onClick: onCancel,
+      },
+    };
 
-    return useMemo(() => {
-        const actions: FormActions = {
-            cancel: {
-                label: isEditMode ? 'Cancel' : 'Back',
-                onClick: onCancel,
-                disabled: isLoading || isSaving
-            }
-        }
+    if (canEdit) {
+      if (isEditMode) {
+        actions.save = {
+          disabled: isLoading,
+          icon: FloppyDiskBackIcon,
+          label: 'Save Changes',
+          loading: isSaving,
+          onClick: onSave,
+        };
+      } else {
+        actions.edit = {
+          disabled: isLoading,
+          icon: PencilIcon,
+          label: 'Edit',
+          onClick: onEdit,
+        };
+      }
+    }
 
-        if (canEdit) {
-            if (isEditMode) {
-                actions.save = {
-                    label: 'Save Changes',
-                    onClick: onSave,
-                    loading: isSaving,
-                    disabled: isLoading,
-                    icon: DocumentIcon
-                }
-            } else {
-                actions.edit = {
-                    label: 'Edit',
-                    onClick: onEdit,
-                    disabled: isLoading,
-                    icon: PencilIcon
-                }
-            }
-        }
+    if (canDelete && onDelete && !isEditMode) {
+      actions.delete = {
+        disabled: isLoading || isSaving,
+        icon: TrashIcon,
+        label: 'Delete',
+        loading: isDeleting,
+        onClick: onDelete,
+      };
+    }
 
-        if (canDelete && onDelete && !isEditMode) {
-            actions.delete = {
-                label: 'Delete',
-                onClick: onDelete,
-                loading: isDeleting,
-                disabled: isLoading || isSaving,
-                icon: TrashIcon
-            }
-        }
-
-        return actions
-    }, [
-        isEditMode,
-        isLoading,
-        isSaving,
-        isDeleting,
-        canEdit,
-        canDelete,
-        onEdit,
-        onSave,
-        onCancel,
-        onDelete
-    ])
-}
+    return actions;
+  }, [
+    isEditMode,
+    isLoading,
+    isSaving,
+    isDeleting,
+    canEdit,
+    canDelete,
+    onEdit,
+    onSave,
+    onCancel,
+    onDelete,
+  ]);
+};

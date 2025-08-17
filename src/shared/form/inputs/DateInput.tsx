@@ -1,39 +1,38 @@
-import React from 'react'
+import React from 'react';
 
-import { InputError,InputLabel } from '../common'
-import { BaseInputProps } from './types.ts'
+import { BaseInputProps } from './types.ts';
+import { DatePickerInput } from '@mantine/dates';
+import { DatePickerType } from '@mantine/dates/lib/types/DatePickerValue';
 
 interface DateInputProps extends BaseInputProps {
-    value: string
-    onChange: (value: string) => void
-    type?: 'date' | 'datetime-local' | 'time'
+  onChange: (value: string) => void;
+  type: DatePickerType;
+  value: string;
 }
 
 export const DateInput: React.FC<DateInputProps> = ({
-                                                        label,
-                                                        required,
-                                                        disabled,
-                                                        error,
-                                                        className = '',
-                                                        id,
-                                                        value,
-                                                        onChange,
-                                                        type = 'datetime-local'
-                                                    }) => {
-    const inputId = id || `date-input-${Math.random().toString(36).substr(2, 9)}`
-
-    return (
-        <div className={className}>
-            {label && <InputLabel htmlFor={inputId} label={label} required={required} />}
-            <input
-                id={inputId}
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-                className={`input ${error ? 'input-error' : ''}`}
-            />
-            <InputError error={error} />
-        </div>
-    )
-}
+  className,
+  disabled,
+  error,
+  id,
+  label,
+  onChange,
+  required,
+  type = 'default',
+  value,
+}) => {
+  return (
+    <DatePickerInput
+      required={required}
+      type={type}
+      label={label}
+      placeholder="Pick date"
+      value={value}
+      className={className || `input ${error ? 'input-error' : ''}`}
+      disabled={disabled}
+      id={id}
+      onChange={(e) => onChange(e.target.value)}
+      error={error}
+    />
+  );
+};

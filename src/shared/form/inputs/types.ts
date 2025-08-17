@@ -1,8 +1,8 @@
 export interface BaseInputProps {
-    label?: string
-    required?: boolean
-    disabled?: boolean
-    error?: string
-    className?: string
-    id?: string
+  className?: string;
+  disabled?: boolean;
+  error?: string;
+  id?: string;
+  label?: string;
+  required?: boolean;
 }
