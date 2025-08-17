@@ -11,6 +11,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { registerServiceWorker } from '@/utils/registerServiceWorker.ts';
 
 import App from './App';
+import { MantineProvider } from '@mantine/core';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,33 +49,35 @@ root.render(
   // <React.StrictMode>
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <App />
-      <Toaster
-        toastOptions={{
-          duration: 4000,
-          error: {
-            duration: 5000,
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+      <MantineProvider>
+        <App />
+        <Toaster
+          toastOptions={{
+            duration: 4000,
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
             },
-          },
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#4ade80',
-              secondary: '#fff',
+            style: {
+              background: '#363636',
+              color: '#fff',
             },
-          },
-        }}
-        gutter={8}
-        position="top-right"
-        reverseOrder={false}
-      />
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4ade80',
+                secondary: '#fff',
+              },
+            },
+          }}
+          gutter={8}
+          position="top-right"
+          reverseOrder={false}
+        />
+      </MantineProvider>
     </BrowserRouter>
     {import.meta.env?.DEV && <ReactQueryDevtools initialIsOpen={false} />}
   </QueryClientProvider>,

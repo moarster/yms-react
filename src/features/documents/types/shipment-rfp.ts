@@ -44,7 +44,7 @@ export interface RoutePoint extends EntityData {
   _cargoHandlingType: ListLink<'cargo-handling-type'>;
   _counterParty: ReferenceLink<'counter-party'>;
   address: string; // max 255 chars
-  arrival: string; // date-time
+  arrival?: string; // date-time
   cargoList: Cargo[];
   contactPhone?: string;
   departure?: string; // date-time
@@ -105,7 +105,6 @@ export const createRoutePoint = (): RoutePoint => ({
   _cargoHandlingType: LinkFactories.cargoHandlingType(),
   _counterParty: LinkFactories.counterParty(),
   address: '',
-  arrival: '',
   cargoList: [createCargo()],
   contactPhone: '',
   departure: '',

@@ -362,6 +362,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
               onChange={(value) => updateRouteData(routeIndex, 'contactPhone', value)}
             />
             <DateInput
+              type="default"
               value={point.arrival}
               label="Плановое время прибытия"
               onChange={(value) => updateRouteData(routeIndex, 'arrival', value)}

@@ -1,17 +1,17 @@
-import React from 'react';
+import React, { HTMLInputTypeAttribute } from 'react';
 
-import { InputError, InputLabel } from '../common';
 import { BaseInputProps } from './types.ts';
+import { TextInput as MantineTextInput } from '@mantine/core';
 
 interface TextInputProps extends BaseInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
-  type?: 'email' | 'password' | 'tel' | 'text';
+  type?: HTMLInputTypeAttribute | undefined;
   value: string;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
-  className = '',
+  className,
   disabled,
   error,
   id,
@@ -22,21 +22,19 @@ export const TextInput: React.FC<TextInputProps> = ({
   type = 'text',
   value,
 }) => {
-  const inputId = id || `text-input-${Math.random().toString(36).substr(2, 9)}`;
-
   return (
-    <div className={className}>
-      {label && <InputLabel label={label} htmlFor={inputId} required={required} />}
-      <input
-        type={type}
-        id={inputId}
-        value={value}
-        disabled={disabled}
-        placeholder={placeholder}
-        className={`input ${error ? 'input-error' : ''}`}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <InputError error={error} />
-    </div>
+    <MantineTextInput
+      label={label}
+      placeholder={placeholder}
+      type={type}
+      required={required}
+      withAsterisk={required}
+      id={id || `text-input-${crypto.randomUUID()}`}
+      value={value}
+      error={error}
+      disabled={disabled}
+      className={className}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 };
