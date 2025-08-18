@@ -1,6 +1,7 @@
 import './index.css';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '@glideapps/glide-data-grid/dist/index.css';
 
 import { MantineProvider } from '@mantine/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

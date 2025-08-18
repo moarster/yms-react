@@ -1,5 +1,6 @@
 import { Column, RenderCellProps, RenderEditCellProps } from 'react-data-grid';
 
+import { createEditor } from '@/shared/ui/DataGridTable/render/editorFactory.ts';
 import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 import { JsonSchema, JsonSchemaProperty } from '@/types';
 
@@ -61,7 +62,7 @@ export function generateDataGridColumns<T extends TableRow>(
         key,
         name: property.title || key,
         renderCell: getCellRenderer(key, property),
-        renderEditCell: getCellEditor(property),
+        renderEditCell: createEditor(property),
         resizable: true,
         sortable: property['x-table-sortable'] !== false,
         width: property['x-table-width'] || getDefaultWidth(property),

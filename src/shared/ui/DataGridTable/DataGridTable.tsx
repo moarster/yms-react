@@ -120,7 +120,6 @@ const DataGridTable = <TRow extends TableRow>({
   return (
     <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>
       <DataGrid<TRow>
-
         renderers={{
           noRowsFallback: (
             <div className="no-rows-fallback">

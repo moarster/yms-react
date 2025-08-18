@@ -32,7 +32,7 @@ export interface TableConfig {
 }
 
 // Auto table props with proper generics - intersection types instead of spread
-export interface DataGridTableProps<TRow extends TableRow = TableRow>
+export interface TableProps<TRow extends TableRow = TableRow>
   extends TableActions<TRow>,
     TableSelection<TRow> {
   className?: string;
