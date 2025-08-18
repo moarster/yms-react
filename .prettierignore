@@ -1,0 +1,49 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+*.local
+
+# Generated files
+stats.html
+pnpm-lock.yaml
+
+# IDE and OS
+.vscode
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Docker
+.dockerignore
+
+# Coverage
+coverage
+.nyc_output
+
+# Generated types (if any)
+src/types/generated
+
+# Config files that should maintain their formatting
+*.config.js
+*.config.ts
+*.config.mjs
+
+
+# Package manager files
+package-lock.json

@@ -1,5 +1,4 @@
 import Form from '@aokiapp/rjsf-mantine-theme';
-
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,

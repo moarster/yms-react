@@ -1,4 +1,4 @@
-export { CheckboxInput } from './CheckboxInput.tsx';
+export { ChipInput } from './ChipInput.tsx';
 export { DateInput } from './DateInput.tsx';
 export { NumberInput } from './NumberInput.tsx';
 export { ReferenceInput } from './ReferenceInput.tsx';

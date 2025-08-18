@@ -102,7 +102,7 @@
 /* Cell styling */
 .rdg-modern .rdg-cell {
     @apply text-gray-900 text-sm;
-    padding: 12px 16px;
+    /*padding: 12px 16px;*/
     border-right: 1px solid rgba(0, 0, 0, 0.02);
     display: flex;
     align-items: center;

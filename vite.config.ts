@@ -1,40 +1,52 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import path from 'path';
+
 import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    react(),
-    visualizer({
-      open: false,
-      filename: 'dist/stats.html',
-      gzipSize: true,
-      brotliSize: true,
-    }),
-  ],
-
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-
-  server: {
-    port: 3000,
-  },
-
   build: {
-    outDir: 'dist',
-    sourcemap: false, // Disable in production for smaller builds
-
+    // Asset optimizations
+    assetsInlineLimit: 4096, // 4kb
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
 
+    // CSS optimizations
+    cssCodeSplit: true,
+
+    cssMinify: true,
+
+    cssTarget: 'chrome80',
+    // Build optimizations
+    minify: 'esbuild',
+    outDir: 'dist',
+
+    // Report compressed size
+    reportCompressedSize: true,
     rollupOptions: {
       output: {
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split('.');
+          const ext = info?.[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
+            return `assets/img/[name].[hash][extname]`;
+          }
+          if (/woff2?|ttf|otf|eot/i.test(ext || '')) {
+            return `assets/fonts/[name].[hash][extname]`;
+          }
+          return `assets/[name].[hash][extname]`;
+        },
+
+        // Optimize chunk names
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId.split('/').pop()
+            : '';
+          const name = chunkInfo.name || facadeModuleId || 'chunk';
+          return `chunks/${name}.[hash].js`;
+        },
+
         // Manual chunks for better code splitting
         manualChunks: (id) => {
           // Node modules chunking
@@ -93,57 +105,18 @@ export default defineConfig({
             }
           }
         },
-
-        // Optimize chunk names
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId
-            ? chunkInfo.facadeModuleId.split('/').pop()
-            : '';
-          const name = chunkInfo.name || facadeModuleId || 'chunk';
-          return `chunks/${name}.[hash].js`;
-        },
-
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.');
-          const ext = info?.[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
-            return `assets/img/[name].[hash][extname]`;
-          }
-          if (/woff2?|ttf|otf|eot/i.test(ext || '')) {
-            return `assets/fonts/[name].[hash][extname]`;
-          }
-          return `assets/[name].[hash][extname]`;
-        },
       },
 
       // Treeshaking optimizations
       treeshake: {
-        preset: 'recommended',
         moduleSideEffects: false,
+        preset: 'recommended',
       },
     },
 
-    // Build optimizations
-    minify: 'esbuild',
+    sourcemap: false, // Disable in production for smaller builds
+
     target: 'es2020',
-    cssTarget: 'chrome80',
-
-    // CSS optimizations
-    cssCodeSplit: true,
-    cssMinify: true,
-
-    // Asset optimizations
-    assetsInlineLimit: 4096, // 4kb
-
-    // Report compressed size
-    reportCompressedSize: true,
-  },
-
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'zustand'],
-    exclude: ['@vite/client', '@vite/env'],
-    // Force pre-bundling of these packages
-    force: true,
   },
 
   // Enable module preload
@@ -151,5 +124,33 @@ export default defineConfig({
     renderBuiltUrl(filename) {
       return '/' + filename;
     },
+  },
+
+  optimizeDeps: {
+    exclude: ['@vite/client', '@vite/env'],
+    // Force pre-bundling of these packages
+    force: true,
+    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'zustand'],
+  },
+
+  plugins: [
+    tailwindcss(),
+    react(),
+    visualizer({
+      brotliSize: true,
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      open: false,
+    }),
+  ],
+
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+
+  server: {
+    port: 3000,
   },
 });

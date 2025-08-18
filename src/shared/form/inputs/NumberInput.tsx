@@ -1,6 +1,6 @@
+import { isNumberLike, NumberInput as MantineNumberInput } from '@mantine/core';
 import React from 'react';
 
-import { InputError, InputLabel } from '../common';
 import { BaseInputProps } from './types.ts';
 
 interface NumberInputProps extends BaseInputProps {
@@ -26,34 +26,29 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   step = 0.01,
   value,
 }) => {
-  const inputId = id || `number-input-${Math.random().toString(36).substr(2, 9)}`;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+  const handleChange = (val: number | string) => {
     if (val === '') {
       onChange(null);
     } else {
-      const numValue = parseFloat(val);
+      const numValue = isNumberLike(val) ? Number(val) : parseFloat(val.toString());
       onChange(isNaN(numValue) ? null : numValue);
     }
   };
 
   return (
-    <div className={className}>
-      {label && <InputLabel label={label} htmlFor={inputId} required={required} />}
-      <input
-        max={max}
-        min={min}
-        step={step}
-        id={inputId}
-        type="number"
-        disabled={disabled}
-        value={value ?? ''}
-        placeholder={placeholder}
-        className={`input ${error ? 'input-error' : ''}`}
-        onChange={handleChange}
-      />
-      <InputError error={error} />
-    </div>
+    <MantineNumberInput
+      max={max}
+      min={min}
+      step={step}
+      error={error}
+      label={label}
+      disabled={disabled}
+      required={required}
+      value={value ?? ''}
+      className={className}
+      placeholder={placeholder}
+      id={id || `text-input-${crypto.randomUUID()}`}
+      onChange={handleChange}
+    />
   );
 };

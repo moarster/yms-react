@@ -1,21 +1,48 @@
-import React, { useEffect, useRef } from 'react';
+import { TextInput } from '@mantine/core';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RenderEditCellProps } from 'react-data-grid';
 
-export const TextEditor: React.FC<RenderEditCellProps<any>> = (props) => {
-  const ref = useRef<HTMLInputElement>(null);
+import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 
-  useEffect(() => {
-    ref.current?.focus();
-    ref.current?.select();
+export const TextEditor: React.FC<RenderEditCellProps<TableRow>> = (props) => {
+  const ref = useRef<HTMLInputElement>(null);
+  const { column, onClose, onRowChange, row } = props;
+  const [value, setValue] = useState(String(row[column.key] ?? ''));
+  const initialized = useRef(false);
+
+  useLayoutEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    const len = el.value.length;
+    el.setSelectionRange(len, len);
   }, []);
 
+  function commit() {
+    onRowChange({ ...row, [column.key]: value }, true);
+    onClose(true);
+  }
+
   return (
-    <input
+    <TextInput
+      classNames={{
+        input:
+          'focus:outline-none focus:ring-0 w-full h-full pl-2 pr-2 pb-0 pt-0 m-0  border-none shadow-none ',
+        wrapper: 'w-full h-full p-0 m-0 ',
+      }}
       ref={ref}
-      value={props.row[props.column.key] || ''}
-      className="w-full h-full px-2 py-1 border-0 outline-none focus:ring-2 focus:ring-blue-500"
-      onBlur={() => props.onClose(true)}
-      onChange={(e) => props.onRowChange({ ...props.row, [props.column.key]: e.target.value })}
+      value={value}
+      key={column.key + row.id}
+      className="w-full h-full border-0 outline-none "
+      unstyled
+      //onBlur={commit}
+      onChange={(e) => setValue(e.currentTarget.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') commit();
+        if (e.key === 'Escape') onClose();
+      }}
     />
   );
 };

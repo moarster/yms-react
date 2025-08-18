@@ -1,5 +1,5 @@
-import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { Alert, Box, Button, Typography } from '@mantine/core';
+import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {

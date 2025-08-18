@@ -7,7 +7,7 @@ import { PaginatedResponse } from './api.types.ts';
 import { ApiInterceptors, TokenProvider } from './interceptors';
 
 class RequestBatcher {
-  private queue: Map<string, Promise<any>> = new Map();
+  private queue = new Map<string, Promise<any>>();
   private batchTimeout = 10; // ms
 
   async batch<T>(key: string, request: () => Promise<T>): Promise<T> {

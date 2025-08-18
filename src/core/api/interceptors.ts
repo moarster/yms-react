@@ -4,9 +4,9 @@ import toast from 'react-hot-toast';
 import { ApiError } from './api.types.ts';
 
 export interface TokenProvider {
-  getToken(): null | string;
-  logout(): void;
-  refreshToken(): Promise<string>;
+  getToken: () => null | string;
+  logout: () => void;
+  refreshToken: () => Promise<string>;
 }
 
 export class ApiInterceptors {

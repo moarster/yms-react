@@ -1,6 +1,5 @@
 import { Transition } from '@headlessui/react';
 import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
-
 import clsx from 'clsx';
 import React from 'react';
 
@@ -28,13 +27,13 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
 
   return (
     <Transition
-      show={true}
       leaveTo="opacity-0"
       leaveFrom="opacity-100"
       leave="transition ease-in duration-100"
       enter="transform ease-out duration-300 transition"
       enterTo="translate-y-0 opacity-100 sm:translate-x-0"
       enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      show
       appear
     >
       <div className="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">

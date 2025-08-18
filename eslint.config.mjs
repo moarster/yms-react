@@ -7,7 +7,7 @@ import importPlugin from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 import perfectionist from 'eslint-plugin-perfectionist';
 import prettierPlugin from 'eslint-plugin-prettier';
-import mantine from 'eslint-config-mantine';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default [
   {
@@ -15,28 +15,20 @@ export default [
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  ...mantine.map((config) =>
-    config.languageOptions?.parserOptions?.project
-      ? {
-          ...config,
-          languageOptions: {
-            ...config.languageOptions,
-            parserOptions: { project: './tsconfig.json' },
-          },
-        }
-      : config,
-  ),
+  jsxA11y.flatConfigs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
 
     languageOptions: {
       ecmaVersion: 2023,
       globals: globals.browser,
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
         project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     plugins: {
@@ -44,7 +36,7 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       import: importPlugin,
-      // 'jsx-a11y': jsxA11y,
+//      'jsx-a11y': jsxA11y,
       perfectionist,
       prettier: prettierPlugin,
     },
@@ -65,6 +57,20 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
+
+      "react/button-has-type": "error",
+      "react/jsx-boolean-value": "error",
+      "react/jsx-curly-brace-presence": ["error", "never"],
+      "react/jsx-fragments": ["error", "syntax"],
+      "react/jsx-no-comment-textnodes": "error",
+      "react/jsx-no-duplicate-props": "error",
+      "react/jsx-no-target-blank": "error",
+      "react/no-children-prop": "error",
+      "react/no-deprecated": "error",
+      "react/no-find-dom-node": "error",
+      "react/no-string-refs": "error",
+      "react/self-closing-comp": "error",
+      "react/void-dom-elements-no-children": "error",
 
       'import/first': 'error',
       'import/newline-after-import': 'error',
@@ -110,13 +116,30 @@ export default [
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
+          args: "all",
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          caughtErrors: "none",
           caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-inferrable-types': 'error',
+
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/consistent-generic-constructors": "error",
+      "@typescript-eslint/method-signature-style": ["error", "property"],
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/lines-between-class-members": "off",
+      "@typescript-eslint/indent": "off",
+      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/comma-dangle": "off",
+      "@typescript-eslint/no-redeclare": "off",
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/no-loop-func": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
 
       // Code quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -127,8 +150,14 @@ export default [
       'no-duplicate-imports': 'error',
 
       // Basic accessibility
-      // 'jsx-a11y/alt-text': 'error',
-      // 'jsx-a11y/anchor-has-content': 'error',
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/anchor-has-content': 'error',
+      "jsx-a11y/no-autofocus": "off",
+      "jsx-a11y/control-has-associated-label": "off",
+      "jsx-a11y/mouse-events-have-key-events": "off",
+      "jsx-a11y/label-has-for": "off",
+      "jsx-a11y/anchor-is-valid": "off",
+      "jsx-a11y/label-has-associated-control": "off",
     },
   },
   {
@@ -138,6 +167,7 @@ export default [
       globals: globals.node,
       parserOptions: {
         project: './tsconfig.node.json',
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
@@ -146,6 +176,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2023,
       globals: globals.node,
+
     },
     rules: {
       'no-unused-vars': 'off',

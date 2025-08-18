@@ -1,7 +1,7 @@
+import { DatePickerInput, DatePickerType } from '@mantine/dates';
 import React from 'react';
 
 import { BaseInputProps } from './types.ts';
-import { DatePickerInput, DatePickerType } from '@mantine/dates';
 
 interface DateInputProps extends BaseInputProps {
   onChange: (value?: string) => void;
@@ -22,16 +22,16 @@ export const DateInput: React.FC<DateInputProps> = ({
 }) => {
   return (
     <DatePickerInput
-      required={required}
       type={type}
-      label={label}
-      placeholder="Pick date"
-      value={value}
-      className={className}
-      disabled={disabled}
-      id={id}
-      onChange={(e) => onChange(e?.toString())}
       error={error}
+      label={label}
+      value={value}
+      disabled={disabled}
+      required={required}
+      className={className}
+      placeholder="Pick date"
+      id={id || `text-input-${crypto.randomUUID()}`}
+      onChange={(e) => onChange(e?.toString())}
     />
   );
 };

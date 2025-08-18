@@ -1,7 +1,7 @@
+import { TextInput as MantineTextInput } from '@mantine/core';
 import React, { HTMLInputTypeAttribute } from 'react';
 
 import { BaseInputProps } from './types.ts';
-import { TextInput as MantineTextInput } from '@mantine/core';
 
 interface TextInputProps extends BaseInputProps {
   onChange: (value: string) => void;
@@ -24,16 +24,16 @@ export const TextInput: React.FC<TextInputProps> = ({
 }) => {
   return (
     <MantineTextInput
-      label={label}
-      placeholder={placeholder}
       type={type}
-      required={required}
-      withAsterisk={required}
-      id={id || `text-input-${crypto.randomUUID()}`}
-      value={value}
       error={error}
+      label={label}
+      value={value}
       disabled={disabled}
+      required={required}
       className={className}
+      withAsterisk={required}
+      placeholder={placeholder}
+      id={id || `text-input-${crypto.randomUUID()}`}
       onChange={(e) => onChange(e.target.value)}
     />
   );

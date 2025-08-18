@@ -29,7 +29,7 @@ const FieldInfoTooltip: React.FC<FieldInfoTooltipProps> = ({ className = '', con
       {isVisible && (
         <div className="absolute z-50 w-80 p-3 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg left-0 top-full">
           {/* Arrow pointing up */}
-          <div className="absolute -top-1 left-2 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+          <div className="absolute -top-1 left-2 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45" />
 
           {/* Content */}
           <div className="prose prose-sm max-w-none">

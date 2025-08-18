@@ -1,7 +1,6 @@
 // noinspection t
 
 import { PlusIcon, TruckIcon } from '@phosphor-icons/react';
-
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import React, { useState } from 'react';
@@ -172,14 +171,12 @@ const ShipmentRfpsPage: React.FC = () => {
           </p>
         </div>
 
-        {
-          <div className="flex space-x-3">
-            <Link className="btn-primary" to="/shipment-rfps/new">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Create RFP
-            </Link>
-          </div>
-        }
+        <div className="flex space-x-3">
+          <Link className="btn-primary" to="/shipment-rfps/new">
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create RFP
+          </Link>
+        </div>
       </div>
 
       {/* Statistics */}

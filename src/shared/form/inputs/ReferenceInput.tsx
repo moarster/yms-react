@@ -1,9 +1,9 @@
+import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 import React, { useState } from 'react';
 
 import { BaseEntity, isDataEntity } from '@/types';
 
 import { BaseInputProps } from './types.ts';
-import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 
 interface ReferenceInputProps extends BaseInputProps {
   emptyFactory?: () => BaseEntity;
@@ -80,44 +80,44 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   const rightSection = (
     <>
       {value?.id && !disabled && (
-        <CloseButton size="sm" onClick={handleClear} aria-label="Clear selection" />
+        <CloseButton size="sm" aria-label="Clear selection" onClick={handleClear} />
       )}
       <Combobox.Chevron />
     </>
   );
   const comboboxOptions = filteredOptions.map((option) => (
     <Combobox.Option
-      value={getOptionTitle(option)}
       key={option.id}
+      value={getOptionTitle(option)}
       active={value?.id === option.id}
     >
       {getOptionTitle(option)}
     </Combobox.Option>
   ));
   return (
-    <Combobox store={combobox} onOptionSubmit={handleSelect} disabled={disabled}>
+    <Combobox store={combobox} disabled={disabled} onOptionSubmit={handleSelect}>
       <Combobox.Target>
         <InputBase
-          className={className}
-          required={required}
-          label={label}
-          id={id || `text-input-${crypto.randomUUID()}`}
-          rightSection={rightSection}
-          rightSectionPointerEvents="auto"
-          value={searchTerm || displayValue}
-          onChange={searchable ? handleSearchChange : undefined}
-          onClick={() => !disabled && combobox.openDropdown()} //{() => !disabled && setIsOpen(!isOpen)}
-          onFocus={() => !disabled && combobox.openDropdown()}
-          onBlur={handleBlur}
-          placeholder={placeholder}
-          disabled={disabled}
-          error={!!error}
-          readOnly={!searchable}
           styles={{
             input: {
               cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
             },
           }}
+          label={label}
+          error={!!error}
+          disabled={disabled}
+          required={required}
+          className={className}
+          readOnly={!searchable}
+          placeholder={placeholder}
+          rightSection={rightSection}
+          rightSectionPointerEvents="auto"
+          value={searchTerm || displayValue}
+          id={id || `text-input-${crypto.randomUUID()}`}
+          onBlur={handleBlur}
+          onClick={() => !disabled && combobox.openDropdown()} //{() => !disabled && setIsOpen(!isOpen)}
+          onFocus={() => !disabled && combobox.openDropdown()}
+          onChange={searchable ? handleSearchChange : undefined}
         />
       </Combobox.Target>
 

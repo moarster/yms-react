@@ -10,10 +10,10 @@ import { catalogService } from '@/features/catalogs/catalogService';
 import { schemaService, TableConfig } from '@/services/schemaService';
 import { DataGridTable } from '@/shared/ui/DataGridTable';
 import { useTableData } from '@/shared/ui/DataGridTable/hooks/useTableData.ts';
+import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
 import { CatalogItem } from './catalog.types.ts';
-import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 
 interface CatalogItemRow extends TableRow, CatalogItem {}
 
@@ -179,8 +179,8 @@ const CatalogItemsPage: React.FC = () => {
           data={items}
           loading={isLoading}
           config={tableConfig}
-          enableInlineEdit={true}
           schema={!isListType ? schema : undefined}
+          editable
           onDelete={handleDelete}
           onDataChange={handleDataChange}
           onSelectionChange={handleSelectionChange}

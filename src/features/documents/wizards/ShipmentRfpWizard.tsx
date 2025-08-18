@@ -1,5 +1,6 @@
 // noinspection D
 
+import { Textarea } from '@mantine/core';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -10,7 +11,6 @@ import {
   PackageIcon,
   TruckIcon,
 } from '@phosphor-icons/react';
-
 import React, { useEffect, useState } from 'react';
 
 import { useWizardValidation } from '@/features/documents/hooks/useWizardValidation.ts';
@@ -24,14 +24,8 @@ import {
   ShipmentRfpWizardProps,
   WizardFormData,
 } from '@/features/documents/wizards/wizard.types.ts';
-import FileUpload from '@/shared/form/FileUpload.tsx';
-import {
-  CheckboxInput,
-  DateInput,
-  NumberInput,
-  ReferenceInput,
-  TextInput,
-} from '@/shared/form/inputs';
+import { ChipInput, DateInput, NumberInput, ReferenceInput, TextInput } from '@/shared/form/inputs';
+import FileUpload from '@/shared/form/inputs/FileUpload.tsx';
 import { isBaseEntity } from '@/types';
 import { LinkFactories } from '@/types/factories/linkFactory.ts';
 
@@ -264,7 +258,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
 
   const renderBasicInfo = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <ReferenceInput
           placeholder="Выберите"
           label="Вид транспортировки"
@@ -292,8 +286,9 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
           required
           onChange={(value) => updateFormData('_currency', value)}
         />
-        <CheckboxInput
-          text="Экспресс отгрузка"
+        <ChipInput
+          className="align-middle"
+          label="Экспресс отгрузка"
           value={formData.express || false}
           onChange={(value) => updateFormData('express', value)}
         />
@@ -487,7 +482,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Комментарий</label>
-        <textarea
+        <Textarea
           rows={3}
           maxLength={1000}
           value={formData.comment || ''}
@@ -501,7 +496,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Внутренний комментарий
         </label>
-        <textarea
+        <Textarea
           rows={3}
           value={formData.innerComment || ''}
           placeholder="Комментарий для внутреннего использования (только ДКС)"
@@ -697,12 +692,12 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
           >
             {isSubmitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                 Создание...
               </>
             ) : (
               <>
-                <Check className="h-4 w-4 mr-2" />
+                <CheckIcon className="h-4 w-4 mr-2" />
                 Создать заявку
               </>
             )}

@@ -46,11 +46,11 @@ export interface AuthResponse {
 }
 
 export interface AuthService {
-  getCurrentUser(): Promise<User>;
-  isAuthenticated(): boolean;
-  login(email?: string, password?: string): Promise<AuthResponse>;
-  logout(): Promise<void>;
-  refreshToken(): Promise<AuthTokens>;
+  getCurrentUser: () => Promise<User>;
+  isAuthenticated: () => boolean;
+  login: (email?: string, password?: string) => Promise<AuthResponse>;
+  logout: () => Promise<void>;
+  refreshToken: () => Promise<AuthTokens>;
 }
 
 export const userHasRole = (user: null | User, role: UserRole): boolean =>

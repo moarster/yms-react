@@ -53,10 +53,10 @@ const CommonForm: React.FC<CommonFormProps> = ({
           <div className="bg-white rounded-lg shadow">
             <div className="p-6">
               <FormContainer
-                hideFormActions={true} // Always hide since we use header/footer
                 formConfig={formConfig}
                 isEditMode={isEditMode}
                 isSubmitting={isSubmitting}
+                hideFormActions // Always hide since we use header/footer
                 onFormChange={onFormChange}
                 onFormSubmit={onFormSubmit}
               />

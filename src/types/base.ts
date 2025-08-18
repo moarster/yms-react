@@ -32,7 +32,6 @@ export interface MetadataEntity extends Identifiable, Auditable {
   until?: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EntityData
   extends Record<
     string,
