@@ -2,9 +2,9 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CheckIcon,
-  PackageIcon,
   FileTextIcon,
   MapPinIcon,
+  PackageIcon,
   TruckIcon,
 } from '@phosphor-icons/react';
 import { useState } from 'react';

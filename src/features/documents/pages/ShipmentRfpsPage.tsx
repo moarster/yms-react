@@ -9,11 +9,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { userIsCarrier, userIsLogist } from '@/core/auth/types.ts';
 import { useAuthStore } from '@/core/store/authStore.ts';
-import { CatalogItem } from '@/features/catalogs/catalog.types.ts';
 import { documentService } from '@/features/documents/documentService.ts';
 import { ShipmentRfp, ShipmentRfpData } from '@/features/documents/types/shipment-rfp.ts';
 import { schemaService } from '@/services/schemaService.ts';
-import AutoTable from '@/shared/ui/AutoTable/AutoTable.tsx';
 import { DataGridTable } from '@/shared/ui/DataGridTable';
 import { BaseTableRow } from '@/shared/ui/DataGridTable/table.types.ts';
 import ErrorMessage from '@/shared/ui/ErrorMessage.tsx';

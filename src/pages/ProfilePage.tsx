@@ -1,12 +1,12 @@
 import Form from '@aokiapp/rjsf-mantine-theme';
 
 import {
-  UserIcon,
-  KeyIcon,
-  EyeSlashIcon,
-  EyeIcon,
-  CheckCircleIcon,
   BuildingOfficeIcon,
+  CheckCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  KeyIcon,
+  UserIcon,
 } from '@phosphor-icons/react';
 import validator from '@rjsf/validator-ajv8';
 import { useMutation } from '@tanstack/react-query';

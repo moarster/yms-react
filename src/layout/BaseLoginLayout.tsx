@@ -1,4 +1,4 @@
-import { TruckIcon, SteeringWheelIcon } from '@phosphor-icons/react';
+import { SteeringWheelIcon, TruckIcon } from '@phosphor-icons/react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 

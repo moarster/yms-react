@@ -1,16 +1,14 @@
 import {
-  TruckIcon,
-  UsersIcon,
   ArchiveBoxIcon,
   ChartBarIcon,
-  WarningIcon,
   ClipboardTextIcon,
+  TruckIcon,
+  UsersIcon,
+  WarningIcon,
 } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-import { authService } from '@/core/auth/authService.ts';
 import { userIsCarrier, userIsLogist } from '@/core/auth/types.ts';
 import { useAuthStore } from '@/core/store/authStore.ts';
 import { documentService } from '@/features/documents/documentService.ts';

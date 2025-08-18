@@ -4,11 +4,11 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CheckIcon,
-  PackageIcon,
+  ExclamationMarkIcon,
   FileTextIcon,
   MapPinIcon,
+  PackageIcon,
   TruckIcon,
-  ExclamationMarkIcon,
 } from '@phosphor-icons/react';
 
 import React, { useEffect, useState } from 'react';

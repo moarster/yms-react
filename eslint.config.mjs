@@ -10,12 +10,22 @@ import prettierPlugin from 'eslint-plugin-prettier';
 import mantine from 'eslint-config-mantine';
 
 export default [
-  ...mantine,
   {
-    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts'],
+    ignores: ['dist', 'node_modules', '*.config.js'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  ...mantine.map((config) =>
+    config.languageOptions?.parserOptions?.project
+      ? {
+          ...config,
+          languageOptions: {
+            ...config.languageOptions,
+            parserOptions: { project: './tsconfig.json' },
+          },
+        }
+      : config,
+  ),
   {
     files: ['**/*.{ts,tsx}'],
 

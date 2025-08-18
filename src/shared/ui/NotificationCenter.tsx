@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import { XIcon, InfoIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 
 import clsx from 'clsx';
 import React from 'react';

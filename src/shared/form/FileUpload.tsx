@@ -1,4 +1,4 @@
-import { XIcon, WarningCircleIcon, FileTextIco, UploadIcon } from '@phosphor-icons/react';
+import { UploadIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import React, { useCallback, useState } from 'react';
 
 import { Attachment } from '@/types';

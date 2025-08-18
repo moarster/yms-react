@@ -1,10 +1,10 @@
 import {
-  TruckIcon,
-  UserIcon,
+  ArchiveBoxIcon,
   CaretLeftIcon,
   CaretRightIcon,
-  ArchiveBoxIcon,
   HouseIcon,
+  TruckIcon,
+  UserIcon,
 } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React from 'react';

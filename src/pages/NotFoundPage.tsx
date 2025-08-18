@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, HouseIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon } from '@phosphor-icons/react';
 
 import React from 'react';
 import { Link } from 'react-router-dom';

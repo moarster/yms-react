@@ -1,4 +1,4 @@
-import { TrashIcon, PencilIcon, FloppyDiskBackIcon } from '@phosphor-icons/react';
+import { FloppyDiskBackIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 
 import { FormActions } from '@/types/form.ts';

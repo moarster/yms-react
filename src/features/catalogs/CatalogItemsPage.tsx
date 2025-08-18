@@ -1,6 +1,6 @@
 // noinspection D
 
-import { CaretCircleLeftIcon, ArrowDownIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
+import { ArrowDownIcon, CaretCircleLeftIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
 import toast from 'react-hot-toast';

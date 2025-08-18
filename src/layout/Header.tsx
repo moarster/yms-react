@@ -1,5 +1,5 @@
 import { Menu, Transition } from '@headlessui/react';
-import { ArrowSquareRightIcon, BellIcon, UserIcon, GearSixIcon } from '@phosphor-icons/react';
+import { ArrowSquareRightIcon, BellIcon, GearSixIcon, UserIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 
