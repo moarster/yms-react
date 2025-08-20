@@ -8,11 +8,10 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { catalogService } from '@/features/catalogs/catalogService';
 import { schemaService, TableConfig } from '@/services/schemaService';
-import { DataGridTable } from '@/shared/ui/DataGridTable';
 import { useTableData } from '@/shared/ui/DataGridTable/hooks/useTableData.ts';
 import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
-import Table from '@/shared/ui/Table/Table.tsx';
+import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
 
 import { CatalogItem } from './catalog.types.ts';
 
@@ -176,19 +175,7 @@ const CatalogItemsPage: React.FC = () => {
       </div>
 
       <div className="relative">
-        <DataGridTable<CatalogItemRow>
-          data={items}
-          loading={isLoading}
-          config={tableConfig}
-          schema={!isListType ? schema : undefined}
-          editable
-          onDelete={handleDelete}
-          onDataChange={handleDataChange}
-          onSelectionChange={handleSelectionChange}
-        />
-      </div>
-      <div className="relative">
-        <Table
+        <MantineTable
           data={items}
           loading={isLoading}
           config={tableConfig}
