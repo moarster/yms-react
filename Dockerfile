@@ -1,7 +1,7 @@
 FROM node:22-alpine AS base
 
 # Install pnpm globally
-RUN npm install -g pnpm@10.14.0
+RUN npm install -g pnpm@10.15.0
 
 # Set working directory
 WORKDIR /app
@@ -34,7 +34,7 @@ RUN pnpm run build
 # Production stage with nginx
 FROM nginx:alpine AS production
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl curl
 
 RUN mkdir -p /etc/ssl/certs /etc/ssl/private && \
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -67,6 +67,13 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Health check endpoint on HTTP
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
     # Handle React Router (SPA)
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -98,6 +105,18 @@ server {
         application/xml+rss
         application/json;
 }
+
+# HTTP server just for healthcheck
+server {
+    listen 8080;
+    server_name localhost;
+
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+}
 EOF
 
 # Copy built app from build stage
@@ -105,7 +124,7 @@ COPY --from=base /app/dist /usr/share/nginx/html
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f https://localhost/ || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Expose port
 EXPOSE 80 443
