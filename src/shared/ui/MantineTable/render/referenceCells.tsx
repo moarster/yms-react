@@ -3,7 +3,7 @@ import { MRT_Cell, MRT_TableInstance } from 'mantine-react-table';
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CatalogType } from '@/features/catalogs/catalog.types.ts';
+import { CatalogItemRow, CatalogType } from '@/features/catalogs/catalog.types.ts';
 import { BaseLink, ReferentLink } from '@/types';
 
 import { useCatalogOptions } from '../hooks/useCatalogOptions';
@@ -129,7 +129,7 @@ export const ReferenceEditCell: React.FC<ReferenceEditCellProps> = ({
 
 // Utility function to create reference cell config
 export const createReferenceCell = (catalog: string, linkType: CatalogType) => ({
-  Cell: ({ cell }: { cell: MRT_Cell<TableRow> }) => (
+  Cell: ({ cell }: { cell: MRT_Cell<CatalogItemRow> }) => (
     <ReferenceCellDisplay
       value={cell.getValue() as ReferentLink | null}
       catalog={catalog}

@@ -9,10 +9,11 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { catalogService } from '@/features/catalogs/catalogService';
 import { schemaService, TableConfig } from '@/services/schemaService';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
+import { useTableData } from '@/shared/ui/MantineTable/hooks/useTableData.ts';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
+import { TableRow } from '@/shared/ui/MantineTable/types.ts';
 
 import { CatalogItem } from './catalog.types.ts';
-import { useTableData } from '@/shared/ui/MantineTable/hooks/useTableData.ts';
 
 interface CatalogItemRow extends TableRow, CatalogItem {}
 
@@ -46,24 +47,22 @@ const CatalogItemsPage: React.FC = () => {
     mutationFn: async (updatedItems: CatalogItemRow[]) => {
       // Batch update items that changed
       const promises = updatedItems
-        .filter(item => item.id) // Only update items with IDs
-        .map(item =>
-          catalogService.updateCatalogItem(catalogKey!, item.id!, item)
-        );
+        .filter((item) => item.id) // Only update items with IDs
+        .map((item) => catalogService.updateCatalogItem(catalogKey!, item.id!, item));
 
       return Promise.all(promises);
+    },
+    onError: (error) => {
+      console.error('Failed to save changes:', error);
+      toast.error('Failed to save changes');
     },
     onSuccess: () => {
       toast.success('Changes saved successfully');
       // Invalidate cache to refetch data
       queryClient.invalidateQueries({
-        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey]
+        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
       });
     },
-    onError: (error) => {
-      console.error('Failed to save changes:', error);
-      toast.error('Failed to save changes');
-    }
   });
 
   // Use common table data hook
@@ -122,10 +121,6 @@ const CatalogItemsPage: React.FC = () => {
   const handleExport = () => {
     toast.custom('Export functionality coming soon');
   };
-
-  const handleDataChange = useCallback((updatedData: CatalogItemRow[]) => {
-    updateMutation.mutate(updatedData);
-  }, [updateMutation]);
 
   if (catalogLoading || isLoading) {
     return (
@@ -201,8 +196,8 @@ const CatalogItemsPage: React.FC = () => {
           loading={isLoading}
           config={tableConfig}
           className="shadow-sm"
+          collectionUrl={`/${type==='CATALOG'?'reference':'lists'}/${catalogKey}`}
           schema={!isListType ? schema : undefined}
-          onDataChange={handleDataChange}
         />
       </div>
     </div>

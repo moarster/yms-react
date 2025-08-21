@@ -13,11 +13,11 @@ import { extractReferenceInfo } from '@/utils/referenceUtils.ts';
 
 import { TableRow } from './types.ts';
 
-export function generateColumns(
+export function generateColumns<TRow extends TableRow>(
   schema: JsonSchema | undefined,
   enableInlineEdit: boolean,
-): MRT_ColumnDef<TableRow>[] {
-  const columns: MRT_ColumnDef<TableRow>[] = [];
+): MRT_ColumnDef<TRow>[] {
+  const columns: MRT_ColumnDef<TRow>[] = [];
 
   if (schema?.properties) {
     Object.entries(schema.properties).forEach(([key, property]: [string, JsonSchemaProperty]) => {
@@ -55,7 +55,7 @@ export function generateColumns(
       }
 
       const required = schema.required?.includes(key);
-      const column: MRT_ColumnDef<TableRow> = {
+      const column: MRT_ColumnDef<TRow> = {
         accessorKey: key,
         enableEditing: enableInlineEdit && !property['x-table-readonly'],
         header: property.title || property.description || key,

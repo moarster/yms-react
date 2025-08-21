@@ -1,8 +1,8 @@
 import { JsonSchema } from '@/types';
 
 export interface TableRow {
-  [key: string]: any;
-  id?: string;
+  [key: string]: unknown;
+  id: string;
 }
 
 // Action callbacks with proper typing
@@ -38,4 +38,6 @@ export interface TableProps<TRow extends TableRow> {
   loading?: boolean;
   onDataChange?: (data: TRow[]) => void;
   schema?: JsonSchema;
+  collectionUrl?: string;
+  onCellChange?: (rowId: string, columnId: string, value: any) => void;
 }

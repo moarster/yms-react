@@ -1,21 +1,22 @@
-import { MantineReactTable } from 'mantine-react-table';
-import { useMemo } from 'react';
+import { MantineReactTable, MRT_Cell, MRT_Row } from 'mantine-react-table';
+import { useMemo, useState } from 'react';
 
 import LoadingSpinner from '../LoadingSpinner';
 import { generateColumns } from './columnGenerator';
 import { TableProps, TableRow } from './types.ts';
+import { apiClient } from '@/core/api';
 
 const MantineTable = <TRow extends TableRow>({
   className = '',
   config = {},
   data,
   loading = false,
+  collectionUrl = '/',
   schema = { properties: { id: { type: 'string' }, title: { type: 'string' } }, type: 'object' },
 }: TableProps<TRow>) => {
 
-
   const columns = useMemo(
-    () => generateColumns(schema, config.editable ?? true),
+    () => generateColumns<TRow>(schema, config.editable ?? true),
     [schema, config.editable],
   );
 
@@ -27,9 +28,17 @@ const MantineTable = <TRow extends TableRow>({
     );
   }
 
+  const handleSaveCell = async (cell: MRT_Cell<TRow>, value: any) => {
+    const updatedRow = {
+      data: { ...data[cell.row.index], [cell.column.id]:  value },
+      title: data[cell.row.index].title as string,
+    };
+    await apiClient.put(`${collectionUrl}/${cell.row.id}`, updatedRow);
+  };
+
   return (
     <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>
-      <MantineReactTable
+      <MantineReactTable<TRow>
         initialState={{
           density: config.density === 'compact' ? 'xs' : 'md',
         }}
@@ -39,6 +48,11 @@ const MantineTable = <TRow extends TableRow>({
             minHeight: '500px',
           },
         }}
+        mantineEditTextInputProps={({ cell }) => ({
+          onBlur: (event) => {
+            handleSaveCell(cell, event.target.value);
+          },
+        })}
         mantineTableProps={{
           highlightOnHover: true,
           striped: config.density === 'compact',
@@ -54,6 +68,7 @@ const MantineTable = <TRow extends TableRow>({
         enablePagination={config.pagination ?? false}
         enableGlobalFilter={config.filterable ?? false}
         enableColumnFilters={config.filterable ?? false}
+
       />
     </div>
   );
