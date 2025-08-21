@@ -1,5 +1,5 @@
 import { CatalogType } from '@/features/catalogs/catalog.types.ts';
-import { BaseLink, ListLink, ReferenceLink } from '@/types';
+import { BaseLink, ListLink, CatalogLink } from '@/types';
 
 export const createDummyLink = <TCatalog extends string>(
   type: CatalogType,
@@ -22,7 +22,7 @@ export const createListLink = <TCatalog extends string>(catalog: TCatalog): List
 
 export const createReferenceLink = <TCatalog extends string>(
   catalog: TCatalog,
-): ReferenceLink<TCatalog> => ({
+): CatalogLink<TCatalog> => ({
   catalog,
   domain: 'reference',
   entity: 'item',

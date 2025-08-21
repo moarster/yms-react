@@ -16,11 +16,11 @@ export interface Titled {
 
 export interface BaseEntity extends Identifiable, Auditable, Titled {}
 
-export interface DataEntity<TData = EntityData> extends BaseEntity {
+export interface DataEntity<TData = BaseProperty> extends BaseEntity {
   data: TData | undefined;
 }
 
-export interface DomainEntity<TData = EntityData> extends DataEntity<TData> {
+export interface DomainEntity<TData = BaseProperty> extends DataEntity<TData> {
   meta?: string;
   process?: string;
   status?: string;
@@ -31,24 +31,22 @@ export interface MetadataEntity extends Identifiable, Auditable {
   since?: Date;
   until?: Date;
 }
+export type PropertyValue =
+  | BaseEntity
+  | BaseProperty
+  | boolean
+  | Date
+  | null
+  | number
+  | PropertyValue[]
+  | string
+  | undefined;
 
-export interface EntityData
-  extends Record<
-    string,
-    | BaseEntity
-    | boolean
-    | boolean[]
-    | Date
-    | Date[]
-    | EntityData
-    | EntityData[]
-    | null
-    | number
-    | number[]
-    | string
-    | string[]
-    | undefined
-  > {}
+export type PropertyTuple = readonly [string, PropertyValue];
+
+export interface BaseProperty {
+  [key: string]: PropertyValue;
+}
 
 // Strip audit fields for creation
 export type CreatePayload<T extends BaseEntity> = Omit<T, 'id' | keyof Auditable>;

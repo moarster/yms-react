@@ -36,7 +36,6 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       import: importPlugin,
-//      'jsx-a11y': jsxA11y,
       perfectionist,
       prettier: prettierPlugin,
     },
@@ -93,7 +92,7 @@ export default [
       ],
       'perfectionist/sort-exports': ['error', { type: 'natural' }],
       'perfectionist/sort-objects': ['error', { type: 'natural' }],
-      'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
+      //'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
       'perfectionist/sort-union-types': ['error', { type: 'natural' }],
       'perfectionist/sort-enums': ['error', { type: 'natural' }],
       'perfectionist/sort-jsx-props': [
@@ -161,7 +160,7 @@ export default [
     },
   },
   {
-    files: ['vite.config.ts'],
+    files: ['vite.config.ts', 'package.json'],
     languageOptions: {
       ecmaVersion: 2023,
       globals: globals.node,

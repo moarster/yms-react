@@ -1,20 +1,20 @@
-import { Attachment, DomainEntity, EntityData, ListLink, ReferenceLink } from '@/types';
+import { Attachment, DomainEntity, BaseProperty, ListLink, CatalogLink } from '@/types';
 import { LinkFactories } from '@/types/factories/linkFactory.ts';
 
-export interface ShipmentRfpData extends EntityData {
-  _candidates?: ReferenceLink<'counter-party'>[];
-  _carrier?: ReferenceLink<'counter-party'>;
-  _client?: ReferenceLink<'counter-party'>;
-  _contract?: ReferenceLink<'contract'>;
+export interface ShipmentRfpData extends BaseProperty {
+  _candidates?: CatalogLink<'counter-party'>[];
+  _carrier?: CatalogLink<'counter-party'>;
+  _client?: CatalogLink<'counter-party'>;
+  _contract?: CatalogLink<'contract'>;
   _currency?: ListLink<'currency'>;
-  _driver?: ReferenceLink<'driver'>;
-  _refusalReason?: ReferenceLink<'shipment-rfp-refusal-reason'>;
-  _requiredVehicleType?: ReferenceLink<'vehicle-type'>;
-  _routeDirection?: ReferenceLink<'route-direction'>;
-  _shipmentPlanningDepartment?: ReferenceLink<'shipment-planning-department'>;
+  _driver?: CatalogLink<'driver'>;
+  _refusalReason?: CatalogLink<'shipment-rfp-refusal-reason'>;
+  _requiredVehicleType?: CatalogLink<'vehicle-type'>;
+  _routeDirection?: CatalogLink<'route-direction'>;
+  _shipmentPlanningDepartment?: CatalogLink<'shipment-planning-department'>;
   _shipmentType?: ListLink<'shipment-type'>;
   _transportationType?: ListLink<'transportation-type'>;
-  _vehicle?: ReferenceLink<'vehicle'>;
+  _vehicle?: CatalogLink<'vehicle'>;
 
   _vehicleAffiliation?: ListLink<'vehicle-affiliation'>;
 
@@ -40,9 +40,9 @@ export interface ShipmentRfpData extends EntityData {
   vehicleWeight?: number;
 }
 
-export interface RoutePoint extends EntityData {
+export interface RoutePoint extends BaseProperty {
   _cargoHandlingType: ListLink<'cargo-handling-type'>;
-  _counterParty: ReferenceLink<'counter-party'>;
+  _counterParty: CatalogLink<'counter-party'>;
   address: string; // max 255 chars
   arrival?: string; // date-time
   cargoList: Cargo[];
@@ -50,14 +50,14 @@ export interface RoutePoint extends EntityData {
   departure?: string; // date-time
 }
 
-export interface Cargo extends EntityData {
+export interface Cargo extends BaseProperty {
   _cargoNature: ListLink<'cargo-nature'>;
   cargoVolume: number; // minimum 0, multipleOf 0.01
   cargoWeight: number; // minimum 0, multipleOf 0.01
   number: string;
 }
 
-export interface ActualCarrier extends EntityData {
+export interface ActualCarrier extends BaseProperty {
   legalAddress?: string; // max 255 chars
   name?: string; // max 255 chars
   phone?: string;
@@ -66,7 +66,7 @@ export interface ActualCarrier extends EntityData {
   taxIdentificationNumber?: string; // INN: 10 or 12 digits
 }
 
-export interface LetterOfAttorney extends EntityData {
+export interface LetterOfAttorney extends BaseProperty {
   attachment?: Attachment;
   date?: string; // date format
   issuedBy?: string; // max 255 chars

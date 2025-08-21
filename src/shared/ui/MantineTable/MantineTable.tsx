@@ -10,14 +10,13 @@ const MantineTable = <TRow extends TableRow>({
   config = {},
   data,
   loading = false,
-  schema,
+  schema = { properties: { id: { type: 'string' }, title: { type: 'string' } }, type: 'object' },
 }: TableProps<TRow>) => {
+
+
   const columns = useMemo(
-    () =>
-      !schema
-        ? generateColumns(undefined, true)
-        : generateColumns(schema, true),
-    [schema],
+    () => generateColumns(schema, config.editable ?? true),
+    [schema, config.editable],
   );
 
   if (loading) {
@@ -31,17 +30,30 @@ const MantineTable = <TRow extends TableRow>({
   return (
     <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>
       <MantineReactTable
+        initialState={{
+          density: config.density === 'compact' ? 'xs' : 'md',
+        }}
         mantineTableContainerProps={{
           className: 'rdg-modern',
           style: {
             minHeight: '500px',
           },
         }}
+        mantineTableProps={{
+          highlightOnHover: true,
+          striped: config.density === 'compact',
+          withColumnBorders: false,
+          withRowBorders: true,
+        }}
         data={data}
         columns={columns}
-        editDisplayMode="row"
+        editDisplayMode="cell"
         getRowId={(row) => row.id}
-        enableEditing
+        enableEditing={config.editable ?? true}
+        enableSorting={config.sortable ?? true}
+        enablePagination={config.pagination ?? false}
+        enableGlobalFilter={config.filterable ?? false}
+        enableColumnFilters={config.filterable ?? false}
       />
     </div>
   );

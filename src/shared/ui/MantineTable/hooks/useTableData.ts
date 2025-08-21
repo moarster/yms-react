@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
+import { TableRow } from '../types.ts';
 
 interface UseTableDataOptions<T extends TableRow> {
   deleteFn?: (ids: (number | string)[]) => Promise<void>;

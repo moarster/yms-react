@@ -11,10 +11,9 @@ import { useAuthStore } from '@/core/store/authStore.ts';
 import { documentService } from '@/features/documents/documentService.ts';
 import { ShipmentRfp, ShipmentRfpData } from '@/features/documents/types/shipment-rfp.ts';
 import { schemaService } from '@/services/schemaService.ts';
-import { DataGridTable } from '@/shared/ui/DataGridTable';
-import { BaseTableRow } from '@/shared/ui/DataGridTable/table.types.ts';
 import ErrorMessage from '@/shared/ui/ErrorMessage.tsx';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx';
+import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
 import { DocumentStatus } from '@/types';
 
 interface StatusFilterProps {
@@ -218,7 +217,7 @@ const ShipmentRfpsPage: React.FC = () => {
 
       {/* RFPs Auto-generated Table */}
       <div className="card p-0 overflow-hidden">
-        <DataGridTable<ShipmentRfpRow>
+        <MantineTable
           config={{
             filterable: true,
             height: '70vh',
@@ -230,7 +229,6 @@ const ShipmentRfpsPage: React.FC = () => {
           data={rfps}
           schema={schema}
           loading={isLoading}
-          enableInlineEdit={false}
           onRowClick={handleRowClick}
           onSelectionChange={handleSelectionChange}
         />

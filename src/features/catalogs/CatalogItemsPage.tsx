@@ -1,19 +1,18 @@
 // noinspection D
 
 import { ArrowDownIcon, CaretCircleLeftIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
-import { useQuery } from '@tanstack/react-query';
-import React, { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { catalogService } from '@/features/catalogs/catalogService';
 import { schemaService, TableConfig } from '@/services/schemaService';
-import { useTableData } from '@/shared/ui/DataGridTable/hooks/useTableData.ts';
-import { TableRow } from '@/shared/ui/DataGridTable/types.ts';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
 
 import { CatalogItem } from './catalog.types.ts';
+import { useTableData } from '@/shared/ui/MantineTable/hooks/useTableData.ts';
 
 interface CatalogItemRow extends TableRow, CatalogItem {}
 
@@ -40,6 +39,31 @@ const CatalogItemsPage: React.FC = () => {
     enabled: !!catalogKey && !isListType,
     queryFn: () => schemaService.getAnySchema(catalogKey!),
     queryKey: ['catalog-schema', catalogKey],
+  });
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: async (updatedItems: CatalogItemRow[]) => {
+      // Batch update items that changed
+      const promises = updatedItems
+        .filter(item => item.id) // Only update items with IDs
+        .map(item =>
+          catalogService.updateCatalogItem(catalogKey!, item.id!, item)
+        );
+
+      return Promise.all(promises);
+    },
+    onSuccess: () => {
+      toast.success('Changes saved successfully');
+      // Invalidate cache to refetch data
+      queryClient.invalidateQueries({
+        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey]
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to save changes:', error);
+      toast.error('Failed to save changes');
+    }
   });
 
   // Use common table data hook
@@ -99,12 +123,9 @@ const CatalogItemsPage: React.FC = () => {
     toast.custom('Export functionality coming soon');
   };
 
-  // Handle data changes (for inline editing)
-  const handleDataChange = (updatedData: CatalogItemRow[]) => {
-    // Here you would typically save the changes to the backend
-    console.log('Data changed:', updatedData);
-    toast.success('Changes saved');
-  };
+  const handleDataChange = useCallback((updatedData: CatalogItemRow[]) => {
+    updateMutation.mutate(updatedData);
+  }, [updateMutation]);
 
   if (catalogLoading || isLoading) {
     return (
@@ -179,11 +200,9 @@ const CatalogItemsPage: React.FC = () => {
           data={items}
           loading={isLoading}
           config={tableConfig}
+          className="shadow-sm"
           schema={!isListType ? schema : undefined}
-          editable
-          onDelete={handleDelete}
           onDataChange={handleDataChange}
-          onSelectionChange={handleSelectionChange}
         />
       </div>
     </div>

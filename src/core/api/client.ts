@@ -83,7 +83,11 @@ export class Client {
     return response.data;
   }
 
-  async put<T extends BaseEntity>(url: string, data?: T, config?: AxiosRequestConfig): Promise<T> {
+  async put<T extends BaseEntity>(
+    url: string,
+    data: Partial<T>,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.client.put<T>(url, data, config);
     return response.data;
   }

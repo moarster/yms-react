@@ -110,6 +110,24 @@ class CatalogService {
   async deleteCatalogItem(catalogKey: string, itemId: string): Promise<void> {
     return await apiClient.delete(`/reference/${catalogKey}/items/${itemId}`);
   }
+
+  // Update catalog item
+  async updateCatalogItem(
+    catalogKey: string,
+    itemId: string,
+    data: Partial<CatalogItem>,
+  ): Promise<CatalogItem> {
+    return await apiClient.put(`/reference/${catalogKey}/items/${itemId}`, data);
+  }
+
+  // Update list item
+  async updateListItem(
+    listKey: string,
+    itemId: string,
+    data: Partial<ListItem>,
+  ): Promise<ListItem> {
+    return await apiClient.put(`/lists/${listKey}/items/${itemId}`, data);
+  }
 }
 
 export const catalogService = new CatalogService();
