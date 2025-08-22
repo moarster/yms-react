@@ -1,28 +1,28 @@
 import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
-import React, { useState } from 'react';
+import React from 'react';
 
-import { BaseEntity, isDataEntity } from '@/types';
+import { useReference } from '@/shared/hooks/useReference.ts';
+import { BaseEntity,  extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
 
 import { BaseInputProps } from './types.ts';
 
 interface ReferenceInputProps extends BaseInputProps {
   emptyFactory?: () => BaseEntity;
   onChange: (value: BaseEntity | null) => void;
-  options: BaseEntity[];
+  linkDef: LinkDefinition;
   placeholder?: string;
   searchable?: boolean;
-  value: BaseEntity | null;
+  value: ReferentLink | null;
 }
 
 export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   className = '',
   disabled,
-  emptyFactory,
   error,
   id,
   label,
+  linkDef,
   onChange,
-  options,
   placeholder = 'Choose option',
   required,
   searchable = true,
@@ -31,50 +31,44 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
+  const { catalog, domain } = extractLinkConstants(linkDef);
+  const linkType = domain === 'lists' ? 'LIST' : 'CATALOG';
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    comboboxOptions,
+    displayValue,
+    isLoading,
+    handleClear,
+    handleSearchChange,
+    handleSelect,
+    resetSearch,
+    searchTerm,
+  } = useReference({
+    catalog,
+    linkType,
+    value,
+    searchable,
+    onChange,
+    enabled: !!catalog,
+  });
 
-  const getOptionTitle = (option: BaseEntity): string => {
-    return option.title ?? (isDataEntity(option) ? ((option.data?.title as string) ?? '') : '');
-  };
-  const displayValue = value ? getOptionTitle(value) : '';
-  const shouldFilterOptions = searchable && searchTerm && searchTerm !== displayValue;
-  // Filter options based on search
-  const filteredOptions = shouldFilterOptions
-    ? options.filter((option) =>
-        getOptionTitle(option).toLowerCase().includes(searchTerm.toLowerCase().trim()),
-      )
-    : options;
-
-  const handleSelect = (selectedValue: string) => {
-    const selectedOption = options.find((option) => getOptionTitle(option) === selectedValue);
-    if (selectedOption) {
-      onChange(selectedOption);
-      setSearchTerm(selectedValue);
-      combobox.closeDropdown();
-    }
-  };
-
-  const handleClear = () => {
-    onChange(emptyFactory ? emptyFactory() : null);
-    setSearchTerm('');
+  const handleSelectWithClose = (selectedValue: string) => {
+    handleSelect(selectedValue);
     combobox.closeDropdown();
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSearch = event.currentTarget.value;
-    setSearchTerm(newSearch);
+    handleSearchChange(newSearch);
 
     if (searchable) {
       combobox.openDropdown();
       combobox.updateSelectedOptionIndex();
     }
   };
-
   const handleBlur = () => {
     combobox.closeDropdown();
-    // Reset search to current value or empty
-    setSearchTerm(displayValue);
+    resetSearch();
   };
 
   const rightSection = (
@@ -85,17 +79,9 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
       <Combobox.Chevron />
     </>
   );
-  const comboboxOptions = filteredOptions.map((option) => (
-    <Combobox.Option
-      key={option.id}
-      value={getOptionTitle(option)}
-      active={value?.id === option.id}
-    >
-      {getOptionTitle(option)}
-    </Combobox.Option>
-  ));
+  const effectiveDisplayValue = isLoading ? 'Loading...' : searchTerm || displayValue;
   return (
-    <Combobox store={combobox} disabled={disabled} onOptionSubmit={handleSelect}>
+    <Combobox store={combobox} disabled={disabled} onOptionSubmit={handleSelectWithClose}>
       <Combobox.Target>
         <InputBase
           styles={{
@@ -112,21 +98,28 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
           placeholder={placeholder}
           rightSection={rightSection}
           rightSectionPointerEvents="auto"
-          value={searchTerm || displayValue}
+          value={effectiveDisplayValue}
           id={id || `text-input-${crypto.randomUUID()}`}
           onBlur={handleBlur}
-          onClick={() => !disabled && combobox.openDropdown()} //{() => !disabled && setIsOpen(!isOpen)}
+          onClick={() => !disabled && combobox.openDropdown()}
           onFocus={() => !disabled && combobox.openDropdown()}
-          onChange={searchable ? handleSearchChange : undefined}
+          onChange={searchable ? handleInputChange : undefined}
         />
       </Combobox.Target>
 
       <Combobox.Dropdown>
         <Combobox.Options>
           {comboboxOptions.length > 0 ? (
-            comboboxOptions
+            comboboxOptions.map(({ active, key, label, value: optionValue }) => (
+              <Combobox.Option key={key} active={active} value={optionValue}>
+                {label}
+              </Combobox.Option>
+            ))
           ) : (
-            <Combobox.Empty>No options found</Combobox.Empty>
+            <Combobox.Empty>
+              {' '}
+              {isLoading ? 'Loading options...' : 'No options found'}
+            </Combobox.Empty>
           )}
         </Combobox.Options>
       </Combobox.Dropdown>

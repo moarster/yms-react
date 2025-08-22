@@ -42,8 +42,6 @@ export type PropertyValue =
   | string
   | undefined;
 
-export type PropertyTuple = readonly [string, PropertyValue];
-
 export interface BaseProperty {
   [key: string]: PropertyValue;
 }

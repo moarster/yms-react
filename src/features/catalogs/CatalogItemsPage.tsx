@@ -1,9 +1,9 @@
 // noinspection D
 
+import { notifications } from '@mantine/notifications';
 import { ArrowDownIcon, CaretCircleLeftIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useCallback, useMemo } from 'react';
-import toast from 'react-hot-toast';
+import React, { useMemo } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { catalogService } from '@/features/catalogs/catalogService';
@@ -54,11 +54,16 @@ const CatalogItemsPage: React.FC = () => {
     },
     onError: (error) => {
       console.error('Failed to save changes:', error);
-      toast.error('Failed to save changes');
+      notifications.show({
+        color: 'red',
+        message: 'Failed to save changes',
+      });
     },
     onSuccess: () => {
-      toast.success('Changes saved successfully');
-      // Invalidate cache to refetch data
+      notifications.show({
+        color: 'green',
+        message: 'Changes saved successfully',
+      });
       queryClient.invalidateQueries({
         queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
       });
@@ -119,7 +124,10 @@ const CatalogItemsPage: React.FC = () => {
 
   // Handle export
   const handleExport = () => {
-    toast.custom('Export functionality coming soon');
+    notifications.show({
+      color: 'teal',
+      message: 'Export functionality coming soon',
+    });
   };
 
   if (catalogLoading || isLoading) {
@@ -196,8 +204,8 @@ const CatalogItemsPage: React.FC = () => {
           loading={isLoading}
           config={tableConfig}
           className="shadow-sm"
-          collectionUrl={`/${type==='CATALOG'?'reference':'lists'}/${catalogKey}`}
           schema={!isListType ? schema : undefined}
+          collectionUrl={`/${type === 'CATALOG' ? 'reference' : 'lists'}/${catalogKey}`}
         />
       </div>
     </div>

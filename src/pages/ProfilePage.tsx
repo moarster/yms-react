@@ -1,4 +1,5 @@
 import Form from '@aokiapp/rjsf-mantine-theme';
+import { notifications } from '@mantine/notifications';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
@@ -10,7 +11,6 @@ import {
 import validator from '@rjsf/validator-ajv8';
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { authService } from '@/core/auth/authService.ts';
 import { KeycloakAuthService } from '@/core/auth/keycloak/keycloakService.ts';
@@ -211,11 +211,17 @@ const ProfilePage: React.FC = () => {
       return response.data;
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update profile');
+      notifications.show({
+        color: 'red',
+        message: error.message || 'Failed to update profile',
+      });
     },
     onSuccess: (updatedUser: User) => {
       setUser(updatedUser);
-      toast.success('Profile updated successfully');
+      notifications.show({
+        color: 'green',
+        message: 'Profile updated successfully',
+      });
       addNotification({
         message: 'Your profile information has been updated successfully',
         title: 'Profile Updated',
@@ -230,10 +236,16 @@ const ProfilePage: React.FC = () => {
       await (authService as KeycloakAuthService).changePassword(data.newPassword);
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to change password');
+      notifications.show({
+        color: 'red',
+        message: error.message || 'Failed to change password',
+      });
     },
     onSuccess: () => {
-      toast.success('Password changed successfully');
+      notifications.show({
+        color: 'green',
+        message: 'Password changed successfully',
+      });
       addNotification({
         message: 'Your password has been changed successfully',
         title: 'Password Changed',

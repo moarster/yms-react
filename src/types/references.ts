@@ -1,5 +1,7 @@
-import { BaseEntity, BaseProperty } from './base';
 import { LinkDefinition } from '@/types/schema.ts';
+
+import { BaseEntity, BaseProperty } from './base';
+import { isBaseEntity } from '@/types/guards.ts';
 
 export interface BaseLink extends BaseProperty {
   readonly id: string;
@@ -8,7 +10,6 @@ export interface BaseLink extends BaseProperty {
   readonly catalog?: string;
   title?: string;
 }
-
 
 export interface ListLink<TCatalog extends string = string> extends BaseLink {
   readonly domain: 'lists';
@@ -29,9 +30,9 @@ export interface CustomLink extends BaseLink {
   readonly entity: string;
   readonly catalog?: string;
 }
-export interface ResolvedLink<T extends BaseLink = BaseLink> extends T {
+export interface ResolvedLink extends BaseLink {
   entry: BaseEntity;
-  resolvedAt: Date;
+  resolvedAt?: Date;
 }
 export interface Attachment extends BaseProperty {
   filename?: string;
@@ -64,13 +65,9 @@ export const isCatalogLink = (link: BaseLink): link is CatalogLink =>
 export const isReferentLink = (link: BaseLink): link is ReferentLink =>
   isListLink(link) || isCatalogLink(link);
 
-export const hasRequiredFields = <T extends BaseLink>(
-  link: Partial<T>
-): link is T =>
-  typeof link.id === 'string' &&
-  typeof link.domain === 'string' &&
-  link.id.length > 0 &&
-  link.domain.length > 0;
+export const isResolvedLink = (link: BaseLink): link is ResolvedLink =>
+  isBaseLink(link) && isBaseEntity(link.entry);
+
 
 // Validation helper for link creation
 export const validateLinkStructure = (link: Partial<BaseLink>): string[] => {
@@ -101,7 +98,7 @@ export const createDummyLink = (def: LinkDefinition): BaseLink => ({
   domain: def.properties.domain.const,
   entity: def.properties.entity.const,
   id: '-',
-})
+});
 
 // Factory functions for type-safe link creation
 export const createListLink = (params: {
@@ -140,5 +137,5 @@ export const partitionLinks = (links: BaseLink[]) => {
     }
   }
 
-  return { lists, catalogs, custom };
+  return { catalogs, custom, lists };
 };

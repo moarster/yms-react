@@ -1,5 +1,5 @@
 import { CatalogType } from '@/features/catalogs/catalog.types.ts';
-import {  ReferentLink } from '@/types';
+import { ReferentLink } from '@/types';
 
 export interface ReferenceFieldInfo {
   catalog: string;
@@ -7,10 +7,7 @@ export interface ReferenceFieldInfo {
   linkType: CatalogType;
 }
 
-export const extractReferenceInfo = (
-  reference: ReferentLink,
-):ReferenceFieldInfo => {
-
+export const extractReferenceInfo = (reference: ReferentLink): ReferenceFieldInfo => {
   const linkType = reference.domain === 'reference' ? 'CATALOG' : 'LIST';
 
   return {
@@ -19,4 +16,3 @@ export const extractReferenceInfo = (
     linkType,
   };
 };
-

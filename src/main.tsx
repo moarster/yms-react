@@ -3,10 +3,10 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import ReactDOM from 'react-dom/client';
-import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
 
 import { registerServiceWorker } from '@/utils/registerServiceWorker.ts';
@@ -51,32 +51,7 @@ root.render(
     <BrowserRouter>
       <MantineProvider>
         <App />
-        <Toaster
-          toastOptions={{
-            duration: 4000,
-            error: {
-              duration: 5000,
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
-            },
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: '#4ade80',
-                secondary: '#fff',
-              },
-            },
-          }}
-          gutter={8}
-          position="top-right"
-          reverseOrder={false}
-        />
+        <Notifications zIndex={1000} position="top-right" />
       </MantineProvider>
     </BrowserRouter>
     {import.meta.env?.DEV && <ReactQueryDevtools initialIsOpen={false} />}

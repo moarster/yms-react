@@ -1,5 +1,5 @@
+import { notifications } from '@mantine/notifications';
 import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import toast from 'react-hot-toast';
 
 import { ApiError } from './api.types.ts';
 
@@ -105,7 +105,10 @@ export class ApiInterceptors {
         };
 
         if (error.response?.status !== 401) {
-          toast.error(apiError.message);
+          notifications.show({
+            color: 'red',
+            message: apiError.message,
+          });
         }
         if (error.config) {
           const requestKey = this.getRequestKey(error.config);

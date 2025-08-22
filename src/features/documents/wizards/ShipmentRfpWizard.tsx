@@ -28,18 +28,18 @@ import { ChipInput, DateInput, NumberInput, ReferenceInput, TextInput } from '@/
 import FileUpload from '@/shared/form/inputs/FileUpload.tsx';
 import { isBaseEntity } from '@/types';
 import { LinkFactories } from '@/types/factories/linkFactory.ts';
+import { useSchema } from '@/hooks/useSchema.ts';
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
   initialData,
   isSubmitting = false,
-  lists,
   onCancel,
   onSubmit,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<WizardFormData>(initialData);
   const { canProceedToNext, canSubmit, getStepErrors } = useWizardValidation(formData);
-
+  const { getPropertyDefinition } = useSchema({ entityKey: 'shipmentRfp', refetch: false });
   useEffect(() => {
     setFormData(initialData);
   }, [initialData]);
@@ -262,16 +262,16 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         <ReferenceInput
           placeholder="Выберите"
           label="Вид транспортировки"
-          options={lists.shipmentTypes}
           emptyFactory={LinkFactories.shipmentType}
           value={formData._shipmentType || LinkFactories.shipmentType()}
+          linkDef={getPropertyDefinition('_shipmentType')}
           required
           onChange={(value) => updateFormData('_shipmentType', value)}
         />
         <ReferenceInput
           label="Вид отгрузки"
           placeholder="Выберите"
-          options={lists.transportationTypes}
+          linkDef={getPropertyDefinition('_transportationType')}
           emptyFactory={LinkFactories.transportationType}
           value={formData._transportationType || LinkFactories.transportationType()}
           required
@@ -280,7 +280,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         <ReferenceInput
           label="Валюта"
           placeholder="Выберите"
-          options={lists.currencies}
+          linkDef={getPropertyDefinition('_currency')}
           emptyFactory={LinkFactories.currency}
           value={formData._currency || LinkFactories.currency()}
           required
@@ -333,7 +333,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             <ReferenceInput
               label="Контрагент"
               placeholder="Выберите"
-              options={lists.counterParties}
+              linkDef={getPropertyDefinition('/route/_counterParty')}
               emptyFactory={LinkFactories.counterParty}
               value={point._counterParty || LinkFactories.counterParty()}
               required
@@ -342,7 +342,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             <ReferenceInput
               placeholder="Выберите"
               label="Тип обработки груза"
-              options={lists.cargoHandlingTypes}
+              linkDef={getPropertyDefinition('/route/_cargoHandlingType')}
               emptyFactory={LinkFactories.cargoHandlingType}
               value={point._cargoHandlingType || LinkFactories.cargoHandlingType()}
               required
@@ -415,7 +415,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                 <ReferenceInput
                   label="Характер груза"
                   placeholder="Выберите"
-                  options={lists.cargoNatures}
+                  linkDef={getPropertyDefinition('/route/cargoList/_cargoNature')}
                   emptyFactory={LinkFactories.cargoNature}
                   value={cargo._cargoNature || LinkFactories.cargoNature()}
                   required
@@ -455,7 +455,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
       <ReferenceInput
         label="Требуемый тип"
         placeholder="Выберите"
-        options={lists.vehicleTypes}
+        linkDef={getPropertyDefinition('_requiredVehicleType')}
         emptyFactory={LinkFactories.vehicleType}
         value={formData._requiredVehicleType || LinkFactories.vehicleType()}
         required

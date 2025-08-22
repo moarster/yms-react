@@ -1,7 +1,7 @@
 import { MRT_ColumnDef } from 'mantine-react-table';
 import { HTMLInputTypeAttribute } from 'react';
 
-import { createReferenceCell } from '@/shared/ui/MantineTable/render/referenceCells.tsx';
+import { createReferenceCell } from '@/shared/ui/MantineTable/render';
 import {
   createDummyLink,
   isLinkDefinition,
@@ -57,7 +57,7 @@ export function generateColumns<TRow extends TableRow>(
       const required = schema.required?.includes(key);
       const column: MRT_ColumnDef<TRow> = {
         accessorKey: key,
-        enableEditing: enableInlineEdit && !property['x-table-readonly'],
+        enableEditing: key !== 'id' && enableInlineEdit && !property['x-table-readonly'],
         header: property.title || property.description || key,
         minSize: getDefaultWidth(property),
       };

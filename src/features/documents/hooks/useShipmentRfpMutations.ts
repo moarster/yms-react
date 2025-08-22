@@ -1,5 +1,5 @@
+import { notifications } from '@mantine/notifications';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 
 import { documentService } from '@/features/documents/documentService.ts';
 import { ShipmentRfp, ShipmentRfpData } from '@/features/documents/types/shipment-rfp.ts';
@@ -10,11 +10,18 @@ export const useShipmentRfpMutations = () => {
   const createMutation = useMutation({
     mutationFn: (data: ShipmentRfpData) => documentService.createShipmentRfp(data),
     onError: (error) => {
-      toast.error('Error creating RFP');
+      notifications.show({
+        color: 'red',
+        message: 'Error creating RFP',
+      });
       console.error('RFP creation error:', error);
     },
     onSuccess: () => {
-      toast.success('RFP created successfully');
+      notifications.show({
+        color: 'green',
+        message: 'RFP created successfully',
+      });
+
       queryClient.invalidateQueries({ queryKey: ['shipment-rfps'] });
     },
   });
@@ -23,7 +30,10 @@ export const useShipmentRfpMutations = () => {
     mutationFn: ({ data, id }: { id: string; data: ShipmentRfp }) =>
       documentService.updateShipmentRfp(id, data),
     onSuccess: () => {
-      toast.success('RFP updated successfully');
+      notifications.show({
+        color: 'green',
+        message: 'RFP updated successfully',
+      });
       queryClient.invalidateQueries({ queryKey: ['rfp'] });
     },
   });

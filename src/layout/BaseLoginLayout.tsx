@@ -1,6 +1,6 @@
+import { notifications } from '@mantine/notifications';
 import { SteeringWheelIcon, TruckIcon } from '@phosphor-icons/react';
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { useAuthStore } from '@/core/store/authStore.ts';
 
@@ -24,10 +24,16 @@ const BaseLoginLayout: React.FC<BaseLoginLayoutProps> = ({
   const handleModeSwitch = () => {
     if (isDemoMode) {
       switchMode('keycloak');
-      toast.success('Switched to Keycloak authentication');
+      notifications.show({
+        color: 'gray',
+        message: 'Switched to Keycloak authentication',
+      });
     } else {
       switchMode('demo');
-      toast.success('Switched to demo mode');
+      notifications.show({
+        color: 'lime',
+        message: 'Switched to demo mode',
+      });
     }
     setShowModeSwitchPanel(false);
   };

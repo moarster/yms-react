@@ -1,6 +1,6 @@
+import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { TableRow } from '../types.ts';
 
@@ -58,13 +58,19 @@ export function useTableData<T extends TableRow>({
       await deleteFn(ids);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete items');
+      notifications.show({
+        color: 'red',
+        message: error.message || 'Failed to delete items',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: Array.isArray(queryKey) ? queryKey : [queryKey],
       });
-      toast.success(`${selectedRows.length > 1 ? 'Items' : 'Item'} deleted successfully`);
+      notifications.show({
+        color: 'green',
+        message: `${selectedRows.length > 1 ? 'Items' : 'Item'} deleted successfully`,
+      });
       setSelectedRows([]);
     },
   });

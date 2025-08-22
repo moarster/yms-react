@@ -52,66 +52,20 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'prettier/prettier': ['error'],
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'prettier/prettier': 'error',
+
+      // React essentials
+      'react/jsx-no-duplicate-props': 'error',
+      'react/no-deprecated': 'error',
+      'react/no-find-dom-node': 'error',
+      'react/self-closing-comp': 'error',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
 
-      "react/button-has-type": "error",
-      "react/jsx-boolean-value": "error",
-      "react/jsx-curly-brace-presence": ["error", "never"],
-      "react/jsx-fragments": ["error", "syntax"],
-      "react/jsx-no-comment-textnodes": "error",
-      "react/jsx-no-duplicate-props": "error",
-      "react/jsx-no-target-blank": "error",
-      "react/no-children-prop": "error",
-      "react/no-deprecated": "error",
-      "react/no-find-dom-node": "error",
-      "react/no-string-refs": "error",
-      "react/self-closing-comp": "error",
-      "react/void-dom-elements-no-children": "error",
-
+      // Imports
       'import/first': 'error',
-      'import/newline-after-import': 'error',
+      'import/newline-after-import': 'warn',
 
-      'perfectionist/sort-imports': [
-        'error',
-        {
-          type: 'natural',
-          groups: [
-            'builtin',
-            'external',
-            'internal-type',
-            'internal',
-            ['parent', 'sibling', 'index'],
-            'object',
-            'style',
-            'unknown',
-          ],
-        },
-      ],
-      'perfectionist/sort-exports': ['error', { type: 'natural' }],
-      'perfectionist/sort-objects': ['error', { type: 'natural' }],
-      //'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
-      'perfectionist/sort-union-types': ['error', { type: 'natural' }],
-      'perfectionist/sort-enums': ['error', { type: 'natural' }],
-      'perfectionist/sort-jsx-props': [
-        'error',
-        {
-          type: 'line-length',
-          ignoreCase: true,
-          fallbackSort: { type: 'natural' },
-          groups: ['multiline-prop', 'unknown', 'shorthand-prop', 'callback'],
-          customGroups: [
-            {
-              groupName: 'callback',
-              elementNamePattern: '^on.+',
-            },
-          ],
-        },
-      ],
-
-      // TypeScript - re-enable the good stuff
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -125,20 +79,7 @@ export default [
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-inferrable-types': 'error',
-
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/consistent-generic-constructors": "error",
-      "@typescript-eslint/method-signature-style": ["error", "property"],
-      "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/lines-between-class-members": "off",
-      "@typescript-eslint/indent": "off",
-      "@typescript-eslint/naming-convention": "off",
-      "@typescript-eslint/comma-dangle": "off",
-      "@typescript-eslint/no-redeclare": "off",
-      "@typescript-eslint/no-use-before-define": "off",
-      "@typescript-eslint/no-loop-func": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
+      '@typescript-eslint/consistent-generic-constructors': 'warn',
 
       // Code quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -148,15 +89,9 @@ export default [
       'object-shorthand': 'error',
       'no-duplicate-imports': 'error',
 
-      // Basic accessibility
+      // Accessibility (only the essentials)
       'jsx-a11y/alt-text': 'error',
       'jsx-a11y/anchor-has-content': 'error',
-      "jsx-a11y/no-autofocus": "off",
-      "jsx-a11y/control-has-associated-label": "off",
-      "jsx-a11y/mouse-events-have-key-events": "off",
-      "jsx-a11y/label-has-for": "off",
-      "jsx-a11y/anchor-is-valid": "off",
-      "jsx-a11y/label-has-associated-control": "off",
     },
   },
   {

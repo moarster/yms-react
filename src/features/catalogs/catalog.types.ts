@@ -1,5 +1,5 @@
-import { BaseEntity, DataEntity } from '@/types';
 import { TableRow } from '@/shared/ui/MantineTable/types.ts';
+import { BaseEntity, DataEntity } from '@/types';
 
 export type CatalogType = 'CATALOG' | 'LIST';
 

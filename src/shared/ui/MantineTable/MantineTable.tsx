@@ -1,20 +1,20 @@
 import { MantineReactTable, MRT_Cell, MRT_Row } from 'mantine-react-table';
 import { useMemo, useState } from 'react';
 
+import { apiClient } from '@/core/api';
+
 import LoadingSpinner from '../LoadingSpinner';
 import { generateColumns } from './columnGenerator';
 import { TableProps, TableRow } from './types.ts';
-import { apiClient } from '@/core/api';
 
 const MantineTable = <TRow extends TableRow>({
   className = '',
+  collectionUrl = '/',
   config = {},
   data,
   loading = false,
-  collectionUrl = '/',
   schema = { properties: { id: { type: 'string' }, title: { type: 'string' } }, type: 'object' },
 }: TableProps<TRow>) => {
-
   const columns = useMemo(
     () => generateColumns<TRow>(schema, config.editable ?? true),
     [schema, config.editable],
@@ -30,7 +30,7 @@ const MantineTable = <TRow extends TableRow>({
 
   const handleSaveCell = async (cell: MRT_Cell<TRow>, value: any) => {
     const updatedRow = {
-      data: { ...data[cell.row.index], [cell.column.id]:  value },
+      data: { ...data[cell.row.index], [cell.column.id]: value },
       title: data[cell.row.index].title as string,
     };
     await apiClient.put(`${collectionUrl}/${cell.row.id}`, updatedRow);
@@ -68,7 +68,6 @@ const MantineTable = <TRow extends TableRow>({
         enablePagination={config.pagination ?? false}
         enableGlobalFilter={config.filterable ?? false}
         enableColumnFilters={config.filterable ?? false}
-
       />
     </div>
   );

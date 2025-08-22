@@ -1,9 +1,9 @@
 import Form from '@aokiapp/rjsf-mantine-theme';
+import { notifications } from '@mantine/notifications';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import React, { useRef, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { demoUsers } from '@/core/auth/demo/demoUsers.ts';
 import { authConfig } from '@/core/config';
@@ -48,7 +48,10 @@ const DemoLoginPage: React.FC = () => {
       });
     } catch (error: any) {
       const message = error?.message || 'Login failed. Please try again.';
-      toast.error(message);
+      notifications.show({
+        color: 'red',
+        message,
+      });
       addNotification({
         message,
         title: 'Login Failed',
