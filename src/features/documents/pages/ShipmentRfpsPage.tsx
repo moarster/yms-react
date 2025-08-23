@@ -15,6 +15,7 @@ import ErrorMessage from '@/shared/ui/ErrorMessage.tsx';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
 import { DocumentStatus } from '@/types';
+import { TableRow } from '@/shared/ui/MantineTable/types.ts';
 
 interface StatusFilterProps {
   onStatusChange: (statuses: DocumentStatus[]) => void;
@@ -55,7 +56,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ onStatusChange, selectedSta
   );
 };
 
-interface ShipmentRfpRow extends BaseTableRow, ShipmentRfpData {}
+interface ShipmentRfpRow extends TableRow, ShipmentRfpData {}
 const ShipmentRfpsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -125,17 +126,20 @@ const ShipmentRfpsPage: React.FC = () => {
   }
 
   const rfps =
-    rfpsData?.content?.map((item) => ({
-      ...(item.data || {}),
-      id: item.id,
-      status: item.status,
-    })) || [];
+    rfpsData?.content?.map(
+      (item) =>
+        ({
+          ...(item.data || {}),
+          id: item.id,
+          status: item.status,
+        }) as ShipmentRfpRow,
+    ) || [];
   const stats = [
     {
       color: 'text-blue-600',
       icon: TruckIcon,
       name: 'Total RFPs',
-      value: rfpsData?.page.totalPages || 0,
+      value: rfpsData?.totalPages || 0,
     },
     {
       color: 'text-gray-600',
@@ -221,7 +225,7 @@ const ShipmentRfpsPage: React.FC = () => {
           config={{
             filterable: true,
             height: '70vh',
-            pageSize: rfpsData?.page.size,
+            pageSize: rfpsData?.size,
             pagination: true,
             selectable: isLogist,
             sortable: true,

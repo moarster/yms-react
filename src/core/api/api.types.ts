@@ -7,9 +7,8 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
-export interface PaginatedResponse<T extends BaseEntity> {
+export interface PaginatedResponse<T extends BaseEntity> extends PageInfo{
   content: T[];
-  page?: PageInfo;
 }
 
 export interface PageInfo {
@@ -21,6 +20,11 @@ export interface PageInfo {
   size: number;
   totalElements: number;
   totalPages: number;
+  sort: {
+    sorted: boolean;
+    unsorted: boolean;
+    empty: boolean;
+  };
 }
 
 export interface ApiError {

@@ -56,20 +56,11 @@ export class Client {
 
   async getMany<T extends BaseEntity>(
     url: string,
-    paginated?: boolean,
     config?: AxiosRequestConfig,
   ): Promise<PaginatedResponse<T>> {
     const key = `GET:${url}:${JSON.stringify(config?.params || {})}`;
     return this.batcher.batch(key, async () => {
-      let response;
-      if (paginated === false) {
-        response = {
-          content: (await this.client.get<T[]>(url, config)).data,
-        };
-      } else {
-        response = (await this.client.get<PaginatedResponse<T>>(url, config)).data;
-      }
-      return response;
+      return (await this.client.get<PaginatedResponse<T>>(url, config)).data;
     });
   }
 

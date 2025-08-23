@@ -1,9 +1,8 @@
 import { MRT_RowData } from 'mantine-react-table';
 
-import { JsonSchema } from '@/types';
+import { BaseProperty, JsonSchema } from '@/types';
 
-export interface TableRow extends MRT_RowData {
-  [key: string]: unknown;
+export interface TableRow extends MRT_RowData, BaseProperty {
   id: string;
 }
 
