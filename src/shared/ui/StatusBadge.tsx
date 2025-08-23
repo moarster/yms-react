@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import React from 'react';
 
 interface StatusBadgeProps {
@@ -7,45 +6,43 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ size = 'md', status }) => {
-  const statusConfig = {
-    ASSIGNED: {
-      className: 'status-assigned',
-      label: 'Assigned',
-    },
-    CANCELLED: {
-      className: 'status-cancelled',
-      label: 'Cancelled',
-    },
-    COMPLETED: {
-      className: 'status-completed',
-      label: 'Completed',
-    },
-    DRAFT: {
-      className: 'status-draft',
-      label: 'NEW',
-    },
+  const getStatusClasses = () => {
+    switch (status) {
+      case 'ASSIGNED': return 'status-assigned';
+      case 'CANCELLED': return 'status-cancelled';
+      case 'COMPLETED': return 'status-completed';
+      case 'DRAFT': return 'status-draft';
+      default: return '';
+    }
   };
 
-  const sizeClasses = {
-    lg: 'px-3 py-1 text-sm',
-    md: 'px-2.5 py-0.5 text-xs',
-    sm: 'px-2 py-0.5 text-xs',
+  const getStatusLabel = () => {
+    switch (status) {
+      case 'ASSIGNED': return 'Assigned';
+      case 'CANCELLED': return 'Cancelled';
+      case 'COMPLETED': return 'Completed';
+      case 'DRAFT': return 'NEW';
+      default: return status;
+    }
   };
 
-  const config = statusConfig[status];
-  if (!config) {
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'lg': return 'px-3 py-1 text-sm';
+      case 'sm': return 'px-2 py-0.5 text-xs';
+      default: return 'px-2.5 py-0.5 text-xs';
+    }
+  };
+
+  if (!getStatusClasses()) {
     return null;
   }
 
   return (
     <span
-      className={clsx(
-        'inline-flex items-center font-medium rounded-full',
-        config.className,
-        sizeClasses[size],
-      )}
+      className={`inline-flex items-center font-medium rounded-full ${getStatusClasses()} ${getSizeClasses()}`}
     >
-      {config.label}
+      {getStatusLabel()}
     </span>
   );
 };

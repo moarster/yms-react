@@ -2,7 +2,6 @@
 
 import { PlusIcon, TruckIcon } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
-import clsx from 'clsx';
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -32,26 +31,28 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ onStatusChange, selectedSta
 
   return (
     <div className="flex flex-wrap gap-2">
-      {statuses.map((status) => (
-        <button
-          className={clsx(
-            'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors duration-200',
-            selectedStatuses.includes(status.value)
-              ? 'bg-primary-100 text-primary-800 border-primary-300'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
-          )}
-          key={status.value}
-          onClick={() => {
-            if (selectedStatuses.includes(status.value)) {
-              onStatusChange(selectedStatuses.filter((s) => s !== status.value));
-            } else {
-              onStatusChange([...selectedStatuses, status.value]);
-            }
-          }}
-        >
-          {status.label}
-        </button>
-      ))}
+      {statuses.map((status) => {
+        const isSelected = selectedStatuses.includes(status.value);
+        const baseClasses = 'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors duration-200';
+        const selectedClasses = `bg-${status.color}-100 text-${status.color}-800 border-${status.color}-200`;
+        const unselectedClasses = 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
+
+        return (
+          <button
+            className={`${baseClasses} ${isSelected ? selectedClasses : unselectedClasses}`}
+            key={status.value}
+            onClick={() => {
+              if (isSelected) {
+                onStatusChange(selectedStatuses.filter((s) => s !== status.value));
+              } else {
+                onStatusChange([...selectedStatuses, status.value]);
+              }
+            }}
+          >
+            {status.label}
+          </button>
+        );
+      })}
     </div>
   );
 };

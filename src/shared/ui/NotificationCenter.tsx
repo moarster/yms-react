@@ -1,76 +1,86 @@
-import { Transition } from '@headlessui/react';
 import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
-import clsx from 'clsx';
+import { ActionIcon, Box, Button, Group, Notification, Stack, Transition } from '@mantine/core';
 import React from 'react';
 
 import { useUiStore } from '@/core/store/uiStore.ts';
-import { Notification } from '@/types';
+import { Notification as NotificationType } from '@/types';
 
-const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
+const NOTIFICATION_COLORS = {
+  error: 'red',
+  info: 'blue',
+  success: 'green',
+  warning: 'yellow',
+} as const;
+
+const NOTIFICATION_ICONS = {
+  error: WarningCircleIcon,
+  info: InfoIcon,
+  success: CheckCircleIcon,
+  warning: WarningCircleIcon,
+} as const;
+
+interface NotificationItemProps {
+  notification: NotificationType;
+}
+
+const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => {
   const { removeNotification } = useUiStore();
 
-  const icons = {
-    error: WarningCircleIcon,
-    info: InfoIcon,
-    success: CheckCircleIcon,
-    warning: WarningCircleIcon,
-  };
-
-  const colorClasses = {
-    error: 'text-red-400',
-    info: 'text-blue-400',
-    success: 'text-green-400',
-    warning: 'text-yellow-400',
-  };
-
-  const Icon = icons[notification.type];
+  const Icon = NOTIFICATION_ICONS[notification.type];
+  const color = NOTIFICATION_COLORS[notification.type];
 
   return (
     <Transition
-      leaveTo="opacity-0"
-      leaveFrom="opacity-100"
-      leave="transition ease-in duration-100"
-      enter="transform ease-out duration-300 transition"
-      enterTo="translate-y-0 opacity-100 sm:translate-x-0"
-      enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-      show
-      appear
+      mounted
+      transition="slide-left"
+      duration={300}
+      timingFunction="ease"
     >
-      <div className="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <Icon className={clsx('h-6 w-6', colorClasses[notification.type])} />
-            </div>
-            <div className="ml-3 w-0 flex-1 pt-0.5">
-              <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-              <p className="mt-1 text-sm text-gray-500">{notification.message}</p>
+      {(styles) => (
+        <Notification
+          style={styles}
+          color={color}
+          icon={<Icon size={20} />}
+          withCloseButton={false}
+          onClose={() => removeNotification(notification.id)}
+          withBorder
+          radius="md"
+          w={400}
+        >
+          <Group justify="space-between" align="flex-start">
+            <Box flex={1}>
+              <Box fw={500} size="sm">
+                {notification.title}
+              </Box>
+              <Box c="dimmed" size="sm">
+                {notification.message}
+              </Box>
               {notification.actions && notification.actions.length > 0 && (
-                <div className="mt-3 flex space-x-2">
+                <Group mt="xs" gap="xs">
                   {notification.actions.map((action, index) => (
-                    <button
+                    <Button
                       key={index}
-                      className="bg-white rounded-md text-sm font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                      variant="subtle"
+                      size="xs"
                       onClick={action.action}
                     >
                       {action.label}
-                    </button>
+                    </Button>
                   ))}
-                </div>
+                </Group>
               )}
-            </div>
-            <div className="ml-4 flex-shrink-0 flex">
-              <button
-                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                onClick={() => removeNotification(notification.id)}
-              >
-                <span className="sr-only">Close</span>
-                <XIcon className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            </Box>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => removeNotification(notification.id)}
+            >
+              <XIcon size={16} />
+            </ActionIcon>
+          </Group>
+        </Notification>
+      )}
     </Transition>
   );
 };
@@ -78,14 +88,25 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
 const NotificationCenter: React.FC = () => {
   const { notifications } = useUiStore();
 
+  if (notifications.length === 0) return null;
+
   return (
-    <div className="fixed inset-0 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end z-50">
-      <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
+    <Box
+      pos="fixed"
+      top={0}
+      right={0}
+      p="md"
+      style={{
+        pointerEvents: 'none',
+        zIndex: 1000
+      }}
+    >
+      <Stack gap="sm" style={{ pointerEvents: 'auto' }}>
         {notifications.map((notification) => (
           <NotificationItem key={notification.id} notification={notification} />
         ))}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   );
 };
 

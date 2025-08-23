@@ -6,7 +6,6 @@ import {
   TruckIcon,
   UserIcon,
 } from '@phosphor-icons/react';
-import clsx from 'clsx';
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -44,10 +43,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div
-      className={clsx(
-        'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-all duration-200',
-        sidebarOpen ? 'w-64' : 'w-16',
-      )}
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-all duration-200 ${sidebarOpen ? 'w-64' : 'w-16'}`}
     >
       {/* Logo and toggle */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
@@ -78,22 +74,19 @@ const Sidebar: React.FC = () => {
 
           return (
             <NavLink
-              className={clsx(
-                'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200',
+              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                 isActive
                   ? 'bg-primary-100 text-primary-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-              )}
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
               to={item.href}
               key={item.name}
               title={!sidebarOpen ? item.name : undefined}
             >
               <item.icon
-                className={clsx(
-                  'flex-shrink-0 h-6 w-6',
-                  isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500',
-                  !sidebarOpen && 'mx-auto',
-                )}
+                className={`flex-shrink-0 h-6 w-6 ${
+                  isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
+                } ${!sidebarOpen ? 'mx-auto' : ''}`}
               />
               {sidebarOpen && (
                 <>

@@ -9,7 +9,7 @@ import { BaseInputProps } from './types.ts';
 interface ReferenceInputProps extends BaseInputProps {
   emptyFactory?: () => BaseEntity;
   onChange: (value: BaseEntity | null) => void;
-  linkDef: LinkDefinition;
+  linkDef?: LinkDefinition;
   placeholder?: string;
   searchable?: boolean;
   value: ReferentLink | null;
@@ -31,6 +31,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
+  if (!linkDef) return null;
   const { catalog, domain } = extractLinkConstants(linkDef);
   const linkType = domain === 'lists' ? 'LIST' : 'CATALOG';
 
@@ -51,6 +52,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     onChange,
     enabled: !!catalog,
   });
+
 
   const handleSelectWithClose = (selectedValue: string) => {
     handleSelect(selectedValue);

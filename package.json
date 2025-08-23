@@ -6,7 +6,6 @@
   "type": "module",
   "dependencies": {
     "@aokiapp/rjsf-mantine-theme": "0.5.0",
-    "@headlessui/react": "^2.2.7",
     "@mantine/core": "8.2.5",
     "@mantine/dates": "8.2.5",
     "@mantine/dropzone": "^8.2.7",
@@ -24,7 +23,6 @@
     "@tanstack/react-query-devtools": "^5.85.5",
     "allof-merge": "^0.6.7",
     "axios": "^1.11.0",
-    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "json-ptr": "^3.1.1",
     "keycloak-js": "^26.2.0",

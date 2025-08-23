@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import React from 'react';
 
 interface LoadingSpinnerProps {
@@ -8,20 +7,23 @@ interface LoadingSpinnerProps {
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className, size = 'md', text }) => {
-  const sizeClasses = {
-    lg: 'h-12 w-12',
-    md: 'h-8 w-8',
-    sm: 'h-4 w-4',
-    xl: 'h-16 w-16',
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'lg':
+        return 'h-12 w-12';
+      case 'sm':
+        return 'h-4 w-4';
+      case 'xl':
+        return 'h-16 w-16';
+      default:
+        return 'h-8 w-8';
+    }
   };
 
   return (
-    <div className={clsx('flex flex-col items-center justify-center', className)}>
+    <div className={`flex flex-col items-center justify-center ${className || ''}`}>
       <div
-        className={clsx(
-          'animate-spin rounded-full border-2 border-gray-300 border-t-primary-600',
-          sizeClasses[size],
-        )}
+        className={`animate-spin rounded-full border-2 border-gray-300 border-t-primary-600 ${getSizeClasses()}`}
       />
       {text && <p className="mt-2 text-sm text-gray-600">{text}</p>}
     </div>

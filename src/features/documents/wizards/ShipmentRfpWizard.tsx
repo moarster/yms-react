@@ -39,11 +39,19 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<WizardFormData>(initialData);
   const { canProceedToNext, canSubmit, getStepErrors } = useWizardValidation(formData);
-  const { getPropertyDefinition } = useSchema({ entityKey: 'shipmentRfp', refetch: false });
+  const {
+    getLinkDefinition,
+    isLoading: schemaLoading,
+  } = useSchema({
+    entityKey: 'shipment-rfp'
+  });
+
   useEffect(() => {
     setFormData(initialData);
   }, [initialData]);
-
+  if (schemaLoading) {
+    return <div>Loading schema...</div>;
+  }
   const steps = [
     {
       description: 'Тип перевозки и базовые параметры',
@@ -264,14 +272,14 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
           label="Вид транспортировки"
           emptyFactory={LinkFactories.shipmentType}
           value={formData._shipmentType || LinkFactories.shipmentType()}
-          linkDef={getPropertyDefinition('_shipmentType')}
+          linkDef={getLinkDefinition('_shipmentType')}
           required
           onChange={(value) => updateFormData('_shipmentType', value)}
         />
         <ReferenceInput
           label="Вид отгрузки"
           placeholder="Выберите"
-          linkDef={getPropertyDefinition('_transportationType')}
+          linkDef={getLinkDefinition('_transportationType')}
           emptyFactory={LinkFactories.transportationType}
           value={formData._transportationType || LinkFactories.transportationType()}
           required
@@ -280,7 +288,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
         <ReferenceInput
           label="Валюта"
           placeholder="Выберите"
-          linkDef={getPropertyDefinition('_currency')}
+          linkDef={getLinkDefinition('_currency')}
           emptyFactory={LinkFactories.currency}
           value={formData._currency || LinkFactories.currency()}
           required
@@ -333,7 +341,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             <ReferenceInput
               label="Контрагент"
               placeholder="Выберите"
-              linkDef={getPropertyDefinition('/route/_counterParty')}
+              linkDef={getLinkDefinition('/route/_counterParty')}
               emptyFactory={LinkFactories.counterParty}
               value={point._counterParty || LinkFactories.counterParty()}
               required
@@ -342,7 +350,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
             <ReferenceInput
               placeholder="Выберите"
               label="Тип обработки груза"
-              linkDef={getPropertyDefinition('/route/_cargoHandlingType')}
+              linkDef={getLinkDefinition('/route/_cargoHandlingType')}
               emptyFactory={LinkFactories.cargoHandlingType}
               value={point._cargoHandlingType || LinkFactories.cargoHandlingType()}
               required
@@ -415,7 +423,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
                 <ReferenceInput
                   label="Характер груза"
                   placeholder="Выберите"
-                  linkDef={getPropertyDefinition('/route/cargoList/_cargoNature')}
+                  linkDef={getLinkDefinition('/route/cargoList/_cargoNature')}
                   emptyFactory={LinkFactories.cargoNature}
                   value={cargo._cargoNature || LinkFactories.cargoNature()}
                   required
@@ -455,7 +463,7 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
       <ReferenceInput
         label="Требуемый тип"
         placeholder="Выберите"
-        linkDef={getPropertyDefinition('_requiredVehicleType')}
+        linkDef={getLinkDefinition('_requiredVehicleType')}
         emptyFactory={LinkFactories.vehicleType}
         value={formData._requiredVehicleType || LinkFactories.vehicleType()}
         required

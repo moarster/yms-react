@@ -1,25 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { schemaService } from '@/services/schemaService.ts';
-import { JsonSchemaProperty } from '@/types';
+import { isLinkDefinition, JsonSchemaProperty, LinkDefinition } from '@/types';
 
 interface UseSchemaParams {
   entityKey: string;
-  refetch?: boolean;
+  enabled?: boolean;
 }
 
 /**
  * A set of utility functions for working with schemas.
  */
-export const useSchema = ({ entityKey, refetch = true }: UseSchemaParams) => {
-  const { data: schema } = useQuery({
-    enabled: refetch,
+export const useSchema = ({ entityKey, enabled = true }: UseSchemaParams) => {
+  const {
+    data: schema,
+    isLoading,
+    error,
+  } = useQuery({
+    enabled,
     queryFn: () => schemaService.getAnySchema(entityKey!),
     queryKey: ['catalog-schema', entityKey],
   });
 
-
   const getPropertyDefinition = (propertyKey: string): JsonSchemaProperty | undefined => {
-    if (propertyKey.search('/') < 1) return schema!.properties?.[propertyKey];
+    if (!schema) return undefined;
+    if (propertyKey.search(/\//) < 0) return schema!.properties?.[propertyKey];
 
     return propertyKey
       .split('/')
@@ -32,8 +36,17 @@ export const useSchema = ({ entityKey, refetch = true }: UseSchemaParams) => {
       }, schema as JsonSchemaProperty);
   };
 
+  const getLinkDefinition = (propertyKey: string): LinkDefinition | undefined => {
+    const linkDef = getPropertyDefinition(propertyKey);
+    if (!linkDef || !isLinkDefinition(linkDef)) return undefined;
+    return linkDef;
+  }
+
   return {
     schema,
     getPropertyDefinition,
+    getLinkDefinition,
+    isLoading,
+    error,
   };
 };
