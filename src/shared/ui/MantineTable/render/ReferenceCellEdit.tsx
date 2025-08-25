@@ -2,10 +2,11 @@ import {  Select } from '@mantine/core';
 import { MRT_Cell, MRT_TableInstance } from 'mantine-react-table';
 import React, { useMemo } from 'react';
 
-import { BaseLink } from '@/types';
+import { BaseEntity, BaseLink, createLinkDefinition, ReferentLink } from '@/types';
 
 import { TableRow } from '../types.ts';
 import { useReference } from '@/shared/ui/hooks/useReference.ts';
+import { ReferenceInput } from '@/shared/ui/inputs';
 
 interface ReferenceCellEditProps {
   catalog: string;
@@ -20,72 +21,64 @@ export const ReferenceCellEdit: React.FC<ReferenceCellEditProps> = ({
   linkType,
   table,
 }) => {
-  const value = cell.getValue() as BaseLink | null;
+  const value = cell.getValue() as ReferentLink | null;
+  const handleChange = (selectedEntity: ReferentLink | null) => {
+    if (!selectedEntity) {
+      table.setEditingRow({
+        ...table.getState().editingRow,
+        [cell.row.id]: {
+          ...table.getState().editingRow?.[cell.row.id],
+          [cell.column.id]: null,
+        },
+      });
+    } else {
+      const newLink: BaseLink = {
+        catalog,
+        domain: linkType === 'LIST' ? 'lists' : 'reference',
+        entity: 'item',
+        id: selectedEntity.id!,
+        title: selectedEntity.title || selectedEntity.id!,
+      };
 
-  const { handleSelect, handleClear, comboboxOptions, isLoading, options } = useReference({
-    catalog,
-    linkType,
-    value,
-    searchable: true,
-    onChange: (value) => {
-      if (!value) {
-        cell.row.original[cell.column.id as keyof TableRow] = null;
-      } else {
-        const newLink: BaseLink = {
-          catalog,
-          domain: linkType === 'LIST' ? 'lists' : 'reference',
-          entity: 'item',
-          id: value.id!,
-          title: value.title || value.id!,
-        };
-        cell.row.original[cell.column.id as keyof TableRow] = newLink as BaseLink;
-      }
-      table.setEditingCell(null);
-    },
-  });
-  const selectData = useMemo(
-    () =>
-      comboboxOptions.map(({ option, label }) => ({
-        label,
-        value: option.id!,
-      })),
-    [comboboxOptions],
-  );
-
-  const handleChange = (selectedId: string | null) => {
-    if (!selectedId) {
-      handleClear();
-      return;
-    }
-
-    const selectedOption = options.find((opt) => opt.id === selectedId);
-    if (selectedOption) {
-      handleSelect(selectedOption.title || selectedOption.id!);
+      table.setEditingRow({
+        ...table.getState().editingRow,
+        [cell.row.id]: {
+          ...table.getState().editingRow?.[cell.row.id],
+          [cell.column.id]: newLink,
+        },
+      });
     }
   };
 
+  // Create a LinkDefinition for the unified component
+  const linkDef = createLinkDefinition(
+    linkType === 'LIST' ? 'lists' : 'reference',
+    'item',
+    catalog
+  );
+
   return (
-    <Select
+    <ReferenceInput
+      variant="table"
+      linkDef={linkDef}
+      value={value}
+      onChange={handleChange}
+      placeholder="Select option"
       styles={{
         input: {
           border: 'none',
           height: '100%',
           minHeight: 'auto',
           padding: '0 8px',
+          fontSize: '12px',
         },
         wrapper: {
           height: '100%',
         },
+        section: {
+          width: '16px',
+        }
       }}
-      size="xs"
-      variant="unstyled"
-      data={selectData}
-      disabled={isLoading}
-      value={value?.id || null}
-      placeholder={isLoading ? 'Loading...' : 'Select option'}
-      clearable
-      searchable
-      onChange={handleChange}
       onBlur={() => table.setEditingCell(null)}
     />
   );

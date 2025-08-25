@@ -2,7 +2,7 @@ import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 import React from 'react';
 
 import { useReference } from '@/shared/ui/hooks/useReference.ts';
-import { BaseEntity,  extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
+import { BaseEntity, extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
 
 import { BaseInputProps } from './types.ts';
 
@@ -13,6 +13,12 @@ interface ReferenceInputProps extends BaseInputProps {
   placeholder?: string;
   searchable?: boolean;
   value: ReferentLink | null;
+  // Table-specific props
+  variant?: 'form' | 'table';
+  onBlur?: () => void;
+  onClick?: () => void;
+  onFocus?: () => void;
+  styles: object;
 }
 
 export const ReferenceInput: React.FC<ReferenceInputProps> = ({
@@ -23,15 +29,36 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   label,
   linkDef,
   onChange,
+  onBlur,
+  onClick,
+  onFocus,
   placeholder = 'Choose option',
   required,
   searchable = true,
   value,
+  variant = 'form',
+  styles = {
+    input: {
+      cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
+    },
+  },
 }) => {
   const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
+    onDropdownClose: () => {
+      combobox.resetSelectedOption();
+      if (variant === 'table' && onBlur) {
+        // Small delay to allow option selection in table mode
+        setTimeout(() => {
+          if (!combobox.dropdownOpened) {
+            onBlur();
+          }
+        }, 100);
+      }
+    },
   });
+
   if (!linkDef) return null;
+
   const { catalog, domain } = extractLinkConstants(linkDef);
   const linkType = domain === 'lists' ? 'LIST' : 'CATALOG';
 
@@ -53,7 +80,6 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     enabled: !!catalog,
   });
 
-
   const handleSelectWithClose = (selectedValue: string) => {
     handleSelect(selectedValue);
     combobox.closeDropdown();
@@ -71,6 +97,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   const handleBlur = () => {
     combobox.closeDropdown();
     resetSearch();
+    onBlur?.();
   };
 
   const rightSection = (
@@ -86,11 +113,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     <Combobox store={combobox} disabled={disabled} onOptionSubmit={handleSelectWithClose}>
       <Combobox.Target>
         <InputBase
-          styles={{
-            input: {
-              cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
-            },
-          }}
+          styles={styles}
           label={label}
           error={!!error}
           disabled={disabled}
