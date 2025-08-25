@@ -1,7 +1,7 @@
 import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 import React from 'react';
 
-import { useReference } from '@/shared/hooks/useReference.ts';
+import { useReference } from '@/shared/ui/hooks/useReference.ts';
 import { BaseEntity,  extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
 
 import { BaseInputProps } from './types.ts';

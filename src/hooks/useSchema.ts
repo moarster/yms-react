@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { schemaService } from '@/services/schemaService.ts';
+import { schemaService } from '@/shared/services/schemaService.ts';
 import { isLinkDefinition, JsonSchemaProperty, LinkDefinition } from '@/types';
 
 interface UseSchemaParams {

@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { BaseLink } from '@/types';
 
 import { TableRow } from '../types.ts';
-import { useReference } from '@/shared/hooks/useReference.ts';
+import { useReference } from '@/shared/ui/hooks/useReference.ts';
 
 interface ReferenceCellEditProps {
   catalog: string;

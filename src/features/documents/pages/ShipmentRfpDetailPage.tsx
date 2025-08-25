@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDocumentFormActions } from '@/features/documents/hooks/useDocumentFormActions.ts';
 import { useDocumentWorkflowActions } from '@/features/documents/hooks/useDocumentWorkflowActions.ts';
 import { ShipmentRfp } from '@/features/documents/types/shipment-rfp.ts';
-import CommonForm from '@/shared/form/CommonForm.tsx';
 
 import { useShipmentRfpDetail } from '../hooks/useShipmentRfpDetail.ts';
 import { useShipmentRfpForm } from '../hooks/useShipmentRfpForm.ts';
@@ -114,7 +113,7 @@ const ShipmentRfpDetailPage: React.FC = () => {
     workflowTasks,
   };
 
-  return <CommonForm {...commonFormProps} />;
+  return <div />;
 };
 
 export default ShipmentRfpDetailPage;

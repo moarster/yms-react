@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { catalogService } from '@/features/catalogs/catalogService';
-import { schemaService, TableConfig } from '@/services/schemaService';
+import { schemaService, TableConfig } from '@/shared/services/schemaService';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 import { useTableData } from '@/shared/ui/MantineTable/hooks/useTableData.ts';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';

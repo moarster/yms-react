@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { isResolvedLink, ReferentLink } from '@/types';
 
-import { useReference } from '@/shared/hooks/useReference.ts';
+import { useReference } from '@/shared/ui/hooks/useReference.ts';
 import { CatalogType } from '@/features/catalogs/catalog.types.ts';
 
 interface ReferenceCellShowProps {

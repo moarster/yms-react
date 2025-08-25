@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useAuthStore } from '@/core/store/authStore.ts';
 import { documentService } from '@/features/documents/documentService.ts';
 import { useShipmentRfpMutations } from '@/features/documents/hooks/useShipmentRfpMutations.ts';
-import { schemaService } from '@/services/schemaService.ts';
+import { schemaService } from '@/shared/services/schemaService.ts';
 
 export const useShipmentRfpDetail = () => {
   const { id } = useParams<{ id: string }>();

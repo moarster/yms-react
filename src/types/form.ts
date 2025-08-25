@@ -1,14 +1,13 @@
-import { RJSFSchema, UiSchema } from '@rjsf/utils';
 import React from 'react';
+import { JsonSchema } from '@/types/schema.ts';
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 export interface FormConfig {
   disabled?: boolean;
   formData?: object;
-  schema: RJSFSchema;
+  schema: JsonSchema;
   showErrorList?: boolean;
-  uiSchema?: UiSchema;
 }
 
 export interface SidebarSection {

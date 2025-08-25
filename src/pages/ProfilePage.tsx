@@ -1,16 +1,25 @@
-import Form from '@aokiapp/rjsf-mantine-theme';
+import {
+  ActionIcon,
+  Button,
+  Grid,
+  Group,
+  Paper,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
-  EyeIcon,
-  EyeSlashIcon,
   KeyIcon,
   UserIcon,
 } from '@phosphor-icons/react';
-import validator from '@rjsf/validator-ajv8';
 import { useMutation } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { authService } from '@/core/auth/authService.ts';
 import { KeycloakAuthService } from '@/core/auth/keycloak/keycloakService.ts';
@@ -19,194 +28,71 @@ import { useAuthStore } from '@/core/store/authStore.ts';
 import { useUiStore } from '@/core/store/uiStore.ts';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
-const profileSchema = {
-  properties: {
-    email: {
-      format: 'email',
-      title: 'Email Address',
-      type: 'string',
-    },
-    name: {
-      minLength: 1,
-      title: 'Full Name',
-      type: 'string',
-    },
-  },
-  required: ['name', 'email'],
-  type: 'object',
-};
+interface ProfileFormValues {
+  name: string;
+  email: string;
+}
 
-const passwordSchema = {
-  properties: {
-    confirmPassword: {
-      minLength: 1,
-      title: 'Confirm New Password',
-      type: 'string',
-    },
-    currentPassword: {
-      minLength: 1,
-      title: 'Current Password',
-      type: 'string',
-    },
-    newPassword: {
-      minLength: 6,
-      title: 'New Password',
-      type: 'string',
-    },
-  },
-  required: ['currentPassword', 'newPassword', 'confirmPassword'],
-  type: 'object',
-};
-
-const profileUiSchema = {
-  email: {
-    'ui:classNames': 'input',
-    'ui:help': 'This email will be used for notifications and account recovery',
-    'ui:placeholder': 'Enter your email address',
-  },
-  name: {
-    'ui:classNames': 'input',
-    'ui:placeholder': 'Enter your full name',
-  },
-};
-
-const passwordUiSchema = {
-  confirmPassword: {
-    'ui:classNames': 'input',
-    'ui:placeholder': 'Confirm your new password',
-    'ui:widget': 'password',
-  },
-  currentPassword: {
-    'ui:classNames': 'input',
-    'ui:placeholder': 'Enter your current password',
-    'ui:widget': 'password',
-  },
-  newPassword: {
-    'ui:classNames': 'input',
-    'ui:placeholder': 'Enter your new password',
-    'ui:widget': 'password',
-  },
-};
-const passwordValidate = (formData: any, errors: any) => {
-  if (formData.newPassword !== formData.confirmPassword) {
-    errors.confirmPassword.addError("Passwords don't match");
-  }
-  return errors;
-};
-
-const FieldTemplate = (props: any) => {
-  const { children, classNames, description, errors, help, id, label, required } = props;
-  return (
-    <div className={classNames}>
-      {label && (
-        <label htmlFor={id} className="label">
-          {label}
-          {required ? ' *' : ''}
-        </label>
-      )}
-      {description && <p className="text-sm text-gray-600 mb-1">{description}</p>}
-      {children}
-      {errors && errors.length > 0 && (
-        <div className="mt-1">
-          {Array.isArray(errors) ? (
-            errors.map((error: string, index: number) => (
-              <p key={index} className="text-sm text-red-600">
-                {error}
-              </p>
-            ))
-          ) : (
-            <p className="text-sm text-red-600">{errors}</p>
-          )}
-        </div>
-      )}
-      {help && <div className="mt-1 text-xs text-gray-500">{help}</div>}
-    </div>
-  );
-};
-
-const ObjectFieldTemplate = (props: any) => {
-  return (
-    <div className="space-y-4">
-      {props.properties.map((element: any) => (
-        <div key={element.content.key}>{element.content}</div>
-      ))}
-    </div>
-  );
-};
-
-// Custom submit button template
-const SubmitButton = ({ children, icon: Icon, loading }: any) => (
-  <div className="pt-4">
-    <button type="submit" disabled={loading} className="btn-primary">
-      {loading ? (
-        <>
-          <LoadingSpinner size="sm" />
-          <span className="ml-2">Loading...</span>
-        </>
-      ) : (
-        <>
-          <Icon className="h-4 w-4 mr-2" />
-          {children}
-        </>
-      )}
-    </button>
-  </div>
-);
+interface PasswordFormValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 interface ProfileSectionProps {
   children: React.ReactNode;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   title: string;
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ children, icon: Icon, title }) => (
-  <div className="card">
-    <div className="px-6 py-4 border-b border-gray-200">
-      <div className="flex items-center space-x-2">
-        <Icon className="h-5 w-5 text-gray-400" />
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-      </div>
-    </div>
-    <div className="p-6">{children}</div>
-  </div>
+  <Paper shadow="sm" p="md" withBorder>
+    <Stack gap="md">
+      <Group gap="sm">
+        <ActionIcon variant="subtle" size="lg" color="gray">
+          <Icon size={20} />
+        </ActionIcon>
+        <Title order={3}>{title}</Title>
+      </Group>
+      {children}
+    </Stack>
+  </Paper>
 );
-
-// Custom password widget with show/hide toggle
-const PasswordWidget = (props: any) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const { className, onChange, placeholder, value } = props;
-
-  return (
-    <div className="relative">
-      <input
-        value={value || ''}
-        placeholder={placeholder}
-        className={`${className} pr-10`}
-        type={showPassword ? 'text' : 'password'}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <button
-        type="button"
-        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        {showPassword ? (
-          <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-        ) : (
-          <EyeIcon className="h-5 w-5 text-gray-400" />
-        )}
-      </button>
-    </div>
-  );
-};
 
 const ProfilePage: React.FC = () => {
   const { setUser, user } = useAuthStore();
   const { addNotification } = useUiStore();
 
+  // Profile form
+  const profileForm = useForm<ProfileFormValues>({
+    initialValues: {
+      name: user?.name || '',
+      email: user?.email || '',
+    },
+    validate: {
+      name: (value) => (value.trim().length > 0 ? null : 'Name is required'),
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+    },
+  });
+
+  // Password form
+  const passwordForm = useForm<PasswordFormValues>({
+    initialValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+    validate: {
+      currentPassword: (value) => (value.trim().length > 0 ? null : 'Current password is required'),
+      newPassword: (value) => (value.length >= 6 ? null : 'Password must be at least 6 characters'),
+      confirmPassword: (value, values) =>
+        value === values.newPassword ? null : 'Passwords do not match',
+    },
+  });
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { name: string; email: string }) => {
+    mutationFn: async (data: ProfileFormValues) => {
       const response = await (authService as KeycloakAuthService).updateProfile(data);
       return response.data;
     },
@@ -251,171 +137,201 @@ const ProfilePage: React.FC = () => {
         title: 'Password Changed',
         type: 'success',
       });
+      passwordForm.reset();
     },
   });
 
-  const handleProfileSubmit = ({ formData }: any) => {
-    updateProfileMutation.mutate(formData);
+  const handleProfileSubmit = (values: ProfileFormValues) => {
+    updateProfileMutation.mutate(values);
   };
 
-  const handlePasswordSubmit = ({ formData }: any) => {
-    changePasswordMutation.mutate({ newPassword: formData.newPassword });
+  const handlePasswordSubmit = (values: PasswordFormValues) => {
+    changePasswordMutation.mutate({ newPassword: values.newPassword });
   };
 
   if (!user) {
     return <LoadingSpinner size="lg" text="Loading profile..." />;
   }
 
-  // Custom widgets
-  const widgets = {
-    password: PasswordWidget,
-  };
-
-  const templates = {
-    FieldTemplate,
-    ObjectFieldTemplate,
-  };
-
   return (
-    <div className="space-y-6">
+    <Stack gap="xl">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your account settings and preferences</p>
+        <Title order={1}>Profile Settings</Title>
+        <Text c="dimmed">Manage your account settings and preferences</Text>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile Information */}
-        <ProfileSection icon={UserIcon} title="Profile Information">
-          <Form
-            formData={{
-              email: user.email || '',
-              name: user.name || '',
-            }}
-            showErrorList={false}
-            templates={templates}
-            validator={validator}
-            schema={profileSchema}
-            uiSchema={profileUiSchema}
-            onSubmit={handleProfileSubmit}
-          >
-            <SubmitButton icon={CheckCircleIcon} loading={updateProfileMutation.isPending}>
-              {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
-            </SubmitButton>
-          </Form>
-        </ProfileSection>
-
-        {/* Organization Information */}
-        {user.organization && (
-          <ProfileSection title="Organization" icon={BuildingOfficeIcon}>
-            <div className="space-y-4">
-              <div>
-                <label className="label">Organization Name</label>
-                <input
-                  type="text"
-                  className="input bg-gray-50"
-                  value={user.organization.name}
-                  disabled
+      <Grid>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
+          {/* Profile Information */}
+          <ProfileSection icon={UserIcon} title="Profile Information">
+            <form onSubmit={profileForm.onSubmit(handleProfileSubmit)}>
+              <Stack gap="md">
+                <TextInput
+                  label="Full Name"
+                  placeholder="Enter your full name"
+                  required
+                  {...profileForm.getInputProps('name')}
                 />
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">INN</label>
-                  <input
-                    type="text"
-                    className="input bg-gray-50"
-                    value={user.organization.inn}
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="label">OGRN</label>
-                  <input
-                    type="text"
-                    className="input bg-gray-50"
-                    value={user.organization.ogrn}
-                    disabled
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="label">Address</label>
-                <textarea
-                  rows={2}
-                  className="input bg-gray-50"
-                  value={user.organization.address}
-                  disabled
+                <TextInput
+                  label="Email Address"
+                  placeholder="Enter your email address"
+                  type="email"
+                  required
+                  description="This email will be used for notifications and account recovery"
+                  {...profileForm.getInputProps('email')}
                 />
-              </div>
 
-              <div className="text-sm text-gray-500">
-                <p>Organization information is managed by your administrator.</p>
-                <p>Contact support if you need to update these details.</p>
-              </div>
-            </div>
+                <Group justify="flex-end" pt="md">
+                  <Button
+                    type="submit"
+                    loading={updateProfileMutation.isPending}
+                    leftSection={<CheckCircleIcon size={16} />}
+                  >
+                    Update Profile
+                  </Button>
+                </Group>
+              </Stack>
+            </form>
           </ProfileSection>
-        )}
-      </div>
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, lg: 6 }}>
+          {/* User Roles & Permissions */}
+          <ProfileSection icon={UserIcon} title="Roles & Permissions">
+            <Stack gap="md">
+              <div>
+                <Text fw={500} size="sm" mb="xs">Your Roles</Text>
+                <Group gap="xs">
+                  {user.roles.map((role) => (
+                    <Text
+                      key={role.id}
+                      size="xs"
+                      px="sm"
+                      py={4}
+                      bg="blue.1"
+                      c="blue.8"
+                      style={{ borderRadius: '1rem' }}
+                    >
+                      {role.name}
+                    </Text>
+                  ))}
+                </Group>
+              </div>
+
+              <div>
+                <Text fw={500} size="sm" mb="xs">Permissions</Text>
+                <Grid gutter="xs">
+                  {user.roles
+                    .flatMap((role) => role.permissions)
+                    .filter((permission, index, arr) => arr.indexOf(permission) === index)
+                    .map((permission) => (
+                      <Grid.Col span={6} key={permission}>
+                        <Group gap="xs">
+                          <CheckCircleIcon size={16} color="var(--mantine-color-green-6)" />
+                          <Text size="sm" c="dimmed">
+                            {permission.replace(/_/g, ' ').toLowerCase()}
+                          </Text>
+                        </Group>
+                      </Grid.Col>
+                    ))}
+                </Grid>
+              </div>
+
+              <Text size="sm" c="dimmed">
+                Roles and permissions are managed by your system administrator.
+                Contact support if you need additional access.
+              </Text>
+            </Stack>
+          </ProfileSection>
+        </Grid.Col>
+      </Grid>
+
+      {/* Organization Information */}
+      {user.organization && (
+        <ProfileSection icon={BuildingOfficeIcon} title="Organization">
+          <Stack gap="md">
+            <TextInput
+              label="Organization Name"
+              value={user.organization.name}
+              disabled
+              styles={{ input: { backgroundColor: 'var(--mantine-color-gray-1)' } }}
+            />
+
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  label="INN"
+                  value={user.organization.inn}
+                  disabled
+                  styles={{ input: { backgroundColor: 'var(--mantine-color-gray-1)' } }}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  label="OGRN"
+                  value={user.organization.ogrn}
+                  disabled
+                  styles={{ input: { backgroundColor: 'var(--mantine-color-gray-1)' } }}
+                />
+              </Grid.Col>
+            </Grid>
+
+            <TextInput
+              label="Address"
+              value={user.organization.address}
+              disabled
+              styles={{ input: { backgroundColor: 'var(--mantine-color-gray-1)' } }}
+            />
+
+            <Text size="sm" c="dimmed">
+              Organization information is managed by your administrator.
+              Contact support if you need to update these details.
+            </Text>
+          </Stack>
+        </ProfileSection>
+      )}
 
       {/* Password Change */}
       <ProfileSection icon={KeyIcon} title="Change Password">
-        <Form
-          widgets={widgets}
-          showErrorList={false}
-          templates={templates}
-          validator={validator}
-          schema={passwordSchema}
-          uiSchema={passwordUiSchema}
-          validate={passwordValidate}
-          onSubmit={handlePasswordSubmit}
-        >
-          <SubmitButton icon={KeyIcon} loading={changePasswordMutation.isPending}>
-            {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
-          </SubmitButton>
-        </Form>
+        <form onSubmit={passwordForm.onSubmit(handlePasswordSubmit)}>
+          <Stack gap="md">
+            <PasswordInput
+              label="Current Password"
+              placeholder="Enter your current password"
+              required
+              {...passwordForm.getInputProps('currentPassword')}
+            />
+
+            <PasswordInput
+              label="New Password"
+              placeholder="Enter your new password"
+              required
+              description="Password must be at least 6 characters long"
+              {...passwordForm.getInputProps('newPassword')}
+            />
+
+            <PasswordInput
+              label="Confirm New Password"
+              placeholder="Confirm your new password"
+              required
+              {...passwordForm.getInputProps('confirmPassword')}
+            />
+
+            <Group justify="flex-end" pt="md">
+              <Button
+                type="submit"
+                loading={changePasswordMutation.isPending}
+                leftSection={<KeyIcon size={16} />}
+              >
+                Change Password
+              </Button>
+            </Group>
+          </Stack>
+        </form>
       </ProfileSection>
-
-      {/* User Roles & Permissions */}
-      <ProfileSection icon={UserIcon} title="Roles & Permissions">
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Your Roles</h4>
-            <div className="flex flex-wrap gap-2">
-              {user.roles.map((role) => (
-                <span
-                  key={role.id}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  {role.name}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Permissions</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {user.roles
-                .flatMap((role) => role.permissions)
-                .filter((permission, index, arr) => arr.indexOf(permission) === index) // Remove duplicates
-                .map((permission) => (
-                  <div key={permission} className="flex items-center text-sm text-gray-600">
-                    <CheckCircleIcon className="h-4 w-4 text-green-500 mr-2" />
-                    {permission.replace(/_/g, ' ').toLowerCase()}
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          <div className="text-sm text-gray-500">
-            <p>Roles and permissions are managed by your system administrator.</p>
-            <p>Contact support if you need additional access.</p>
-          </div>
-        </div>
-      </ProfileSection>
-    </div>
+    </Stack>
   );
 };
 

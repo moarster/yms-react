@@ -38,7 +38,6 @@ export default defineConfig({
         entryFileNames: '[name].[hash].js',
 
        /* manualChunks: {
-          forms: ['@rjsf/core', '@rjsf/utils', '@rjsf/validator-ajv8','@aokiapp/rjsf-mantine-theme'],
           table: ['@mantine/core', '@mantine/hooks', '@mantine/form', '@mantine/notifications',
             '@mantine/dates', '@mantine/dropzone', '@mantine/modals', '@tabler/icons-react', 'mantine-react-table'],
           vendor: ['react', 'react-dom', 'react-router-dom']

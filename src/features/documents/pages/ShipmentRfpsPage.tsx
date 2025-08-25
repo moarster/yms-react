@@ -9,7 +9,7 @@ import { userIsCarrier, userIsLogist } from '@/core/auth/types.ts';
 import { useAuthStore } from '@/core/store/authStore.ts';
 import { documentService } from '@/features/documents/documentService.ts';
 import { ShipmentRfp, ShipmentRfpData } from '@/features/documents/types/shipment-rfp.ts';
-import { schemaService } from '@/services/schemaService.ts';
+import { schemaService } from '@/shared/services/schemaService.ts';
 import ErrorMessage from '@/shared/ui/ErrorMessage.tsx';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';

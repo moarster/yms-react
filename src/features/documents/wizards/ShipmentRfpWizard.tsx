@@ -24,8 +24,8 @@ import {
   ShipmentRfpWizardProps,
   WizardFormData,
 } from '@/features/documents/wizards/wizard.types.ts';
-import { ChipInput, DateInput, NumberInput, ReferenceInput, TextInput } from '@/shared/form/inputs';
-import FileUpload from '@/shared/form/inputs/FileUpload.tsx';
+import { ChipInput, DateInput, NumberInput, ReferenceInput, TextInput } from '@/shared/ui/inputs';
+import FileUpload from '@/shared/ui/inputs/FileUpload.tsx';
 import { isBaseEntity } from '@/types';
 import { LinkFactories } from '@/types/factories/linkFactory.ts';
 import { useSchema } from '@/hooks/useSchema.ts';
