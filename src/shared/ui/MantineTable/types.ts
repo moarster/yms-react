@@ -1,6 +1,6 @@
 import { MRT_ColumnDef, MRT_RowData } from 'mantine-react-table';
 
-import { BaseProperty, JsonSchema, JsonSchemaProperty } from '@/types';
+import { BaseProperty, JsonSchema, JsonSchemaProperty, PropertyValue } from '@/types';
 
 export interface TableRow extends MRT_RowData, BaseProperty {
   id: string;
@@ -40,7 +40,8 @@ export interface TableProps<TRow extends TableRow> {
   onDataChange?: (data: TRow[]) => void;
   schema: JsonSchema;
   collectionUrl?: string;
-  onCellChange?: (rowId: string, columnId: string, value: any) => void;
+  onCellChange?: (rowId: string, columnId: string, value: PropertyValue) => void;
+  onRowClick?: (row: TRow) => void;
 }
 
 export interface TableColumnDef<TRow extends TableRow> extends MRT_ColumnDef<TRow> {

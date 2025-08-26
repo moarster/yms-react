@@ -3,50 +3,45 @@ import React from 'react';
 
 import { BaseInputProps } from './types.ts';
 
-interface NumberInputProps extends BaseInputProps {
-  max?: number;
-  min?: number;
-  onChange: (value: null | number) => void;
-  placeholder?: string;
-  step?: number;
-  value: null | number;
-}
-
-export const NumberInput: React.FC<NumberInputProps> = ({
+export const NumberInput: React.FC<BaseInputProps> = ({
   className = '',
   disabled,
   error,
   id,
   label,
-  max,
-  min,
   onChange,
-  placeholder,
-  required,
-  step = 0.01,
+  propertyDef,
+
   value,
 }) => {
-  const handleChange = (val: number | string) => {
-    if (val === '') {
-      onChange(null);
-    } else {
-      const numValue = isNumberLike(val) ? Number(val) : parseFloat(val.toString());
-      onChange(isNaN(numValue) ? null : numValue);
-    }
-  };
+  const handleChange = onChange
+    ? (val: number | string) => {
+        if (val === '') {
+          onChange(null);
+        } else {
+          const numValue = isNumberLike(val) ? Number(val) : parseFloat(val.toString());
+          onChange(isNaN(numValue) ? null : numValue);
+        }
+      }
+    : undefined;
+
+  const effectiveValue = value
+    ? isNumberLike(value)
+      ? Number(value)
+      : parseFloat(value.toString())
+    : '';
 
   return (
     <MantineNumberInput
-      max={max}
-      min={min}
-      step={step}
+      max={propertyDef.maximum}
+      min={propertyDef.minimum}
+      step={100}
       error={error}
       label={label}
       disabled={disabled}
-      required={required}
-      value={value ?? ''}
+      required={propertyDef.config.required}
+      value={effectiveValue}
       className={className}
-      placeholder={placeholder}
       id={id || `text-input-${crypto.randomUUID()}`}
       onChange={handleChange}
     />

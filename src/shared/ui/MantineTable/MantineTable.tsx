@@ -5,6 +5,7 @@ import { apiClient } from '@/core/api';
 import LoadingSpinner from '../LoadingSpinner';
 import { TableProps, TableRow } from './types.ts';
 import { useColumnGenerator } from '@/shared/ui/MantineTable/hooks/useColumnGenerator.ts';
+import { PropertyValue } from '@/types';
 
 const MantineTable = <TRow extends TableRow>({
   className = '',
@@ -12,6 +13,7 @@ const MantineTable = <TRow extends TableRow>({
   config = {},
   data,
   loading = false,
+  onRowClick,
   schema = {
     type: 'object',
     properties: {
@@ -26,14 +28,19 @@ const MantineTable = <TRow extends TableRow>({
     },
   },
 }: TableProps<TRow>) => {
-  const handleSaveCell = async (cell: MRT_Cell<TRow>, value: any) => {
+  const handleSaveCell = async (cell: MRT_Cell<TRow>, value: PropertyValue) => {
     const updatedRow = {
       data: { ...data[cell.row.index], [cell.column.id]: value },
       title: data[cell.row.index].title as string,
     };
     await apiClient.put(`${collectionUrl}/${cell.row.id}`, updatedRow);
   };
-  const columns = useColumnGenerator<TRow>(schema, config.editable ?? true, handleSaveCell);
+  const columns = useColumnGenerator<TRow>(
+    schema,
+    config.editable ?? true,
+    handleSaveCell,
+    onRowClick,
+  );
 
   if (loading) {
     return (
@@ -75,6 +82,10 @@ const MantineTable = <TRow extends TableRow>({
         enablePagination={config.pagination ?? false}
         enableGlobalFilter={config.filterable ?? false}
         enableColumnFilters={config.filterable ?? false}
+        mantineTableBodyRowProps={({ row }) => ({
+          onClick: () => (onRowClick ? onRowClick(row.original) : {}),
+          style: { cursor: 'pointer' },
+        })}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { LinkDefinition } from '@/types/schema.ts';
 
-import { BaseEntity, BaseProperty } from './base';
+import { BaseEntity, BaseProperty, PropertyValue } from './base';
 import { isBaseEntity } from '@/types/guards.ts';
 
 export interface BaseLink extends BaseProperty {
@@ -62,10 +62,10 @@ export const isListLink = (link: BaseLink): link is ListLink =>
 export const isCatalogLink = (link: BaseLink): link is CatalogLink =>
   isBaseLink(link) && link.domain === 'reference' && link.entity === 'item';
 
-export const isReferentLink = (link: BaseLink): link is ReferentLink =>
-  isListLink(link) || isCatalogLink(link);
+export const isReferentLink = (link: PropertyValue): link is ReferentLink =>
+  isBaseLink(link) && (isListLink(link) || isCatalogLink(link));
 
-export const isResolvedLink = (link: BaseLink): link is ResolvedLink =>
+export const isResolvedLink = (link: PropertyValue): link is ResolvedLink =>
   isBaseLink(link) && isBaseEntity(link.entry);
 
 

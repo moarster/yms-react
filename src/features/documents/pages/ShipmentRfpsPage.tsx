@@ -108,8 +108,8 @@ const ShipmentRfpsPage: React.FC = () => {
     setSelectedRfps(selectedRows);
   };
 
-  const handleRowClick = (rfp: ShipmentRfp) => {
-    navigate(`/shipment-rfps/${rfp.id}`);
+  const handleRowClick = (row: TableRow) => {
+    navigate(`/shipment-rfps/${row.id}`);
   };
 
   const isLoading = schemaLoading || rfpsLoading;
@@ -224,6 +224,7 @@ const ShipmentRfpsPage: React.FC = () => {
       <div className="card p-0 overflow-hidden">
         <MantineTable
           config={{
+            editable: false,
             filterable: true,
             height: '70vh',
             pageSize: rfpsData?.size,

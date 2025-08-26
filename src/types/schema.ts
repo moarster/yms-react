@@ -1,9 +1,10 @@
 import { BaseLink } from '@/types/references.ts';
+import { InputType } from '@/shared/ui/inputs/types.ts';
 
 export interface JsonSchema {
   $id?: string;
   $schema?: string;
-  type: string;
+  type: 'object';
   title?: string;
   description?: string;
   additionalProperties?: boolean;
@@ -12,21 +13,31 @@ export interface JsonSchema {
   required?: string[];
 }
 
-type EmbeddedJsonSchema = Omit<JsonSchema, '$schema' | '$id' | 'properties'> &
+type EmbeddedJsonSchema = Omit<JsonSchema, '$schema' | '$id' | 'properties' | 'type'> &
   Partial<Pick<JsonSchema, 'properties'>>;
 
+export type JsonSchemaPropertyConfig = {
+  pointer: string;
+  inputType: InputType;
+  required?: boolean;
+  onBlur?: () => void;
+  onClick?: () => void;
+  onFocus?: () => void;
+}
+
 export interface JsonSchemaProperty extends EmbeddedJsonSchema {
-  type: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  config?: JsonSchemaPropertyConfig;
   title: string;
-  enum?: (number | string)[];
+  items?: JsonSchemaProperty;
   examples?: object[];
   format?: string;
-  items?: JsonSchemaProperty;
   maximum?: number;
   maxLength?: number;
   minimum?: number;
   minLength?: number;
   pattern?: string;
+  enum?: (number | string)[];
   'x-cell-editor'?: string;
   'x-cell-renderer'?: string;
   'x-table-editable'?: boolean;
@@ -36,6 +47,12 @@ export interface JsonSchemaProperty extends EmbeddedJsonSchema {
   'x-table-sortable'?: boolean;
   // UI hints for table generation
   'x-table-width'?: number;
+}
+
+export type PreparedJsonSchemaProperty = JsonSchemaProperty & { config: JsonSchemaPropertyConfig };
+
+export interface StringDefinition extends Omit<JsonSchemaProperty, 'format' | 'items' | 'maximum' | 'minimum'> {
+  type: 'string';
 }
 
 export interface LinkDefinition extends JsonSchemaProperty {

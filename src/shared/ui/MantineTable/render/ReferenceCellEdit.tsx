@@ -34,6 +34,7 @@ export const ReferenceCellEdit = <TRow extends TableRow>({
       };
       onCellChange(cell, newLink);
     }
+    table.setEditingCell(null);
   };
 
   // Create a LinkDefinition for the unified component

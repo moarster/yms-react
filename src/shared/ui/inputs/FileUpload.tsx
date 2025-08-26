@@ -13,7 +13,7 @@ interface FileUploadProps {
   value: Attachment[];
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({
+export const FileUpload: React.FC<FileUploadProps> = ({
   accept = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'],
   className = '',
   files = [],

@@ -3,29 +3,24 @@ import React from 'react';
 
 import { BaseInputProps } from './types.ts';
 
-interface ChipInputProps extends BaseInputProps {
-  onChange: (value: boolean) => void;
-  value: boolean;
-}
-
-export const ChipInput: React.FC<ChipInputProps> = ({
+export const ChipInput: React.FC<BaseInputProps> = ({
   className = '',
   disabled,
   id,
   label,
   onChange,
-  required,
+  propertyDef,
   value,
 }) => {
   return (
     <Chip
       color="blue"
-      checked={value}
+      checked={value ? !!value : undefined}
       disabled={disabled}
-      required={required}
+      required={propertyDef.config.required}
       className={className}
       id={id || `text-input-${crypto.randomUUID()}`}
-      onChange={() => onChange(!value)}
+      onChange={onChange ? () => onChange(!value) : undefined}
     >
       {label}
     </Chip>

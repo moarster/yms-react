@@ -1,40 +1,32 @@
 import { TextInput as MantineTextInput } from '@mantine/core';
-import React, { HTMLInputTypeAttribute } from 'react';
+import React from 'react';
 
 import { BaseInputProps } from './types.ts';
 
-interface TextInputProps extends BaseInputProps {
-  onChange: (value: string) => void;
-  placeholder?: string;
-  type?: HTMLInputTypeAttribute | undefined;
-  value: string;
-}
-
-export const TextInput: React.FC<TextInputProps> = ({
+export const TextInput: React.FC<BaseInputProps> = ({
   className,
-  disabled,
+  disabled = false,
   error,
   id,
   label,
   onChange,
-  placeholder,
-  required,
-  type = 'text',
   value,
+  propertyDef,
 }) => {
+  const required = !!propertyDef?.config?.required;
   return (
     <MantineTextInput
-      type={type}
+      type={'text'}
       error={error}
       label={label}
-      value={value}
+      value={typeof value === 'string' ? value : undefined}
       disabled={disabled}
       required={required}
       className={className}
       withAsterisk={required}
-      placeholder={placeholder}
+      placeholder={'...'}
       id={id || `text-input-${crypto.randomUUID()}`}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => (onChange ? onChange(e.target.value) : {})}
     />
   );
 };

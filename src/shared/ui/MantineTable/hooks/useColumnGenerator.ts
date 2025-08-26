@@ -6,7 +6,7 @@ import {
   isLinkDefinition,
   isReferentLink,
   JsonSchema,
-  JsonSchemaProperty,
+  JsonSchemaProperty, PropertyValue,
 } from '@/types';
 import { extractReferenceInfo } from '@/utils/referenceUtils.ts';
 import { useSchemaUtils } from '@/hooks/useSchemaUtils.ts';
@@ -17,7 +17,8 @@ import { MRT_Cell } from 'mantine-react-table';
 export function useColumnGenerator<TRow extends TableRow>(
   schema: JsonSchema,
   enableInlineEdit: boolean,
-  onCellChange?: (cell: MRT_Cell<TRow>, value: any) => void,
+  onCellChange?: (cell: MRT_Cell<TRow>, value: PropertyValue) => void,
+  onCellClick?: (row: TRow) => void,
 ): TableColumnDef<TRow>[] {
   const { getPropertyDefinition } = useSchemaUtils(schema);
 
@@ -47,6 +48,7 @@ export function useColumnGenerator<TRow extends TableRow>(
           refInfo.catalog,
           refInfo.linkType,
           onCellChange,
+          onCellClick,
         );
 
         columns.push({
@@ -89,7 +91,7 @@ export function useColumnGenerator<TRow extends TableRow>(
     });
 
     return columns;
-  }, [schema, enableInlineEdit, getPropertyDefinition]);
+  }, [schema.properties, schema.required, getPropertyDefinition, enableInlineEdit, onCellChange]);
 }
 
 function getDefaultWidth(property: JsonSchemaProperty): number {

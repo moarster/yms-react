@@ -2,44 +2,23 @@ import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 import React from 'react';
 
 import { useReference } from '@/shared/ui/hooks/useReference.ts';
-import {  extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
+import { extractLinkConstants, isLinkDefinition, isReferentLink, LinkDefinition, ReferentLink } from '@/types';
 
 import { BaseInputProps } from './types.ts';
 
-interface ReferenceInputProps extends BaseInputProps {
-  onChange: (value: ReferentLink | null) => void;
-  linkDef?: LinkDefinition;
-  placeholder?: string;
-  searchable?: boolean;
-  value: ReferentLink | null;
-  // Table-specific props
-  variant?: 'form' | 'table';
-  onBlur?: () => void;
-  onClick?: () => void;
-  onFocus?: () => void;
-  styles?: object;
-}
-
-export const ReferenceInput: React.FC<ReferenceInputProps> = ({
+export const ReferenceInput: React.FC<BaseInputProps> = ({
   className = '',
   disabled,
   error,
   id,
   label,
-  linkDef,
+  propertyDef,
   onChange,
-  onBlur,
-  placeholder = 'Choose option',
-  required,
-  searchable = true,
   value,
-  variant = 'form',
-  styles = {
-    input: {
-      cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
-    },
-  },
+
 }) => {
+  const variant = 'form';
+  const onBlur = propertyDef.config.onBlur;
   const combobox = useCombobox({
     onDropdownClose: () => {
       combobox.resetSelectedOption();
@@ -54,11 +33,12 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     },
   });
 
-  if (!linkDef) return null;
+  if (!isLinkDefinition(propertyDef)) return null;
 
-  const { catalog, domain } = extractLinkConstants(linkDef);
+  const { catalog, domain } = extractLinkConstants(propertyDef);
   const linkType = domain === 'lists' ? 'LIST' : 'CATALOG';
 
+  const validatedValue = isReferentLink(value) ? value : null;
   const {
     comboboxOptions,
     displayValue,
@@ -70,8 +50,8 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   } = useReference({
     catalog,
     linkType,
-    value,
-    searchable,
+    value:validatedValue,
+    searchable: true,
     onChange,
     enabled: !!catalog,
   });
@@ -85,7 +65,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     const newSearch = event.currentTarget.value;
     handleSearchChange(newSearch);
 
-    if (searchable) {
+    if (true) {
       combobox.openDropdown();
       combobox.updateSelectedOptionIndex();
     }
@@ -93,7 +73,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
 
   const rightSection = (
     <>
-      {value?.id && !disabled && (
+      {validatedValue?.id && !disabled && (
         <CloseButton size="sm" aria-label="Clear selection" onClick={handleClear} />
       )}
       <Combobox.Chevron />
@@ -104,14 +84,15 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     <Combobox store={combobox} disabled={disabled} onOptionSubmit={handleSelectWithClose}>
       <Combobox.Target>
         <InputBase
-          styles={styles}
+          styles={{ input: {
+            cursor: disabled ? 'not-allowed' : true ? 'text' : 'pointer',
+          }}}
           label={label}
           error={!!error}
           disabled={disabled}
-          required={required}
+          required={propertyDef.config.required}
           className={className}
-          readOnly={!searchable}
-          placeholder={placeholder}
+          readOnly={false}
           rightSection={rightSection}
           rightSectionPointerEvents="auto"
           value={effectiveDisplayValue}
@@ -119,7 +100,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
           onBlur={onBlur}
           onClick={() => !disabled && combobox.openDropdown()}
           onFocus={() => !disabled && combobox.openDropdown()}
-          onChange={searchable ? handleInputChange : undefined}
+          onChange={true ? handleInputChange : undefined}
         />
       </Combobox.Target>
 
