@@ -1,11 +1,10 @@
-import { MantineReactTable, MRT_Cell, MRT_Row } from 'mantine-react-table';
-import { useMemo, useState } from 'react';
+import { MantineReactTable, MRT_Cell } from 'mantine-react-table';
 
 import { apiClient } from '@/core/api';
 
 import LoadingSpinner from '../LoadingSpinner';
-import { generateColumns } from './columnGenerator';
 import { TableProps, TableRow } from './types.ts';
+import { useColumnGenerator } from '@/shared/ui/MantineTable/hooks/useColumnGenerator.ts';
 
 const MantineTable = <TRow extends TableRow>({
   className = '',
@@ -13,12 +12,28 @@ const MantineTable = <TRow extends TableRow>({
   config = {},
   data,
   loading = false,
-  schema = { properties: { id: { type: 'string' }, title: { type: 'string' } }, type: 'object' },
+  schema = {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'string',
+        title: 'ID',
+      },
+      title: {
+        type: 'string',
+        title: 'Title',
+      },
+    },
+  },
 }: TableProps<TRow>) => {
-  const columns = useMemo(
-    () => generateColumns<TRow>(schema, config.editable ?? true),
-    [schema, config.editable],
-  );
+  const handleSaveCell = async (cell: MRT_Cell<TRow>, value: any) => {
+    const updatedRow = {
+      data: { ...data[cell.row.index], [cell.column.id]: value },
+      title: data[cell.row.index].title as string,
+    };
+    await apiClient.put(`${collectionUrl}/${cell.row.id}`, updatedRow);
+  };
+  const columns = useColumnGenerator<TRow>(schema, config.editable ?? true, handleSaveCell);
 
   if (loading) {
     return (
@@ -27,14 +42,6 @@ const MantineTable = <TRow extends TableRow>({
       </div>
     );
   }
-
-  const handleSaveCell = async (cell: MRT_Cell<TRow>, value: any) => {
-    const updatedRow = {
-      data: { ...data[cell.row.index], [cell.column.id]: value },
-      title: data[cell.row.index].title as string,
-    };
-    await apiClient.put(`${collectionUrl}/${cell.row.id}`, updatedRow);
-  };
 
   return (
     <div className={`datagrid-wrapper ${className} ${config.density || 'standard'}`}>

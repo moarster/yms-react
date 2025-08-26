@@ -1,5 +1,4 @@
-import { MRT_ColumnDef } from 'mantine-react-table';
-import { HTMLInputTypeAttribute } from 'react';
+import { useMemo,HTMLInputTypeAttribute } from 'react';
 
 import { createReferenceCell } from '@/shared/ui/MantineTable/render';
 import {
@@ -10,20 +9,29 @@ import {
   JsonSchemaProperty,
 } from '@/types';
 import { extractReferenceInfo } from '@/utils/referenceUtils.ts';
+import { useSchemaUtils } from '@/hooks/useSchemaUtils.ts';
 
-import { TableRow } from './types.ts';
+import { TableColumnDef, TableRow } from '../types.ts';
+import { MRT_Cell } from 'mantine-react-table';
 
-export function generateColumns<TRow extends TableRow>(
-  schema: JsonSchema | undefined,
+export function useColumnGenerator<TRow extends TableRow>(
+  schema: JsonSchema,
   enableInlineEdit: boolean,
-): MRT_ColumnDef<TRow>[] {
-  const columns: MRT_ColumnDef<TRow>[] = [];
+  onCellChange?: (cell: MRT_Cell<TRow>, value: any) => void,
+): TableColumnDef<TRow>[] {
+  const { getPropertyDefinition } = useSchemaUtils(schema);
 
-  if (schema?.properties) {
+  return useMemo(() => {
+    const columns: TableColumnDef<TRow>[] = [];
+
     Object.entries(schema.properties).forEach(([key, property]: [string, JsonSchemaProperty]) => {
-      if (property['x-table-hidden'] || property.items) return;
-      if (property.properties && !key.startsWith('_')) return;
+      if (property['x-table-hidden']) return; // Skip hidden properties
+      if (property.properties && !key.startsWith('_')) return; // Skip nested objects
 
+      const columnSchema = getPropertyDefinition(key);
+      if (!columnSchema) return;
+
+      // Handle reference columns (starting with '_')
       if (key.startsWith('_')) {
         if (!isLinkDefinition(property)) {
           console.error(`Unexpected link: ${key}`);
@@ -35,7 +43,11 @@ export function generateColumns<TRow extends TableRow>(
           return;
         }
         const refInfo = extractReferenceInfo(link);
-        const referenceCell = createReferenceCell(refInfo.catalog, refInfo.linkType);
+        const referenceCell = createReferenceCell<TRow>(
+          refInfo.catalog,
+          refInfo.linkType,
+          onCellChange,
+        );
 
         columns.push({
           accessorKey: key,
@@ -45,21 +57,25 @@ export function generateColumns<TRow extends TableRow>(
           header: property.title || property.description || key,
           minSize: 150,
           size: 200,
+          schema: columnSchema,
         });
         return;
       }
 
+      // Skip unsupported types
       if (property.type === undefined || property.type === 'object' || property.type === 'array') {
         console.warn('TODO: add support for arrays and objects');
         return;
       }
 
+      // Handle regular columns
       const required = schema.required?.includes(key);
-      const column: MRT_ColumnDef<TRow> = {
+      const column: TableColumnDef<TRow> = {
         accessorKey: key,
         enableEditing: key !== 'id' && enableInlineEdit && !property['x-table-readonly'],
         header: property.title || property.description || key,
         minSize: getDefaultWidth(property),
+        schema: columnSchema,
       };
 
       if (enableInlineEdit) {
@@ -71,16 +87,9 @@ export function generateColumns<TRow extends TableRow>(
 
       columns.push(column);
     });
-  } else {
-    columns.push({ accessorKey: 'id', header: 'ID', size: 50 });
-    columns.push({
-      accessorKey: 'title',
-      enableEditing: enableInlineEdit,
-      header: 'Наименование',
-      size: 300,
-    });
-  }
-  return columns;
+
+    return columns;
+  }, [schema, enableInlineEdit, getPropertyDefinition]);
 }
 
 function getDefaultWidth(property: JsonSchemaProperty): number {

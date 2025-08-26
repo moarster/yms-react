@@ -18,7 +18,7 @@ interface ReferenceInputProps extends BaseInputProps {
   onBlur?: () => void;
   onClick?: () => void;
   onFocus?: () => void;
-  styles: object;
+  styles?: object;
 }
 
 export const ReferenceInput: React.FC<ReferenceInputProps> = ({
@@ -94,11 +94,6 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
       combobox.updateSelectedOptionIndex();
     }
   };
-  const handleBlur = () => {
-    combobox.closeDropdown();
-    resetSearch();
-    onBlur?.();
-  };
 
   const rightSection = (
     <>
@@ -125,7 +120,7 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
           rightSectionPointerEvents="auto"
           value={effectiveDisplayValue}
           id={id || `text-input-${crypto.randomUUID()}`}
-          onBlur={handleBlur}
+          onBlur={onBlur}
           onClick={() => !disabled && combobox.openDropdown()}
           onFocus={() => !disabled && combobox.openDropdown()}
           onChange={searchable ? handleInputChange : undefined}

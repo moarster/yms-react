@@ -1,36 +1,32 @@
-import {  Select } from '@mantine/core';
 import { MRT_Cell, MRT_TableInstance } from 'mantine-react-table';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { BaseEntity, BaseLink, createLinkDefinition, ReferentLink } from '@/types';
+import { BaseLink, createLinkDefinition, ReferentLink } from '@/types';
 
 import { TableRow } from '../types.ts';
-import { useReference } from '@/shared/ui/hooks/useReference.ts';
 import { ReferenceInput } from '@/shared/ui/inputs';
 
-interface ReferenceCellEditProps {
+interface ReferenceCellEditProps<TRow extends TableRow> {
   catalog: string;
-  cell: MRT_Cell<TableRow>;
+  cell: MRT_Cell<TRow>;
   linkType: 'CATALOG' | 'LIST';
-  table: MRT_TableInstance<TableRow>;
+  table: MRT_TableInstance<TRow>;
+  onCellChange: (cell: MRT_Cell<TRow>, value: any) => void;
 }
 
-export const ReferenceCellEdit: React.FC<ReferenceCellEditProps> = ({
+export const ReferenceCellEdit: React.FC<ReferenceCellEditProps<TableRow>> = <
+  TRow extends TableRow,
+>({
   catalog,
   cell,
   linkType,
   table,
-}) => {
+  onCellChange,
+}: ReferenceCellEditProps<TRow>) => {
   const value = cell.getValue() as ReferentLink | null;
   const handleChange = (selectedEntity: ReferentLink | null) => {
     if (!selectedEntity) {
-      table.setEditingRow({
-        ...table.getState().editingRow,
-        [cell.row.id]: {
-          ...table.getState().editingRow?.[cell.row.id],
-          [cell.column.id]: null,
-        },
-      });
+
     } else {
       const newLink: BaseLink = {
         catalog,
@@ -39,14 +35,7 @@ export const ReferenceCellEdit: React.FC<ReferenceCellEditProps> = ({
         id: selectedEntity.id!,
         title: selectedEntity.title || selectedEntity.id!,
       };
-
-      table.setEditingRow({
-        ...table.getState().editingRow,
-        [cell.row.id]: {
-          ...table.getState().editingRow?.[cell.row.id],
-          [cell.column.id]: newLink,
-        },
-      });
+      onCellChange(cell, newLink);
     }
   };
 
@@ -54,7 +43,7 @@ export const ReferenceCellEdit: React.FC<ReferenceCellEditProps> = ({
   const linkDef = createLinkDefinition(
     linkType === 'LIST' ? 'lists' : 'reference',
     'item',
-    catalog
+    catalog,
   );
 
   return (
@@ -77,7 +66,7 @@ export const ReferenceCellEdit: React.FC<ReferenceCellEditProps> = ({
         },
         section: {
           width: '16px',
-        }
+        },
       }}
       onBlur={() => table.setEditingCell(null)}
     />

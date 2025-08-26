@@ -12,7 +12,10 @@ export interface JsonSchema {
   required?: string[];
 }
 
-export interface JsonSchemaProperty extends Omit<JsonSchema, '$schema' | '$id'> {
+type EmbeddedJsonSchema = Omit<JsonSchema, '$schema' | '$id' | 'properties'> &
+  Partial<Pick<JsonSchema, 'properties'>>;
+
+export interface JsonSchemaProperty extends EmbeddedJsonSchema {
   type: string;
   title: string;
   enum?: (number | string)[];

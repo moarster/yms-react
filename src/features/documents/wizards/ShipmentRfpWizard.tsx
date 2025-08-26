@@ -29,6 +29,7 @@ import FileUpload from '@/shared/ui/inputs/FileUpload.tsx';
 import { isBaseEntity } from '@/types';
 import { LinkFactories } from '@/types/factories/linkFactory.ts';
 import { useSchema } from '@/hooks/useSchema.ts';
+import { useSchemaUtils } from '@/hooks/useSchemaUtils.ts';
 
 const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
   initialData,
@@ -40,11 +41,13 @@ const ShipmentRfpWizard: React.FC<ShipmentRfpWizardProps> = ({
   const [formData, setFormData] = useState<WizardFormData>(initialData);
   const { canProceedToNext, canSubmit, getStepErrors } = useWizardValidation(formData);
   const {
-    getLinkDefinition,
+    schema,
     isLoading: schemaLoading,
   } = useSchema({
     entityKey: 'shipment-rfp'
   });
+
+  const { getLinkDefinition } = useSchemaUtils(schema);
 
   useEffect(() => {
     setFormData(initialData);
