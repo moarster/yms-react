@@ -1,7 +1,6 @@
 import { MRT_Cell, MRT_TableInstance } from 'mantine-react-table';
-import React from 'react';
 
-import { BaseLink, createLinkDefinition, ReferentLink } from '@/types';
+import { BaseLink, createLinkDefinition, PropertyValue, ReferentLink } from '@/types';
 
 import { TableRow } from '../types.ts';
 import { ReferenceInput } from '@/shared/ui/inputs';
@@ -11,12 +10,10 @@ interface ReferenceCellEditProps<TRow extends TableRow> {
   cell: MRT_Cell<TRow>;
   linkType: 'CATALOG' | 'LIST';
   table: MRT_TableInstance<TRow>;
-  onCellChange: (cell: MRT_Cell<TRow>, value: any) => void;
+  onCellChange: (cell: MRT_Cell<TRow>, value: PropertyValue) => void;
 }
 
-export const ReferenceCellEdit: React.FC<ReferenceCellEditProps<TableRow>> = <
-  TRow extends TableRow,
->({
+export const ReferenceCellEdit = <TRow extends TableRow>({
   catalog,
   cell,
   linkType,
@@ -26,7 +23,7 @@ export const ReferenceCellEdit: React.FC<ReferenceCellEditProps<TableRow>> = <
   const value = cell.getValue() as ReferentLink | null;
   const handleChange = (selectedEntity: ReferentLink | null) => {
     if (!selectedEntity) {
-
+      onCellChange(cell, null);
     } else {
       const newLink: BaseLink = {
         catalog,

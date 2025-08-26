@@ -20,6 +20,12 @@ export const createReferenceCell = <T extends TableRow>(
     />
   ),
   Edit: ({ cell, table }: { cell: MRT_Cell<T>; table: MRT_TableInstance<T> }) => (
-    <ReferenceCellEdit cell={cell} table={table} catalog={catalog} linkType={linkType} />
+    <ReferenceCellEdit
+      cell={cell}
+      table={table}
+      catalog={catalog}
+      linkType={linkType}
+      onCellChange={onCellChange || (() => {})}
+    />
   ),
 });

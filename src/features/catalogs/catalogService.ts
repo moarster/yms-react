@@ -1,5 +1,4 @@
 import { apiClient, PaginatedResponse } from '@/core/api';
-import { WizardLists } from '@/features/documents/wizards/wizard.types.ts';
 
 import { Catalog, CatalogItem, CatalogType, ListItem, SimpleList } from './catalog.types';
 
@@ -69,41 +68,8 @@ class CatalogService {
       listType === 'LIST'
         ? `/lists/${listKey}?${params.toString()}`
         : `/catalogs/${listKey}?${params.toString()}`,
-      listType === 'CATALOG',
     );
     return response;
-  }
-
-  async getWizardLists(): Promise<WizardLists> {
-    const [
-      shipmentTypes,
-      transportationTypes,
-      currencies,
-      vehicleTypes,
-      cargoNatures,
-      counterParties,
-      cargoHandlingTypes,
-    ] = await Promise.allSettled([
-      this.getListItems('shipment-type', 'LIST'),
-      this.getListItems('transportation-type', 'LIST'),
-      this.getListItems('currency', 'LIST'),
-      this.getCatalogItems('vehicle-type'),
-      this.getListItems('cargo-nature', 'LIST'),
-      this.getCatalogItems('counter-party'),
-      this.getListItems('cargo-handling-type', 'LIST'),
-    ]);
-
-    return {
-      cargoHandlingTypes:
-        cargoHandlingTypes.status === 'fulfilled' ? cargoHandlingTypes.value.content : [],
-      cargoNatures: cargoNatures.status === 'fulfilled' ? cargoNatures.value.content : [],
-      counterParties: counterParties.status === 'fulfilled' ? counterParties.value.content : [],
-      currencies: currencies.status === 'fulfilled' ? currencies.value.content : [],
-      shipmentTypes: shipmentTypes.status === 'fulfilled' ? shipmentTypes.value.content : [],
-      transportationTypes:
-        transportationTypes.status === 'fulfilled' ? transportationTypes.value.content : [],
-      vehicleTypes: vehicleTypes.status === 'fulfilled' ? vehicleTypes.value.content : [],
-    };
   }
 
   // Delete catalog item

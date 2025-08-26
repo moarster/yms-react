@@ -123,3 +123,11 @@ export function findLinkDefinitions(schema: JsonSchema): Record<string, LinkDefi
     Object.entries(schema.properties).filter(([_, property]) => isLinkDefinition(property)),
   ) as Record<string, LinkDefinition>;
 }
+
+export const LIST_SCHEMA: JsonSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', title: 'ID' },
+    title: { type: 'string', title: 'Наименование' },
+  },
+};

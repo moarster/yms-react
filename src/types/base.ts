@@ -1,3 +1,5 @@
+import { BaseLink } from '@/types/references.ts';
+
 export interface Identifiable {
   id?: string;
 }
@@ -16,6 +18,8 @@ export interface Titled {
 
 export interface BaseEntity extends Identifiable, Auditable, Titled {}
 
+export type Persisted<T extends BaseEntity> = T & Required<Identifiable> & Required<Auditable>;
+
 export interface DataEntity<TData = BaseProperty> extends BaseEntity {
   data: TData | undefined;
 }
@@ -33,6 +37,7 @@ export interface MetadataEntity extends Identifiable, Auditable {
 }
 export type PropertyValue =
   | BaseEntity
+  | BaseLink
   | BaseProperty
   | boolean
   | Date

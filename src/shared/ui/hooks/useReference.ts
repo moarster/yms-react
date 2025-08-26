@@ -4,15 +4,15 @@ import { useState, useMemo } from 'react';
 import { CatalogType } from '@/features/catalogs/catalog.types.ts';
 import { catalogService } from '@/features/catalogs/catalogService.ts';
 import { catalogCacheService } from '@/shared/cache/catalogCacheService.ts';
-import { BaseEntity } from '@/types';
+import { ReferentLink } from '@/types';
 import { useEntity } from '@/hooks/useEntity.ts';
 
 interface UseReferenceParams {
   catalog: string;
   linkType: CatalogType;
-  value: BaseEntity | null;
+  value: ReferentLink | null;
   searchable?: boolean;
-  onChange?: (value: BaseEntity | null) => void;
+  onChange?: (value: ReferentLink | null) => void;
   enabled?: boolean;
 }
 
@@ -33,16 +33,23 @@ export const useReference = ({
     isLoading,
   } = useQuery({
     enabled,
-    queryFn: async (): Promise<BaseEntity[]> => {
+    queryFn: async (): Promise<ReferentLink[]> => {
       // Check cache first
-      const cached = catalogCacheService.get<BaseEntity[]>(catalog, linkType);
+      const cached = catalogCacheService.get<ReferentLink[]>(catalog, linkType);
       if (cached) {
         return cached;
       }
 
       // Fetch from API
       const result = await catalogService.getListItems(catalog, linkType);
-      const entities = result.content;
+      const entities = result.content.map((item): ReferentLink => {
+        return {
+          domain: linkType === 'LIST' ? 'lists' : 'reference',
+          catalog,
+          id: item.id,
+          title: item.title,
+        }
+      });
 
       // Cache the result
       catalogCacheService.set(catalog, linkType, entities);

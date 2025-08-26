@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-import { BaseEntity } from '@/types';
+import { BaseEntity, Persisted } from '@/types';
 
 import { apiConfig } from '../config';
 import { PaginatedResponse } from './api.types.ts';
@@ -49,18 +49,18 @@ export class Client {
     this.interceptors.setTokenProvider(provider);
   }
 
-  async get<T extends BaseEntity>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.get<T>(url, config);
+  async get<T extends BaseEntity>(url: string, config?: AxiosRequestConfig): Promise<Persisted<T>> {
+    const response = await this.client.get<Persisted<T>>(url, config);
     return response.data;
   }
 
   async getMany<T extends BaseEntity>(
     url: string,
     config?: AxiosRequestConfig,
-  ): Promise<PaginatedResponse<T>> {
+  ): Promise<PaginatedResponse<Persisted<T>>> {
     const key = `GET:${url}:${JSON.stringify(config?.params || {})}`;
     return this.batcher.batch(key, async () => {
-      return (await this.client.get<PaginatedResponse<T>>(url, config)).data;
+      return (await this.client.get<PaginatedResponse<Persisted<T>>>(url, config)).data;
     });
   }
 
@@ -69,8 +69,12 @@ export class Client {
     return response.data;
   }
 
-  async post<T extends BaseEntity>(url: string, data?: T, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.post<T>(url, data, config);
+  async post<T extends BaseEntity>(
+    url: string,
+    data?: T,
+    config?: AxiosRequestConfig,
+  ): Promise<Persisted<T>> {
+    const response = await this.client.post<Persisted<T>>(url, data, config);
     return response.data;
   }
 
@@ -78,8 +82,8 @@ export class Client {
     url: string,
     data: Partial<T>,
     config?: AxiosRequestConfig,
-  ): Promise<T> {
-    const response = await this.client.put<T>(url, data, config);
+  ): Promise<Persisted<T>> {
+    const response = await this.client.put<Persisted<T>>(url, data, config);
     return response.data;
   }
 
@@ -93,7 +97,7 @@ export class Client {
   }
   // Batch multiple GET requests
   async batchGet<T>(requests: Array<{ url: string; config?: AxiosRequestConfig }>): Promise<T[]> {
-    return Promise.all(requests.map((req) => this.get<T>(req.url, req.config)));
+    return Promise.all(requests.map((req) => this.getAny<T>(req.url, req.config)));
   }
 
   async getWithRetry<T>(
@@ -106,7 +110,7 @@ export class Client {
 
     for (let i = 0; i < maxRetries; i++) {
       try {
-        return await this.get<T>(url, config);
+        return await this.getAny<T>(url, config);
       } catch (error: any) {
         lastError = error;
 

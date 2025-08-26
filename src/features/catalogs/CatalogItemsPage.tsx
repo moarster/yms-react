@@ -1,8 +1,6 @@
-// noinspection D
-
 import { notifications } from '@mantine/notifications';
-import { ArrowDownIcon, CaretCircleLeftIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowDownIcon, CaretCircleLeftIcon, TrashIcon } from '@phosphor-icons/react';
+import {  useQuery } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -12,10 +10,8 @@ import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 import { useTableData } from '@/shared/ui/MantineTable/hooks/useTableData.ts';
 import MantineTable from '@/shared/ui/MantineTable/MantineTable.tsx';
 import { TableRow } from '@/shared/ui/MantineTable/types.ts';
+import { LIST_SCHEMA } from '@/types';
 
-import { CatalogItem } from './catalog.types.ts';
-
-interface CatalogItemRow extends TableRow, CatalogItem {}
 
 const CatalogItemsPage: React.FC = () => {
   const { catalogKey } = useParams<{ catalogKey: string }>();
@@ -41,45 +37,15 @@ const CatalogItemsPage: React.FC = () => {
     queryFn: () => schemaService.getAnySchema(catalogKey!),
     queryKey: ['catalog-schema', catalogKey],
   });
-  const queryClient = useQueryClient();
-
-  const updateMutation = useMutation({
-    mutationFn: async (updatedItems: CatalogItemRow[]) => {
-      // Batch update items that changed
-      const promises = updatedItems
-        .filter((item) => item.id) // Only update items with IDs
-        .map((item) => catalogService.updateCatalogItem(catalogKey!, item.id!, item));
-
-      return Promise.all(promises);
-    },
-    onError: (error) => {
-      console.error('Failed to save changes:', error);
-      notifications.show({
-        color: 'red',
-        message: 'Failed to save changes',
-      });
-    },
-    onSuccess: () => {
-      notifications.show({
-        color: 'green',
-        message: 'Changes saved successfully',
-      });
-      queryClient.invalidateQueries({
-        queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
-      });
-    },
-  });
 
   // Use common table data hook
   const {
     data: items,
     error,
     handleBulkDelete,
-    handleDelete,
-    handleSelectionChange,
     isLoading,
     selectedRows,
-  } = useTableData<CatalogItemRow>({
+  } = useTableData<TableRow>({
     deleteFn: async (ids) => {
       await Promise.all(
         ids.map((id) => catalogService.deleteCatalogItem(catalogKey!, id.toString())),
@@ -87,7 +53,7 @@ const CatalogItemsPage: React.FC = () => {
     },
     fetchFn: () => catalogService.getListItems(catalogKey!, type),
     onRowClick: (row) => navigate(`/${type}/${catalogKey}/items/${row.id}`),
-    queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey],
+    queryKey: [isListType ? 'list-items' : 'catalog-items', catalogKey!],
     transformData: (result) => {
       const items = result?.content || [];
       return items.map((item: any) => {
@@ -189,11 +155,6 @@ const CatalogItemsPage: React.FC = () => {
               <ArrowDownIcon className="h-4 w-4 mr-2" />
               Export
             </button>
-
-            <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add {catalogInfo.type === 'LIST' ? 'Item' : 'Entry'}
-            </button>
           </div>
         </div>
       </div>
@@ -204,7 +165,7 @@ const CatalogItemsPage: React.FC = () => {
           loading={isLoading}
           config={tableConfig}
           className="shadow-sm"
-          schema={!isListType ? schema : undefined}
+          schema={schema ? schema : LIST_SCHEMA}
           collectionUrl={`/${type === 'CATALOG' ? 'reference' : 'lists'}/${catalogKey}`}
         />
       </div>

@@ -2,13 +2,12 @@ import { CloseButton, Combobox, InputBase, useCombobox } from '@mantine/core';
 import React from 'react';
 
 import { useReference } from '@/shared/ui/hooks/useReference.ts';
-import { BaseEntity, extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
+import {  extractLinkConstants, LinkDefinition, ReferentLink } from '@/types';
 
 import { BaseInputProps } from './types.ts';
 
 interface ReferenceInputProps extends BaseInputProps {
-  emptyFactory?: () => BaseEntity;
-  onChange: (value: BaseEntity | null) => void;
+  onChange: (value: ReferentLink | null) => void;
   linkDef?: LinkDefinition;
   placeholder?: string;
   searchable?: boolean;
@@ -30,8 +29,6 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
   linkDef,
   onChange,
   onBlur,
-  onClick,
-  onFocus,
   placeholder = 'Choose option',
   required,
   searchable = true,
@@ -69,7 +66,6 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     handleClear,
     handleSearchChange,
     handleSelect,
-    resetSearch,
     searchTerm,
   } = useReference({
     catalog,
