@@ -1,8 +1,8 @@
 import { Grid, Paper, Stack } from '@mantine/core';
 import React from 'react';
 
-import { ShipmentRfp } from '@/features/documents/types/shipment-rfp';
-import { InputLayout } from '@/features/documents/pages/components/types.ts';
+import { ShipmentRfp } from '@/features/documents/types/shipment-rfp.ts';
+import { InputLayout } from '@/features/documents/components/types.ts';
 import { InputFactory } from '@/shared/ui/inputs/InputFactory.tsx';
 import { JsonSchema } from '@/types';
 import { useSchemaUtils } from '@/hooks/useSchemaUtils.ts';

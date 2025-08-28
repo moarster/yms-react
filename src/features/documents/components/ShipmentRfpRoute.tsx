@@ -11,8 +11,8 @@ import {
 import { MapPinIcon, PackageIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { ShipmentRfp } from '@/features/documents/types/shipment-rfp';
-import { formatters } from '@/utils/format';
+import { ShipmentRfp } from '@/features/documents/types/shipment-rfp.ts';
+import { formatters } from '@/utils/format.ts';
 
 interface ShipmentRfpRouteProps {
   rfp: ShipmentRfp | null;

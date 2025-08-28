@@ -222,4 +222,31 @@ export class KeycloakAuthService implements AuthService {
       phone: tokenParsed.organization.phone,
     };
   }
+
+  async checkPermission(resource: string, scope: string): Promise<boolean> {
+    if (!this.keycloak?.authenticated || !this.keycloak.token) {
+      return false;
+    }
+
+    try {
+      const response = await fetch('/auth/check-permission', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.keycloak.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resource,
+          scope
+        })
+      });
+
+      const result = await response.json();
+      return result.allowed || false;
+
+    } catch (error) {
+      console.warn('Permission check failed:', error);
+      return false;
+    }
+  }
 }

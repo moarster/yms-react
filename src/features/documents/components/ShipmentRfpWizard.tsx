@@ -23,7 +23,7 @@ import {
 import {
   ShipmentRfpWizardProps,
   WizardFormData,
-} from '@/features/documents/wizards/wizard.types.ts';
+} from '@/features/documents/components/wizard.types.ts';
 import { ChipInput, DateInput, NumberInput, ReferenceInput, TextInput } from '@/shared/ui/inputs';
 import FileUpload from '@/shared/ui/inputs/FileUpload.tsx';
 import { isBaseEntity } from '@/types';

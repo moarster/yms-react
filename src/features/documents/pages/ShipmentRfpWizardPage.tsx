@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { createShipmentRfpData, ShipmentRfpData } from '@/features/documents/types/shipment-rfp.ts';
-import ShipmentRfpWizard from '@/features/documents/wizards/ShipmentRfpWizard.tsx';
+import ShipmentRfpWizard from '@/features/documents/components/ShipmentRfpWizard.tsx';
 
 import { useShipmentRfpMutations } from '../hooks/useShipmentRfpMutations.ts';
 

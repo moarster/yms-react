@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { validateINN, validateRoutePoint } from '@/features/documents/types/shipment-rfp.ts';
-import { WizardFormData } from '@/features/documents/wizards/wizard.types.ts';
+import { WizardFormData } from '@/features/documents/components/wizard.types.ts';
 
 export const useWizardValidation = (formData: WizardFormData) => {
   const stepValidation = useMemo(() => {
