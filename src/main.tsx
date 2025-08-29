@@ -29,6 +29,7 @@ const queryClient = new QueryClient({
       retry: 2,
       // Cache data for 5 minutes
       staleTime: 5 * 60 * 1000,
+
     },
   },
 });

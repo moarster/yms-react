@@ -6,8 +6,10 @@ import { ResourceHints, useAdjacentRoutePrefetch } from '@/core/router/Router';
 import { useAuthStore } from '@/core/store/authStore.ts';
 import { useUiStore } from '@/core/store/uiStore.ts';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
-import { PermissionProvider, usePermissions, useUserPermissions } from '@/core/contexts/PermissionContext.tsx';
+import { PermissionProvider, usePermissions } from '@/core/contexts/PermissionContext.tsx';
 import { UserRole } from '@/core/auth/types.ts';
+import { PermissionResource, PermissionScope } from '@/core/contexts/types.ts';
+import { PermissionGuard } from '@/core/contexts/PermissionGuard.tsx';
 
 // Lazy load all pages
 const AppLayout = lazy(() => import('@/layout/AppLayout'));
@@ -59,16 +61,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
 interface PermissionRouteProps {
   children: React.ReactNode;
-  requiredPermission?: string;
+  requiredResource?: PermissionResource;
+  requiredScope?: PermissionScope;
   requiredRole?: UserRole;
 }
 
 const PermissionRoute: React.FC<PermissionRouteProps> = ({
-                                                           children,
-                                                           requiredPermission,
-                                                           requiredRole,
-                                                         }) => {
-  const { hasPermission, isRole } = usePermissions();
+  children,
+  requiredResource,
+  requiredScope,
+  requiredRole,
+}) => {
+  const { isRole } = usePermissions();
 
   // Check role requirement
   if (requiredRole && !isRole(requiredRole)) {
@@ -76,11 +80,16 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   }
 
   // Check permission requirement
-  if (requiredPermission) {
-    const [resource, action] = requiredPermission.split('.');
-    if (!hasPermission(resource, action)) {
-      return <Navigate to="/dashboard" replace />;
-    }
+  if (requiredResource && requiredScope) {
+    return (
+      <PermissionGuard
+        resource={requiredResource}
+        scope={requiredScope}
+        fallback={<Navigate to="/dashboard" replace />}
+      >
+        {children}
+      </PermissionGuard>
+    );
   }
 
   return <>{children}</>;
@@ -90,8 +99,6 @@ const AppContent: React.FC = () => {
   const isDemoMode = authMode === 'demo';
   const { setTheme } = useUiStore();
   const { prefetchRoute } = usePrefetch();
-
-  const userPermissions = useUserPermissions(user);
 
   // Use adjacent route prefetching
   useAdjacentRoutePrefetch();
@@ -148,7 +155,7 @@ const AppContent: React.FC = () => {
         <Route
           element={
             <ProtectedRoute>
-              <PermissionProvider userPermissions={userPermissions}>
+              <PermissionProvider user={user}>
                 <AppLayout>
                   <Suspense fallback={<PageLoading />}>
                     <Routes>
@@ -158,7 +165,7 @@ const AppContent: React.FC = () => {
                       {/* Catalogs (NSI) routes */}
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="catalogs.view">
+                          <PermissionRoute requiredResource="referents" requiredScope="view">
                             <CatalogsPage />
                           </PermissionRoute>
                         }
@@ -167,27 +174,27 @@ const AppContent: React.FC = () => {
                       {/* Catalog routes */}
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="catalogs.view">
+                          <PermissionRoute requiredResource="referents" requiredScope="view">
                             <CatalogItemsPage />
                           </PermissionRoute>
                         }
-                        path="/catalog/:catalogKey"
+                        path="/catalogs/:catalogKey"
                       />
 
                       {/* List routes */}
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="catalogs.view">
+                          <PermissionRoute requiredResource="referents" requiredScope="view">
                             <CatalogItemsPage />
                           </PermissionRoute>
                         }
-                        path="/list/:catalogKey"
+                        path="/lists/:catalogKey"
                       />
 
                       {/* Document routes */}
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="shipment_rfps.view">
+                          <PermissionRoute requiredResource="shipment-rfps" requiredScope="view">
                             <ShipmentRfpsPage />
                           </PermissionRoute>
                         }
@@ -195,7 +202,7 @@ const AppContent: React.FC = () => {
                       />
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="shipment_rfps.create">
+                          <PermissionRoute requiredResource="shipment-rfps" requiredScope="manage">
                             <ShipmentRfpWizardPage />
                           </PermissionRoute>
                         }
@@ -203,7 +210,7 @@ const AppContent: React.FC = () => {
                       />
                       <Route
                         element={
-                          <PermissionRoute requiredPermission="shipment_rfps.view">
+                          <PermissionRoute requiredResource="shipment-rfps" requiredScope="view">
                             <ShipmentRfpDetailPage />
                           </PermissionRoute>
                         }

@@ -8,48 +8,27 @@ import ErrorMessage from '@/shared/ui/ErrorMessage.tsx';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.tsx';
 
 import { CatalogBase } from './catalog.types.ts';
+import { Badge, Paper, Text } from '@mantine/core';
 
 interface CatalogCardProps {
   catalog: CatalogBase;
 }
 
 const CatalogCard: React.FC<CatalogCardProps> = ({ catalog }) => {
-  const Icon = catalog.type === 'LIST' ? ListBulletsIcon : TextColumnsIcon;
-
   return (
-    <Link
-      className="card hover:shadow-md transition-shadow duration-200"
-      to={`/${catalog.type === 'LIST' ? 'list' : 'catalog'}/${catalog.referenceKey}`}
+    <Paper
+      component={Link}
+      to={`/${catalog.type === 'LIST' ? 'lists' : 'catalogs'}/${catalog.referenceKey}`}
+      shadow="md"
+      radius="lg"
+      withBorder
+      p="xl"
     >
-      <div className="p-4">
-        <div className="flex items-center">
-          <div
-            className={`flex-shrink-0 p-3 rounded-lg ${
-              catalog.type === 'LIST' ? 'bg-blue-100' : 'bg-green-100'
-            }`}
-          >
-            <Icon
-              className={`h-6 w-6 ${catalog.type === 'LIST' ? 'text-blue-600' : 'text-green-600'}`}
-            />
-          </div>
-          <div className="ml-4 flex-1">
-            <h3 className="text-base font-medium text-gray-900">{catalog.title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{catalog.description}</p>
-            <div className="mt-2 flex items-center">
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  catalog.type === 'LIST'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                }`}
-              >
-                {catalog.type === 'LIST' ? 'Simple List' : 'Structured Catalog'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
+      <Text>{catalog.title}</Text>
+      <Badge color={catalog.type === 'LIST' ? 'blue' : 'green'}>
+        {catalog.type === 'LIST' ? 'List' : 'Catalog'}
+      </Badge>
+    </Paper>
   );
 };
 

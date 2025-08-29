@@ -10,6 +10,8 @@ import {
   User,
   UserRole,
 } from '../types';
+import { apiClient } from '@/core/api';
+import { PermissionRequest, PermissionResult } from '@/core/contexts/types.ts';
 
 export class KeycloakAuthService implements AuthService {
   private readonly keycloak: Keycloak | null = null;
@@ -223,26 +225,18 @@ export class KeycloakAuthService implements AuthService {
     };
   }
 
-  async checkPermission(resource: string, scope: string): Promise<boolean> {
+  async checkPermission(evaluate: PermissionRequest): Promise<boolean> {
     if (!this.keycloak?.authenticated || !this.keycloak.token) {
       return false;
     }
 
     try {
-      const response = await fetch('/auth/check-permission', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.keycloak.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resource,
-          scope
-        })
-      });
+      const response = await apiClient.postAny<PermissionRequest, PermissionResult>(
+        '/auth/check-permission',
+        evaluate,
+      );
 
-      const result = await response.json();
-      return result.allowed || false;
+      return response.allowed || false;
 
     } catch (error) {
       console.warn('Permission check failed:', error);

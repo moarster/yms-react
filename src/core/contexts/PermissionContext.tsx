@@ -1,64 +1,72 @@
 import React, { createContext, useCallback, useContext } from 'react';
-import { Role, User, UserRole } from '@/core/auth/types';
+import {  User, UserRole } from '@/core/auth/types';
+import { authServiceFactory } from '@/core/auth/authService.ts';
+import { PermissionResource, PermissionScope } from '@/core/contexts/types.ts';
+import { useQuery } from '@tanstack/react-query';
 
-interface Permission {
-  resource: string;
-  actions: string[];
-  role: UserRole;
-}
 
 interface PermissionContextValue {
-  hasPermission: (resource: string, action: string) => boolean;
+  checkPermission: (resource: PermissionResource, scope: PermissionScope) => Promise<boolean>;
   isRole: (role: UserRole) => boolean;
-  canAccess: (resource: string) => boolean;
-  permissions: Permission[];
+  canAccess: (resource: string) => Promise<boolean>;
 }
 
 const PermissionContext = createContext<PermissionContextValue | null>(null);
 
 interface PermissionProviderProps {
   children: React.ReactNode;
-  userPermissions: Permission[];
+  user: User | null;
 }
 
-export const PermissionProvider: React.FC<PermissionProviderProps> = ({
-  children,
-  userPermissions,
-}) => {
-  const hasPermission = useCallback(
-    (resource: string, action: string) => {
-      return userPermissions.some((p) => p.resource === resource && p.actions.includes(action));
+export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children, user }) => {
+  const checkPermission = useCallback(
+    async (resource: PermissionResource, scope: PermissionScope) => {
+      const keycloakService = authServiceFactory.getKeycloakService();
+      return await keycloakService.checkPermission({ resource, scope });
     },
-    [userPermissions],
+    [],
   );
 
   const isRole = useCallback(
     (role: UserRole) => {
-      return userPermissions.some((p) => p.role === role);
+      return user?.roles.some((r) => r.name === role) ?? false;
     },
-    [userPermissions],
+    [user],
   );
 
   const canAccess = useCallback(
-    (resource: string) => {
-      return userPermissions.some((p) => p.resource === resource);
+    async (resource: string) => {
+      const resourceMap: Record<string, PermissionResource> = {
+        shipment_rfps: 'shipment-rfps',
+        'shipment-rfp': 'shipment-rfps',
+        referents: 'referents',
+        lists: 'referents',
+        catalogs: 'referents',
+        users: 'users',
+        user: 'users',
+      };
+
+      const mappedResource = resourceMap[resource];
+      if (!mappedResource) return false;
+
+      return await checkPermission(mappedResource, 'view');
     },
-    [userPermissions],
+    [checkPermission],
   );
 
   return (
     <PermissionContext.Provider
       value={{
-        hasPermission,
+        checkPermission,
         isRole,
         canAccess,
-        permissions: userPermissions,
       }}
     >
       {children}
     </PermissionContext.Provider>
   );
 };
+
 
 export const usePermissions = () => {
   const context = useContext(PermissionContext);
@@ -68,16 +76,39 @@ export const usePermissions = () => {
   return context;
 };
 
-export const useUserPermissions = (user: User) => {
-  return React.useMemo(() => {
-    if (!user?.roles) return [];
+// New hook for async permission checks
+export const useAsyncPermissions = () => {
+  const { checkPermission, canAccess } = usePermissions();
 
-    return user.roles.flatMap((role: Role): Permission[] =>
-      role.permissions.map((permission: string) => ({
-        resource: permission.split('_')[0].toLowerCase(),
-        actions: [permission.split('_')[1]?.toLowerCase() || 'read'],
-        role: role.name as UserRole,
-      })),
-    );
-  }, [user?.roles]);
+  return {
+    checkPermission,
+    canAccess,
+  };
+};
+
+export const usePermissionCheck = (
+  resource: PermissionResource,
+  scope: PermissionScope,
+  enabled = true,
+) => {
+  const { checkPermission } = usePermissions();
+
+  return useQuery({
+    queryKey: ['permission', resource, scope],
+    queryFn: () => checkPermission(resource, scope),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+export const useResourceAccess = (resource: string, enabled = true) => {
+  const { canAccess } = usePermissions();
+
+  return useQuery({
+    queryKey: ['resource-access', resource],
+    queryFn: () => canAccess(resource),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 };

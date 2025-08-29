@@ -5,7 +5,7 @@ import React from 'react';
 import { UserRole } from '@/core/auth/types';
 import { ShipmentRfp } from '@/features/documents/types/shipment-rfp';
 import { ShipmentRfpStage, WORKFLOW_STAGES } from '../types/workflow-stages';
-import { usePermissions } from '@/core/contexts/PermissionContext';
+import { usePermissionCheck, usePermissions } from '@/core/contexts/PermissionContext';
 
 interface RoleBasedActionsProps {
   srfp?: ShipmentRfp | null;
@@ -22,16 +22,20 @@ interface ActionConfig {
   color: string;
   variant: 'filled' | 'outline' | 'light';
   requiresConfirmation?: boolean;
+  requiredScope?: 'view' | 'manage' | 'delete' | 'participate';
 }
 
 export const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
   srfp,
-  userRole,
   stage,
-  isUpdating = false,
+  userRole,
+  isUpdating,
   onAction,
 }) => {
-  const { hasPermission, isRole } = usePermissions();
+  const { isRole } = usePermissions();
+
+  const { data: canManage } = usePermissionCheck('shipment-rfps', 'manage');
+  const { data: canBid } = usePermissionCheck('shipment-rfps', 'participate');
 
   // Define available actions based on stage and role
   const getAvailableActions = (): ActionConfig[] => {
@@ -39,14 +43,15 @@ export const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
 
     switch (stage) {
       case 'inception':
-        if (isRole('LOGIST') || isRole('ADMIN')) {
+        if ((isRole('LOGIST') || isRole('ADMIN')) && canManage) {
           actions.push(
             {
               action: 'save',
-              label: 'Save Draft',
+              label: 'Save',
               icon: FloppyDiskIcon,
               color: 'gray',
               variant: 'outline',
+              requiresConfirmation: false,
             },
             {
               action: 'publish',
@@ -115,7 +120,17 @@ export const RoleBasedActions: React.FC<RoleBasedActionsProps> = ({
     }
 
     // Filter by permissions
-    return actions.filter((action) => hasPermission('shipment_rfps', action.action.split('_')[0]));
+    return actions.filter((action) => {
+      switch (action.requiredScope) {
+        case 'manage':
+          return canManage;
+        case 'participate':
+          return canBid;
+        case 'view':
+        default:
+          return true;
+      }
+    });
   };
 
   const handleAction = async (actionConfig: ActionConfig) => {

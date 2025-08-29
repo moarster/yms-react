@@ -6,7 +6,7 @@ import { documentService } from '@/features/documents/documentService';
 import { ShipmentRfp } from '@/features/documents/types/shipment-rfp';
 import { DocumentStatus } from '@/types/workflow';
 import { schemaService } from '@/shared/services/schemaService';
-import { usePermissions } from '@/core/contexts/PermissionContext';
+import { useAsyncPermissions, usePermissionCheck } from '@/core/contexts/PermissionContext';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 import ErrorMessage from '@/shared/ui/ErrorMessage';
 
@@ -21,8 +21,13 @@ export const ShipmentRfpWorkflowContainer: React.FC<ShipmentRfpWorkflowContainer
                                                                                             srfpId
                                                                                           }) => {
   const { user } = useAuthStore();
-  const { hasPermission } = usePermissions();
+  const { checkPermission } = useAsyncPermissions();
   const queryClient = useQueryClient();
+
+  const { data: canView, isLoading: permissionLoading } = usePermissionCheck(
+    'shipment-rfps',
+    'view',
+  );
 
   // Fetch SRFP data
   const {
@@ -56,10 +61,6 @@ export const ShipmentRfpWorkflowContainer: React.FC<ShipmentRfpWorkflowContainer
 
   // Handle status changes
   const handleStatusUpdate = async (action: string, data?: Partial<ShipmentRfp>) => {
-    if (!hasPermission('shipment_rfps', action)) {
-      throw new Error('Insufficient permissions');
-    }
-
     try {
       await statusMutation.mutateAsync({ action, data });
     } catch (error) {
@@ -75,7 +76,7 @@ export const ShipmentRfpWorkflowContainer: React.FC<ShipmentRfpWorkflowContainer
   const userRole = user?.roles?.[0]?.name || 'CARRIER';
 
   // Loading state
-  if (srfpLoading || schemaLoading) {
+  if (permissionLoading || srfpLoading || schemaLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading workflow..." />
@@ -83,6 +84,12 @@ export const ShipmentRfpWorkflowContainer: React.FC<ShipmentRfpWorkflowContainer
     );
   }
 
+  // Permission denied
+  if (!canView) {
+    return (
+      <ErrorMessage message="You don't have permission to view this document" />
+    );
+  }
   // Error state
   if (srfpError) {
     return (
@@ -93,12 +100,6 @@ export const ShipmentRfpWorkflowContainer: React.FC<ShipmentRfpWorkflowContainer
     );
   }
 
-  // Access check
-  if (!hasPermission('shipment_rfps', 'read')) {
-    return (
-      <ErrorMessage message="You don't have permission to view this document" />
-    );
-  }
 
   return (
     <ShipmentRfpPresentation
